@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -22,10 +22,17 @@ export default function Dashboard() {
   const { user, loading } = useAuth();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("quotes");
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
   
   // Fetch quotes
   const { data: quotes = [], isLoading: quotesLoading } = useQuery<Quote[]>({
     queryKey: ['/api/quotes'],
+  });
+  
+  // Fetch users (admin only)
+  const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
+    queryKey: ['/api/users'],
+    enabled: !!user?.isAdmin,
   });
   
   // Redirect if not logged in
@@ -38,17 +45,25 @@ export default function Dashboard() {
     return null;
   }
   
+  // Filter quotes by selected user if admin has chosen a specific user
+  const filteredQuotes = React.useMemo(() => {
+    if (!user?.isAdmin || !selectedUser) {
+      return quotes;
+    }
+    return quotes.filter(quote => quote.createdBy === selectedUser);
+  }, [quotes, user, selectedUser]);
+  
   // Group quotes by status for reporting
-  const statusCounts = quotes.reduce((acc: Record<string, number>, quote) => {
+  const statusCounts = filteredQuotes.reduce((acc: Record<string, number>, quote: Quote) => {
     const status = quote.leadStatus || "In Progress";
     acc[status] = (acc[status] || 0) + 1;
     return acc;
   }, {});
   
-  const totalValue = quotes.reduce((sum, quote) => sum + (quote.totalPrice || 0), 0);
-  const wonValue = quotes
-    .filter(quote => quote.leadStatus === "Won")
-    .reduce((sum, quote) => sum + (quote.totalPrice || 0), 0);
+  const totalValue = filteredQuotes.reduce((sum: number, quote: Quote) => sum + (quote.totalPrice || 0), 0);
+  const wonValue = filteredQuotes
+    .filter((quote: Quote) => quote.leadStatus === "Won")
+    .reduce((sum: number, quote: Quote) => sum + (quote.totalPrice || 0), 0);
   
   // Format currency
   const formatCurrency = (amount: number) => {
@@ -233,6 +248,29 @@ export default function Dashboard() {
               <Card>
                 <CardHeader className="px-4 py-4 sm:px-6">
                   <CardTitle className="text-lg">Financial Summary</CardTitle>
+                  {user?.isAdmin && (
+                    <div className="mt-2">
+                      <div className="flex items-center space-x-2">
+                        <Users className="h-4 w-4 text-gray-500" />
+                        <Select
+                          value={selectedUser || ""}
+                          onValueChange={(value) => setSelectedUser(value || null)}
+                        >
+                          <SelectTrigger className="w-full sm:w-[220px]">
+                            <SelectValue placeholder="All team members" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">All team members</SelectItem>
+                            {users.map((u) => (
+                              <SelectItem key={u.id} value={u.id.toString()}>
+                                {u.username}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
                 </CardHeader>
                 <CardContent className="px-4 sm:px-6">
                   {quotes.length === 0 ? (
