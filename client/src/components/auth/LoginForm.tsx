@@ -33,19 +33,26 @@ export function LoginForm() {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
+      console.log("Attempting login with:", data.username);
       const user = await login(data.username, data.password);
+      console.log("Login successful:", user);
+      
       toast({
         title: "Login successful",
         description: `Welcome ${user.username}!`,
       });
       
-      // Redirect based on user role
-      if (user.isAdmin) {
-        setLocation("/admin");
-      } else {
-        setLocation("/calculator");
-      }
+      // Slight delay to ensure session is established
+      setTimeout(() => {
+        // Redirect based on user role
+        if (user.isAdmin) {
+          setLocation("/admin");
+        } else {
+          setLocation("/calculator");
+        }
+      }, 500);
     } catch (error) {
+      console.error("Login error:", error);
       toast({
         title: "Login failed",
         description: "Invalid username or password",

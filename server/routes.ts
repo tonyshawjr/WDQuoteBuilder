@@ -21,7 +21,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }),
     cookie: { 
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      secure: false 
+      secure: false,
+      httpOnly: true,
+      sameSite: 'lax'
     }
   }));
   
@@ -75,8 +77,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
   
   // Auth routes
-  app.post('/api/login', passport.authenticate('local'), (req, res) => {
-    res.json(req.user);
+  app.post('/api/login', (req, res, next) => {
+    passport.authenticate('local', (err: any, user: any, info: any) => {
+      if (err) {
+        console.error('Login error:', err);
+        return res.status(500).json({ message: 'Server error' });
+      }
+      
+      if (!user) {
+        console.log('Login failed:', info?.message || 'Unknown reason');
+        return res.status(401).json({ message: info?.message || 'Authentication failed' });
+      }
+      
+      req.login(user, (loginErr) => {
+        if (loginErr) {
+          console.error('Session login error:', loginErr);
+          return res.status(500).json({ message: 'Login failed' });
+        }
+        
+        console.log('User authenticated successfully:', user.username);
+        return res.json(user);
+      });
+    })(req, res, next);
   });
   
   app.post('/api/logout', (req: any, res) => {
@@ -97,9 +119,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   app.get('/api/me', (req, res) => {
+    console.log('GET /api/me - Auth status:', req.isAuthenticated());
     if (req.isAuthenticated()) {
+      console.log('Authenticated user:', req.user);
       res.json(req.user);
     } else {
+      // Log session information for debugging
+      console.log('Session ID:', req.sessionID);
+      console.log('Session data:', req.session);
       res.status(401).json({ message: 'Not authenticated' });
     }
   });
