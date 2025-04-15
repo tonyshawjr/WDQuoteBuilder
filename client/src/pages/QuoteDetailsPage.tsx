@@ -120,14 +120,30 @@ export default function QuoteDetailsPage() {
       // Get features data with names from feature ID
       const quoteFeatureData: QuoteFeature[] = await response.json();
       
-      // Create extended features with proper naming/data
+      // Create extended features with proper naming/data from admin settings
       return quoteFeatureData.map(qf => {
-        // Find the matching feature
+        // Find the matching feature from admin settings
         const feature = allFeatures?.find(f => f.id === qf.featureId);
+        
+        if (!feature) {
+          return {
+            ...qf,
+            featureName: `Feature #${qf.featureId}`,
+            pricingType: 'fixed',
+          };
+        }
+        
         return {
           ...qf,
-          featureName: feature?.name || `Feature #${qf.featureId}`,
-          pricingType: feature?.pricingType || 'fixed', // Use actual pricing type
+          featureName: feature.name,
+          pricingType: feature.pricingType,
+          hourlyRate: feature.hourlyRate,
+          estimatedHours: feature.estimatedHours,
+          flatPrice: feature.flatPrice,
+          // Store admin pricing for later use
+          adminPricePerUnit: feature.pricingType === 'hourly' && feature.hourlyRate && feature.estimatedHours 
+            ? feature.hourlyRate * feature.estimatedHours 
+            : feature.flatPrice || 0
         };
       }) as QuoteFeatureExtended[];
     }
@@ -154,14 +170,26 @@ export default function QuoteDetailsPage() {
       // Get pages data from API
       const quotePagesData: QuotePage[] = await response.json();
       
-      // Create extended pages with proper naming/data
+      // Create extended pages with proper naming/data from admin settings
       return quotePagesData.map(qp => {
-        // Find the matching page
+        // Find the matching page from admin settings
         const page = allPages?.find(p => p.id === qp.pageId);
+        
+        if (!page) {
+          return {
+            ...qp,
+            pageName: `Page #${qp.pageId}`,
+            pricePerPage: qp.price / qp.quantity
+          };
+        }
+        
         return {
           ...qp,
-          pageName: page?.name || `Page #${qp.pageId}`,
-          pricePerPage: qp.price / qp.quantity // Calculate price per page
+          pageName: page.name,
+          // Use admin-defined pricing instead of calculated
+          pricePerPage: page.pricePerPage,
+          // Store admin pricing for later use
+          adminPricePerPage: page.pricePerPage
         };
       }) as QuotePageExtended[];
     }
@@ -338,20 +366,30 @@ export default function QuoteDetailsPage() {
     setEditableFeatures(prev => 
       prev.map(feature => {
         if (feature.id === featureId) {
-          // Store original price per unit if it's the first edit
-          const pricePerUnit = feature.price / feature.quantity;
+          // Always use admin-defined pricing when available
+          let pricePerUnit;
+          
+          if (feature.adminPricePerUnit !== undefined) {
+            // Use admin pricing from the feature settings
+            pricePerUnit = feature.adminPricePerUnit;
+          } else {
+            // Fallback to calculated price per unit if admin price not available
+            pricePerUnit = feature.price / feature.quantity;
+          }
+          
           return { 
             ...feature, 
             quantity, 
-            // Recalculate price based on quantity
-            price: feature.pricingType === 'hourly' && feature.hourlyRate && feature.estimatedHours
-              ? feature.hourlyRate * feature.estimatedHours 
-              : pricePerUnit * quantity
+            // Recalculate price based on quantity and admin price settings
+            price: quantity * pricePerUnit
           };
         }
         return feature;
       })
     );
+    
+    // Update the backend with the new quantity and price
+    syncFeatureChanges();
   };
   
   // Update feature price directly
@@ -361,22 +399,80 @@ export default function QuoteDetailsPage() {
         feature.id === featureId ? { ...feature, price } : feature
       )
     );
+    
+    // Update the backend with the new price
+    syncFeatureChanges();
+  };
+  
+  // Sync feature changes to the backend
+  const syncFeatureChanges = () => {
+    editableFeatures.forEach(feature => {
+      // Use a debounced or throttled version in a real app
+      fetch(`/api/quotes/${quoteId}/features/${feature.featureId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          quantity: feature.quantity,
+          price: feature.price
+        }),
+        credentials: 'include'
+      }).catch(err => {
+        console.error("Error updating feature:", err);
+      });
+    });
+  };
+  
+  // Sync page changes to the backend
+  const syncPageChanges = () => {
+    editablePages.forEach(page => {
+      // Use a debounced or throttled version in a real app
+      fetch(`/api/quotes/${quoteId}/pages/${page.pageId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          quantity: page.quantity,
+          price: page.price
+        }),
+        credentials: 'include'
+      }).catch(err => {
+        console.error("Error updating page:", err);
+      });
+    });
   };
   
   // Update page quantity
   const updatePageQuantity = (pageId: number, quantity: number) => {
     setEditablePages(prev => 
-      prev.map(page => 
-        page.id === pageId 
-          ? { 
-              ...page, 
-              quantity, 
-              // Recalculate price based on quantity and price per page
-              price: page.pricePerPage * quantity 
-            } 
-          : page
-      )
+      prev.map(page => {
+        if (page.id === pageId) {
+          // Always use admin-defined pricing when available
+          let pricePerPage;
+          
+          if (page.adminPricePerPage !== undefined) {
+            // Use admin pricing from the page settings
+            pricePerPage = page.adminPricePerPage;
+          } else {
+            // Fallback to calculated price per page if admin price not available
+            pricePerPage = page.pricePerPage;
+          }
+          
+          return { 
+            ...page, 
+            quantity, 
+            // Recalculate price based on quantity and admin price settings
+            price: quantity * pricePerPage
+          };
+        }
+        return page;
+      })
     );
+    
+    // Update the backend with the new quantity and price
+    syncPageChanges();
   };
   
   // Update page price directly
@@ -386,6 +482,9 @@ export default function QuoteDetailsPage() {
         page.id === pageId ? { ...page, price } : page
       )
     );
+    
+    // Update the backend with the new price
+    syncPageChanges();
   };
   
   // Remove a feature from the quote
