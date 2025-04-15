@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -8,8 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Quote } from "@shared/schema";
-import { PlusCircle, FileText, Eye, BarChart } from "lucide-react";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Quote, User } from "@shared/schema";
+import { PlusCircle, FileText, Eye, BarChart, Users } from "lucide-react";
 
 // Utility functions
 const formatCurrency = (amount: number) => {
@@ -40,11 +47,36 @@ export default function SimpleDashboard() {
   const { user, loading } = useAuth();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("quotes");
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   
   // Fetch quotes
   const { data: quotes = [], isLoading: quotesLoading } = useQuery<Quote[]>({
     queryKey: ['/api/quotes'],
   });
+  
+  // Fetch users (admin only)
+  const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
+    queryKey: ['/api/users'],
+    enabled: !!user?.isAdmin,
+  });
+
+  // Filter quotes by selected user if admin has chosen a specific user
+  const filteredQuotes = useMemo(() => {
+    if (!user) return [];
+    
+    if (!user.isAdmin) {
+      // Regular users only see their own quotes
+      return quotes;
+    }
+    
+    if (!selectedUserId) {
+      // Admin sees all quotes when no filter is applied
+      return quotes;
+    }
+    
+    // Admin sees quotes for the selected user
+    return quotes.filter(quote => quote.createdBy === selectedUserId);
+  }, [quotes, user, selectedUserId]);
 
   // Redirect if not logged in
   if (loading) {
@@ -78,10 +110,34 @@ export default function SimpleDashboard() {
           <TabsContent value="quotes">
             <Card>
               <CardHeader className="px-4 py-4 sm:px-6">
-                <CardTitle className="flex items-center text-lg">
-                  <FileText className="h-5 w-5 mr-2" />
-                  Quote List
-                </CardTitle>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                  <CardTitle className="flex items-center text-lg">
+                    <FileText className="h-5 w-5 mr-2" />
+                    Quote List
+                  </CardTitle>
+                  
+                  {user?.isAdmin && (
+                    <div className="flex items-center space-x-2">
+                      <Users className="h-4 w-4 text-gray-500" />
+                      <Select
+                        value={selectedUserId || "all"}
+                        onValueChange={(value) => setSelectedUserId(value === "all" ? null : value)}
+                      >
+                        <SelectTrigger className="w-full sm:w-[220px]">
+                          <SelectValue placeholder="All team members" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All team members</SelectItem>
+                          {users.map((u) => (
+                            <SelectItem key={u.id} value={u.id.toString()}>
+                              {u.username}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
               </CardHeader>
               <CardContent className="px-2 sm:px-6">
                 {quotesLoading ? (
@@ -103,7 +159,7 @@ export default function SimpleDashboard() {
                   <div>
                     {/* Mobile quote list cards - only visible on small screens */}
                     <div className="md:hidden space-y-4">
-                      {quotes.map(quote => (
+                      {filteredQuotes.map(quote => (
                         <div 
                           key={quote.id} 
                           className="bg-white border border-gray-100 rounded-lg shadow-sm p-4"
@@ -113,6 +169,11 @@ export default function SimpleDashboard() {
                             <div>
                               <h3 className="font-medium text-base">{quote.clientName}</h3>
                               <p className="text-sm text-gray-500">{quote.businessName || "Individual Client"}</p>
+                              {user?.isAdmin && (
+                                <p className="text-xs text-gray-400 mt-1">
+                                  Created by: {users.find(u => u.id.toString() === quote.createdBy)?.username || quote.createdBy}
+                                </p>
+                              )}
                             </div>
                             <Badge className={getStatusColor(quote.leadStatus)}>
                               {quote.leadStatus || "In Progress"}
@@ -137,17 +198,23 @@ export default function SimpleDashboard() {
                             <TableHead>Business</TableHead>
                             <TableHead>Amount</TableHead>
                             <TableHead>Created</TableHead>
+                            {user?.isAdmin && <TableHead>Created By</TableHead>}
                             <TableHead>Status</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {quotes.map(quote => (
+                          {filteredQuotes.map(quote => (
                             <TableRow key={quote.id}>
                               <TableCell className="font-medium">{quote.clientName}</TableCell>
                               <TableCell>{quote.businessName || "-"}</TableCell>
                               <TableCell>{formatCurrency(quote.totalPrice || 0)}</TableCell>
                               <TableCell>{formatDate(quote.createdAt || null)}</TableCell>
+                              {user?.isAdmin && (
+                                <TableCell>
+                                  {users.find(u => u.id.toString() === quote.createdBy)?.username || quote.createdBy}
+                                </TableCell>
+                              )}
                               <TableCell>
                                 <Badge className={getStatusColor(quote.leadStatus)}>
                                   {quote.leadStatus || "In Progress"}
@@ -184,7 +251,7 @@ export default function SimpleDashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="px-4 sm:px-6">
-                  {quotes.length === 0 ? (
+                  {filteredQuotes.length === 0 ? (
                     <div className="py-8 text-center text-gray-500">
                       <p>No data available yet</p>
                       <p className="text-sm mt-2">Create quotes to see your sales pipeline</p>
@@ -192,7 +259,7 @@ export default function SimpleDashboard() {
                   ) : (
                     <div className="space-y-4">
                       {Object.entries(
-                        quotes.reduce((acc, quote) => {
+                        filteredQuotes.reduce((acc, quote) => {
                           const status = quote.leadStatus || "In Progress";
                           acc[status] = (acc[status] || 0) + 1;
                           return acc;
@@ -206,7 +273,7 @@ export default function SimpleDashboard() {
                             </span>
                           </div>
                           <span className="font-medium">
-                            {Math.round((count / quotes.length) * 100)}%
+                            {Math.round((count / filteredQuotes.length) * 100)}%
                           </span>
                         </div>
                       ))}
@@ -220,7 +287,7 @@ export default function SimpleDashboard() {
                   <CardTitle className="text-lg">Financial Summary</CardTitle>
                 </CardHeader>
                 <CardContent className="px-4 sm:px-6">
-                  {quotes.length === 0 ? (
+                  {filteredQuotes.length === 0 ? (
                     <div className="py-8 text-center text-gray-500">
                       <p>No financial data available</p>
                       <p className="text-sm mt-2">Create quotes to see financial metrics</p>
@@ -231,14 +298,14 @@ export default function SimpleDashboard() {
                         <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
                           <p className="text-xs sm:text-sm text-gray-500">Total Pipeline</p>
                           <p className="text-lg sm:text-2xl font-bold mt-1">
-                            {formatCurrency(quotes.reduce((sum, quote) => sum + (quote.totalPrice || 0), 0))}
+                            {formatCurrency(filteredQuotes.reduce((sum, quote) => sum + (quote.totalPrice || 0), 0))}
                           </p>
                         </div>
                         <div className="bg-green-50 p-3 sm:p-4 rounded-lg">
                           <p className="text-xs sm:text-sm text-gray-500">Won Value</p>
                           <p className="text-lg sm:text-2xl font-bold mt-1 text-green-700">
                             {formatCurrency(
-                              quotes
+                              filteredQuotes
                                 .filter(quote => quote.leadStatus === "Won")
                                 .reduce((sum, quote) => sum + (quote.totalPrice || 0), 0)
                             )}
@@ -252,15 +319,15 @@ export default function SimpleDashboard() {
                           <div 
                             className="bg-green-500 h-2 rounded-full" 
                             style={{ 
-                              width: quotes.length 
-                                ? `${Math.round((quotes.filter(q => q.leadStatus === "Won").length / quotes.length) * 100)}%` 
+                              width: filteredQuotes.length 
+                                ? `${Math.round((filteredQuotes.filter(q => q.leadStatus === "Won").length / filteredQuotes.length) * 100)}%` 
                                 : '0%' 
                             }}
                           />
                         </div>
                         <p className="text-right text-sm mt-1">
-                          {quotes.length 
-                            ? Math.round((quotes.filter(q => q.leadStatus === "Won").length / quotes.length) * 100) 
+                          {filteredQuotes.length 
+                            ? Math.round((filteredQuotes.filter(q => q.leadStatus === "Won").length / filteredQuotes.length) * 100) 
                             : 0}%
                         </p>
                       </div>
