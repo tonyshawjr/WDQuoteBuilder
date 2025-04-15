@@ -195,9 +195,9 @@ export default function QuoteDetailsPage() {
     }
   });
   
-  // Update quote notes mutation
-  const updateNotesMutation = useMutation({
-    mutationFn: async (data: { notes?: string, internalNotes?: string }) => {
+  // Update quote mutation
+  const updateQuoteMutation = useMutation({
+    mutationFn: async (data: { notes?: string, internalNotes?: string, totalPrice?: number }) => {
       return await apiRequest(`/api/quotes/${quoteId}`, {
         method: 'PUT',
         headers: {
@@ -211,14 +211,14 @@ export default function QuoteDetailsPage() {
       queryClient.invalidateQueries({ queryKey: [`/api/quotes/${quoteId}`] });
       setIsEditing(false);
       toast({ 
-        title: "Notes updated",
-        description: "Quote notes have been updated successfully"
+        title: "Quote updated",
+        description: "Quote details have been updated successfully"
       });
     },
     onError: (error: Error) => {
       toast({ 
         variant: "destructive",
-        title: "Error updating notes",
+        title: "Error updating quote",
         description: error.message
       });
     }
@@ -286,12 +286,20 @@ export default function QuoteDetailsPage() {
     updateStatusMutation.mutate(status);
   };
   
-  // Handle notes save
-  const handleSaveNotes = () => {
-    updateNotesMutation.mutate({
+  // Handle quote update (notes, prices, quantities)
+  const handleSaveQuote = () => {
+    // Calculate new total price
+    const newTotalPrice = calculateTotalPrice();
+    
+    // Update the quote with all changes
+    updateQuoteMutation.mutate({
       notes: clientNotes,
-      internalNotes: internalNotes
+      internalNotes: internalNotes,
+      totalPrice: newTotalPrice
     });
+    
+    // TODO: Add API endpoints and handlers for updating features and pages
+    // Currently, we're just updating the total price
   };
   
   // Initialize form values when data is loaded
@@ -435,17 +443,17 @@ export default function QuoteDetailsPage() {
                 <Button 
                   variant="outline" 
                   onClick={handleCancelEdit}
-                  disabled={updateNotesMutation.isPending}
+                  disabled={updateQuoteMutation.isPending}
                 >
                   <X className="h-4 w-4 mr-2" />
                   Cancel
                 </Button>
                 <Button 
-                  onClick={handleSaveNotes}
-                  disabled={updateNotesMutation.isPending}
+                  onClick={handleSaveQuote}
+                  disabled={updateQuoteMutation.isPending}
                 >
                   <Save className="h-4 w-4 mr-2" />
-                  {updateNotesMutation.isPending ? "Saving..." : "Save Changes"}
+                  {updateQuoteMutation.isPending ? "Saving..." : "Save Changes"}
                 </Button>
               </>
             ) : (
