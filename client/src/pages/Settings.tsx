@@ -3,6 +3,8 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { Header } from "@/components/layout/Header";
 import { ProfileEditor } from "@/components/profile/ProfileEditor";
 import { UserManagement } from "@/components/admin/UserManagement";
+import { ProjectTypesManager } from "@/components/admin/ProjectTypesManager";
+import { FeaturesAndPagesManager } from "@/components/admin/FeaturesAndPagesManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserCog, Users, FileText, Settings as SettingsIcon, Database } from "lucide-react";
 import { Loader2 } from "lucide-react";
@@ -71,21 +73,11 @@ export default function Settings() {
               </TabsContent>
               
               <TabsContent value="project-types">
-                <div className="bg-white shadow rounded-lg p-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Project Types Management</h3>
-                  <p className="text-sm text-gray-500 mb-4">
-                    This section will allow you to manage project types. This feature will be implemented soon.
-                  </p>
-                </div>
+                <ProjectTypesManager />
               </TabsContent>
               
               <TabsContent value="features-pages">
-                <div className="bg-white shadow rounded-lg p-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Features & Pages Management</h3>
-                  <p className="text-sm text-gray-500 mb-4">
-                    This section will allow you to manage features and pages. This feature will be implemented soon.
-                  </p>
-                </div>
+                <FeaturesAndPagesManager />
               </TabsContent>
             </>
           )}

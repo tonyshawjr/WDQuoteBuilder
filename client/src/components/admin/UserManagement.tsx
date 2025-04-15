@@ -1,19 +1,15 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/components/auth/AuthProvider';
-import { User } from '@shared/schema';
-import { apiRequest } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
-
-// UI Components
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { insertUserSchema, User } from "@shared/schema";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { Pencil, Trash, Plus, Loader2, Shield, ShieldCheck } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -21,11 +17,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -33,294 +25,338 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
-import { Loader2, Plus, Trash2, User as UserIcon } from 'lucide-react';
+} from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useAuth } from "@/components/auth/AuthProvider";
+
+// Form validation schema
+const userFormSchema = insertUserSchema.extend({
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  isAdmin: z.boolean().default(false),
+});
+
+type UserFormValues = z.infer<typeof userFormSchema>;
 
 export function UserManagement() {
-  const { user: currentUser } = useAuth();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [isAddingUser, setIsAddingUser] = useState(false);
-  const [newUserData, setNewUserData] = useState({
-    username: '',
-    password: '',
-    isAdmin: false
-  });
-  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const { user: currentUser } = useAuth();
+  const [openDialog, setOpenDialog] = useState(false);
+  const [dialogMode, setDialogMode] = useState<"create" | "edit">("create");
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   
+  // Form setup
+  const form = useForm<UserFormValues>({
+    resolver: zodResolver(userFormSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+      isAdmin: false,
+    },
+  });
+
   // Fetch users
-  const { data: users, isLoading, error } = useQuery({
-    queryKey: ['/api/users'],
-    queryFn: async () => {
-      const res = await apiRequest<User[]>('/api/users');
-      return res;
-    }
+  const { data: users = [], isLoading } = useQuery({
+    queryKey: ["/api/users"],
   });
 
   // Create user mutation
   const createUserMutation = useMutation({
-    mutationFn: async (userData: { username: string; password: string; isAdmin: boolean }) => {
-      return await apiRequest('/api/users', {
-        method: 'POST',
-        body: JSON.stringify(userData),
-        headers: {
-          'Content-Type': 'application/json'
-        }
+    mutationFn: async (data: UserFormValues) => {
+      return await apiRequest("/api/users", {
+        method: "POST",
+        body: JSON.stringify(data),
       });
     },
     onSuccess: () => {
       toast({
-        title: 'Success!',
-        description: 'User created successfully.',
+        title: "User created",
+        description: "User has been created successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
-      setIsAddingUser(false);
-      setNewUserData({ username: '', password: '', isAdmin: false });
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      setOpenDialog(false);
+      form.reset();
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       toast({
-        title: 'Error creating user',
+        title: "Failed to create user",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
-    }
+    },
+  });
+
+  // Update user mutation
+  const updateUserMutation = useMutation({
+    mutationFn: async (data: UserFormValues & { id: number }) => {
+      return await apiRequest(`/api/users/${data.id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "User updated",
+        description: "User has been updated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      setOpenDialog(false);
+      form.reset();
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to update user",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   // Delete user mutation
   const deleteUserMutation = useMutation({
-    mutationFn: async (userId: number) => {
-      return await apiRequest(`/api/users/${userId}`, {
-        method: 'DELETE'
+    mutationFn: async (id: number) => {
+      return await apiRequest(`/api/users/${id}`, {
+        method: "DELETE",
       });
     },
     onSuccess: () => {
       toast({
-        title: 'Success!',
-        description: 'User deleted successfully.',
+        title: "User deleted",
+        description: "User has been deleted successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
-      setUserToDelete(null);
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       toast({
-        title: 'Error deleting user',
+        title: "Failed to delete user",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
-    }
+    },
   });
 
   // Handle form submission
-  const handleCreateUser = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newUserData.username || !newUserData.password) {
+  const onSubmit = (values: UserFormValues) => {
+    if (dialogMode === "create") {
+      createUserMutation.mutate(values);
+    } else if (dialogMode === "edit" && selectedUser) {
+      updateUserMutation.mutate({ ...values, id: selectedUser.id });
+    }
+  };
+
+  // Open dialog for creating a new user
+  const handleCreateClick = () => {
+    form.reset({ username: "", password: "", isAdmin: false });
+    setDialogMode("create");
+    setSelectedUser(null);
+    setOpenDialog(true);
+  };
+
+  // Open dialog for editing an existing user
+  const handleEditClick = (user: User) => {
+    form.reset({ 
+      username: user.username, 
+      password: "", // Don't show the current password for security reasons
+      isAdmin: user.isAdmin || false 
+    });
+    setDialogMode("edit");
+    setSelectedUser(user);
+    setOpenDialog(true);
+  };
+
+  // Handle user deletion with confirmation
+  const handleDeleteClick = (user: User) => {
+    // Prevent deleting yourself
+    if (user.id === currentUser?.id) {
       toast({
-        title: 'Validation Error',
-        description: 'Username and password are required',
-        variant: 'destructive',
+        title: "Cannot delete own account",
+        description: "You cannot delete your own account",
+        variant: "destructive",
       });
       return;
     }
-    createUserMutation.mutate(newUserData);
-  };
 
-  // Handle user deletion
-  const handleDeleteUser = () => {
-    if (userToDelete) {
-      deleteUserMutation.mutate(userToDelete.id);
+    if (window.confirm(`Are you sure you want to delete user ${user.username}? This action cannot be undone.`)) {
+      deleteUserMutation.mutate(user.id);
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center p-6">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Loading users...</span>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="text-red-500">Error</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>Failed to load users: {error instanceof Error ? error.message : 'Unknown error'}</p>
-          <Button 
-            onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/users'] })}
-            className="mt-4"
-          >
-            Retry
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <Card className="w-full">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>User Management</CardTitle>
-          <CardDescription>Create and manage user accounts</CardDescription>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold">User Management</h2>
+        <Button onClick={handleCreateClick}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add User
+        </Button>
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-        
-        <Dialog open={isAddingUser} onOpenChange={setIsAddingUser}>
-          <DialogTrigger asChild>
-            <Button size="sm"><Plus className="mr-2 h-4 w-4" /> Add User</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create New User</DialogTitle>
-              <DialogDescription>
-                Add a new user to the system. Users can create quotes and manage their sales pipeline.
-              </DialogDescription>
-            </DialogHeader>
-            
-            <form onSubmit={handleCreateUser}>
-              <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="username">Username</Label>
-                  <Input
-                    id="username"
-                    placeholder="Enter username"
-                    value={newUserData.username}
-                    onChange={(e) => setNewUserData({ ...newUserData, username: e.target.value })}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Enter password"
-                    value={newUserData.password}
-                    onChange={(e) => setNewUserData({ ...newUserData, password: e.target.value })}
-                    required
-                  />
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="isAdmin" 
-                    checked={newUserData.isAdmin}
-                    onCheckedChange={(checked) => 
-                      setNewUserData({ ...newUserData, isAdmin: checked === true })
-                    }
-                  />
-                  <Label htmlFor="isAdmin">Admin privileges</Label>
-                </div>
-              </div>
-              
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsAddingUser(false)}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit"
-                  disabled={createUserMutation.isPending}
-                >
-                  {createUserMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </CardHeader>
-      
-      <CardContent>
-        {users && users.length > 0 ? (
+      ) : users.length === 0 ? (
+        <div className="bg-muted/50 p-8 rounded-lg text-center">
+          <p className="text-muted-foreground mb-4">No users found</p>
+          <Button onClick={handleCreateClick}>Create your first user</Button>
+        </div>
+      ) : (
+        <div className="border rounded-md">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Username</TableHead>
                 <TableHead>Role</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="w-[100px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium flex items-center">
-                    <UserIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+              {users.map((user: User) => (
+                <TableRow key={user.id} className={user.id === currentUser?.id ? "bg-muted/30" : ""}>
+                  <TableCell>
                     {user.username}
-                    {user.id === currentUser?.id && (
-                      <Badge variant="outline" className="ml-2">
-                        You
-                      </Badge>
-                    )}
+                    {user.id === currentUser?.id && <span className="ml-2 text-xs text-muted-foreground">(You)</span>}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={user.isAdmin ? "default" : "secondary"}>
-                      {user.isAdmin ? "Admin" : "Sales Representative"}
-                    </Badge>
+                    <div className="flex items-center">
+                      {user.isAdmin ? (
+                        <>
+                          <ShieldCheck className="h-4 w-4 text-primary mr-1" />
+                          <span>Admin</span>
+                        </>
+                      ) : (
+                        <>
+                          <Shield className="h-4 w-4 text-muted-foreground mr-1" />
+                          <span>User</span>
+                        </>
+                      )}
+                    </div>
                   </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                      disabled={user.id === currentUser?.id} // Prevent deleting yourself
-                      onClick={() => setUserToDelete(user)}
-                      title={user.id === currentUser?.id ? "Cannot delete your own account" : "Delete user"}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => handleEditClick(user)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => handleDeleteClick(user)}
+                        disabled={user.id === currentUser?.id}
+                      >
+                        <Trash className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
-        ) : (
-          <div className="text-center py-6">
-            <p className="text-muted-foreground">No users found</p>
-          </div>
-        )}
-      </CardContent>
-      
-      <AlertDialog open={!!userToDelete} onOpenChange={(open) => !open && setUserToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete the user "{userToDelete?.username}" and remove all their access to the system.
-              This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteUser}
-              className="bg-red-500 hover:bg-red-600"
-              disabled={deleteUserMutation.isPending}
-            >
-              {deleteUserMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </Card>
+        </div>
+      )}
+
+      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {dialogMode === "create" ? "Create User" : "Edit User"}
+            </DialogTitle>
+            <DialogDescription>
+              {dialogMode === "create"
+                ? "Add a new user to the system"
+                : "Update the user details"}
+            </DialogDescription>
+          </DialogHeader>
+
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input placeholder="johnsmith" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {dialogMode === "create" ? "Password" : "New Password"}
+                    </FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="password" 
+                        placeholder={dialogMode === "edit" ? "Leave blank to keep current" : "Password"} 
+                        {...field} 
+                      />
+                    </FormControl>
+                    {dialogMode === "edit" && (
+                      <p className="text-xs text-muted-foreground">
+                        Leave blank to keep the current password
+                      </p>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="isAdmin"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Administrator
+                      </FormLabel>
+                      <p className="text-sm text-muted-foreground">
+                        Grant admin privileges to this user
+                      </p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              <DialogFooter>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setOpenDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit"
+                  disabled={createUserMutation.isPending || updateUserMutation.isPending}
+                >
+                  {(createUserMutation.isPending || updateUserMutation.isPending) && (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  )}
+                  {dialogMode === "create" ? "Create" : "Update"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
