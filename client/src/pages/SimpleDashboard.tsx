@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,8 +17,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Quote, User } from "@shared/schema";
-import { PlusCircle, FileText, Eye, BarChart, Users } from "lucide-react";
+import { PlusCircle, FileText, Eye, BarChart, Users, Trash2 } from "lucide-react";
 
 // Utility functions
 const formatCurrency = (amount: number) => {
@@ -48,6 +60,8 @@ export default function SimpleDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("quotes");
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [quoteToDelete, setQuoteToDelete] = useState<Quote | null>(null);
+  const { toast } = useToast();
   
   // Fetch quotes
   const { data: quotes = [], isLoading: quotesLoading } = useQuery<Quote[]>({
@@ -58,6 +72,31 @@ export default function SimpleDashboard() {
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ['/api/users'],
     enabled: !!user?.isAdmin,
+  });
+
+  // Delete quote mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (quoteId: number) => {
+      await fetch(`/api/quotes/${quoteId}`, {
+        method: 'DELETE',
+      });
+      return quoteId;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Quote deleted",
+        description: "The quote has been successfully deleted",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/quotes'] });
+      setQuoteToDelete(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: `Failed to delete quote: ${error.message}`,
+        variant: "destructive",
+      });
+    }
   });
 
   // Filter quotes by selected user if admin has chosen a specific user
@@ -167,7 +206,6 @@ export default function SimpleDashboard() {
                         <div 
                           key={quote.id} 
                           className="bg-white border border-gray-100 rounded-lg shadow-sm p-4"
-                          onClick={() => setLocation(`/quotes/${quote.id}`)}
                         >
                           <div className="flex justify-between items-start mb-2">
                             <div>
@@ -188,6 +226,28 @@ export default function SimpleDashboard() {
                               {formatDate(quote.createdAt || null)}
                             </div>
                             <div className="font-bold">{formatCurrency(quote.totalPrice || 0)}</div>
+                          </div>
+                          <div className="flex justify-end gap-2 mt-3">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => setLocation(`/quotes/${quote.id}`)}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              View
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setQuoteToDelete(quote);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Delete
+                            </Button>
                           </div>
                         </div>
                       ))}
@@ -225,14 +285,28 @@ export default function SimpleDashboard() {
                                 </Badge>
                               </TableCell>
                               <TableCell className="text-right">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  onClick={() => setLocation(`/quotes/${quote.id}`)}
-                                >
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  View
-                                </Button>
+                                <div className="flex justify-end gap-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => setLocation(`/quotes/${quote.id}`)}
+                                  >
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    View
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setQuoteToDelete(quote);
+                                    }}
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Delete
+                                  </Button>
+                                </div>
                               </TableCell>
                             </TableRow>
                           ))}
@@ -343,6 +417,40 @@ export default function SimpleDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!quoteToDelete} onOpenChange={(open) => !open && setQuoteToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this quote?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the quote for {quoteToDelete?.clientName} 
+              {quoteToDelete?.businessName ? ` from ${quoteToDelete.businessName}` : ""}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-500 hover:bg-red-600"
+              onClick={() => {
+                if (quoteToDelete) {
+                  deleteMutation.mutate(quoteToDelete.id);
+                }
+              }}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? (
+                <>
+                  <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                  Deleting...
+                </>
+              ) : (
+                "Delete Quote"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
