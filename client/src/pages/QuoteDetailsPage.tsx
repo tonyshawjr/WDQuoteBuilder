@@ -80,6 +80,7 @@ export default function QuoteDetailsPage() {
   const [editableFeatures, setEditableFeatures] = useState<QuoteFeatureExtended[]>([]);
   const [editablePages, setEditablePages] = useState<QuotePageExtended[]>([]);
   const [basePrice, setBasePrice] = useState(0);
+  const [projectTypeName, setProjectTypeName] = useState("");
   
   // Redirect if not logged in
   useEffect(() => {
@@ -384,13 +385,17 @@ export default function QuoteDetailsPage() {
             const projectType = await response.json();
             // Use the admin-defined base price from the project type
             setBasePrice(projectType.basePrice || 0);
+            // Store the project type name
+            setProjectTypeName(projectType.name || "Project");
           } else {
             // Fallback to calculated base price if we can't get the project type
             setBasePrice(quote.totalPrice ? quote.totalPrice * 0.3 : 0);
+            setProjectTypeName("Project");
           }
         } catch (error) {
           console.error("Error fetching project type:", error);
           setBasePrice(quote.totalPrice ? quote.totalPrice * 0.3 : 0);
+          setProjectTypeName("Project");
         }
       };
       
@@ -725,7 +730,7 @@ export default function QuoteDetailsPage() {
                         <CardContent>
                           <div className="space-y-4">
                             <div>
-                              <h3 className="text-sm font-medium mb-2">Base Project</h3>
+                              <h3 className="text-sm font-medium mb-2">{projectTypeName}</h3>
                               <div className="bg-gray-50 p-3 rounded-md">
                                 <div className="flex justify-between items-center">
                                   <span className="text-sm">Base Price</span>
