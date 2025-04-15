@@ -8,8 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Quote } from "@shared/schema";
-import { PlusCircle, FileText, BarChart, Eye } from "lucide-react";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { Quote, User } from "@shared/schema";
+import { PlusCircle, FileText, BarChart, Eye, Users } from "lucide-react";
 
 export default function Dashboard() {
   const { user, loading } = useAuth();

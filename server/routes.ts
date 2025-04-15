@@ -94,6 +94,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(403).json({ message: 'Forbidden' });
   };
   
+  // Get all users (admin only)
+  app.get('/api/users', isAdmin, async (req, res) => {
+    try {
+      const users = await storage.getUsers();
+      res.json(users);
+    } catch (err) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
   // Auth routes
   app.post('/api/login', (req, res, next) => {
     passport.authenticate('local', (err: any, user: any, info: any) => {
