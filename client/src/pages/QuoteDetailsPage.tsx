@@ -51,6 +51,7 @@ import {
   Check,
   X,
   FileEdit,
+  User,
   AlertCircle
 } from "lucide-react";
 
@@ -916,6 +917,7 @@ export default function QuoteDetailsPage() {
                   </div>
 
                   <div className="flex items-center">
+                    <User className="h-4 w-4 mr-2 text-gray-500" />
                     <span className="text-sm text-gray-500 mr-2">Assigned to:</span>
                     {isEditing ? (
                       <Select 

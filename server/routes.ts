@@ -877,8 +877,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!user.isAdmin && existingQuote.createdBy !== user.id.toString()) {
         return res.status(403).json({ message: 'Access denied' });
       }
-      
+
       const validatedData = insertQuoteSchema.partial().parse(req.body);
+      
+      // Set the updatedBy field to the current user's username
+      validatedData.updatedBy = user.username;
+      
+      // Only admins can reassign quotes to different users
+      if (validatedData.createdBy && !user.isAdmin) {
+        delete validatedData.createdBy;
+      }
+      
       const quote = await storage.updateQuote(id, validatedData);
       
       res.json(quote);
