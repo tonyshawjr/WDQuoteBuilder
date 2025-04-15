@@ -169,9 +169,17 @@ export default function QuoteDetailsPage() {
   });
   
   // Fetch all pages for reference
+  // Fetch all pages for reference
   const { data: allPages } = useQuery<Page[]>({
     queryKey: ['/api/pages'],
     queryFn: getQueryFn<Page[]>({ on401: 'throw' })
+  });
+  
+  // Fetch all users for displaying names
+  const { data: users = [] } = useQuery<any[]>({
+    queryKey: ['/api/users'],
+    queryFn: getQueryFn<any[]>({ on401: 'throw' }),
+    enabled: !!user
   });
 
   // Fetch quote pages
@@ -1256,7 +1264,7 @@ export default function QuoteDetailsPage() {
                               {formatDate(quote.createdAt)} at {new Date(quote.createdAt).toLocaleTimeString()}
                             </div>
                             <div className="text-sm text-gray-500">
-                              Quote created by {quote.createdBy || (user?.isAdmin ? 'Admin' : user?.username) || 'Unknown'}
+                              Quote created by {users.find((u: any) => u.id.toString() === quote.createdBy?.toString())?.username || quote.createdBy || 'Unknown'}
                             </div>
                           </div>
                           
@@ -1267,7 +1275,7 @@ export default function QuoteDetailsPage() {
                                 {formatDate(quote.updatedAt)} at {new Date(quote.updatedAt).toLocaleTimeString()}
                               </div>
                               <div className="text-sm text-gray-500">
-                                Quote last updated by {quote.updatedBy || (user?.isAdmin ? 'Admin' : user?.username) || 'Unknown'}
+                                Quote last updated by {users.find(u => u.id.toString() === quote.updatedBy?.toString())?.username || quote.updatedBy || 'Unknown'}
                               </div>
                             </div>
                           )}
