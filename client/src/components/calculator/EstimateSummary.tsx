@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { 
   Clipboard, 
   FileDown, 
-  Save,
   Check
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -103,13 +102,6 @@ export function EstimateSummary({
     });
   };
   
-  const handleSaveQuote = () => {
-    toast({
-      title: "Feature not available",
-      description: "Save quote is not implemented in this demo",
-    });
-  };
-
   const hasSelections = selectedProjectType && (selectedFeatures.length > 0 || selectedPages.length > 0);
   
   return (
@@ -212,15 +204,7 @@ export function EstimateSummary({
             Export PDF
           </Button>
           
-          <Button 
-            className="w-full" 
-            variant="outline"
-            onClick={handleSaveQuote}
-            disabled={!hasSelections}
-          >
-            <Save className="h-4 w-4 mr-2" />
-            Save Quote
-          </Button>
+
         </div>
       </CardContent>
     </Card>

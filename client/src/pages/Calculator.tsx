@@ -108,21 +108,9 @@ export default function Calculator() {
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <div className="flex justify-between items-center mb-6">
-            <TabsList>
-              <TabsTrigger value="calculator">Calculator</TabsTrigger>
-              <TabsTrigger value="save-quote" disabled={!isReadyToSaveQuote}>Save Quote</TabsTrigger>
-            </TabsList>
-            
-            {activeTab === "calculator" && isReadyToSaveQuote && (
-              <Button onClick={() => setActiveTab("save-quote")}>
-                Continue to Save Quote
-              </Button>
-            )}
-          </div>
-          
-          <TabsContent value="calculator">
+        {!activeTab || activeTab === "calculator" ? (
+          <>
+            <h2 className="text-2xl font-bold mb-6">Create Web Design Estimate</h2>
             <div className="md:flex md:space-x-6">
               <div className="md:w-2/3">
                 <CalculatorPanel
@@ -141,11 +129,29 @@ export default function Calculator() {
                   selectedProjectType={selectedProjectType}
                   selectedPages={selectedPages}
                 />
+                
+                {isReadyToSaveQuote && (
+                  <Button 
+                    className="mt-4 w-full"
+                    onClick={() => setActiveTab("save-quote")}
+                  >
+                    Save Quote
+                  </Button>
+                )}
               </div>
             </div>
-          </TabsContent>
-          
-          <TabsContent value="save-quote">
+          </>
+        ) : (
+          <>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">Save Quote</h2>
+              <Button 
+                variant="outline" 
+                onClick={() => setActiveTab("calculator")}
+              >
+                Back to Calculator
+              </Button>
+            </div>
             <div className="md:flex md:space-x-6">
               <div className="md:w-1/2">
                 <ClientInfoForm 
@@ -155,23 +161,16 @@ export default function Calculator() {
               </div>
               
               <div className="md:w-1/2 mt-6 md:mt-0">
-                <h2 className="text-2xl font-bold mb-4">Quote Summary</h2>
+                <h2 className="text-xl font-bold mb-4">Quote Summary</h2>
                 <EstimateSummary
                   selectedFeatures={selectedFeatures}
                   selectedProjectType={selectedProjectType}
                   selectedPages={selectedPages}
                 />
-                <Button 
-                  variant="outline" 
-                  className="mt-4 w-full"
-                  onClick={() => setActiveTab("calculator")}
-                >
-                  Back to Calculator
-                </Button>
               </div>
             </div>
-          </TabsContent>
-        </Tabs>
+          </>
+        )}
       </div>
     </div>
   );
