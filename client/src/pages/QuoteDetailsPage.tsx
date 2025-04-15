@@ -924,13 +924,7 @@ export default function QuoteDetailsPage() {
                                     <Button 
                                       size="sm"
                                       variant="outline"
-                                      onClick={() => {
-                                        // Add feature flow - would require project type selection
-                                        toast({
-                                          title: "Feature selection",
-                                          description: "Feature selection would open a modal to pick from available features",
-                                        });
-                                      }}
+                                      onClick={() => setFeatureDialogOpen(true)}
                                     >
                                       Add Feature
                                     </Button>
@@ -1021,13 +1015,7 @@ export default function QuoteDetailsPage() {
                                     <Button 
                                       size="sm"
                                       variant="outline"
-                                      onClick={() => {
-                                        // Add page flow
-                                        toast({
-                                          title: "Page selection",
-                                          description: "Page selection would open a modal to pick from available pages",
-                                        });
-                                      }}
+                                      onClick={() => setPageDialogOpen(true)}
                                     >
                                       Add Page
                                     </Button>
@@ -1245,6 +1233,141 @@ export default function QuoteDetailsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+      {/* Feature selection dialog */}
+      <Dialog open={featureDialogOpen} onOpenChange={setFeatureDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Feature</DialogTitle>
+            <DialogDescription>
+              Select a feature to add to this quote
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {(allFeatures || []).length > 0 ? (
+              <div className="max-h-[300px] overflow-y-auto pr-2">
+                {/* Filter out features that are already in the quote */}
+                {(allFeatures || [])
+                  .filter(feature => 
+                    !editableFeatures.some(ef => ef.featureId === feature.id)
+                  )
+                  .filter(feature => 
+                    quote?.projectTypeId === feature.projectTypeId
+                  )
+                  .map(feature => (
+                    <div 
+                      key={feature.id}
+                      className="flex items-center justify-between p-3 my-1 border rounded-md hover:bg-gray-50 cursor-pointer"
+                      onClick={() => addFeatureToQuote(feature.id)}
+                    >
+                      <div>
+                        <h4 className="font-medium">{feature.name}</h4>
+                        <p className="text-sm text-gray-500">{feature.description}</p>
+                      </div>
+                      <div className="text-sm font-medium">
+                        {feature.pricingType === 'hourly' && feature.hourlyRate && feature.estimatedHours 
+                          ? `${feature.estimatedHours} hours @ $${feature.hourlyRate}/hr`
+                          : formatCurrency(feature.flatPrice || 0)
+                        }
+                      </div>
+                    </div>
+                  ))}
+                  
+                {/* Show a notice if all features are already added */}
+                {(allFeatures || [])
+                  .filter(feature => quote?.projectTypeId === feature.projectTypeId)
+                  .filter(feature => 
+                    !editableFeatures.some(ef => ef.featureId === feature.id)
+                  ).length === 0 && (
+                    <p className="text-center py-8 text-gray-500">
+                      All available features for this project type have already been added
+                    </p>
+                  )}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500">No features found</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Close
+              </Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Page selection dialog */}
+      <Dialog open={pageDialogOpen} onOpenChange={setPageDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Page</DialogTitle>
+            <DialogDescription>
+              Select a page to add to this quote
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {(allPages || []).length > 0 ? (
+              <div className="max-h-[300px] overflow-y-auto pr-2">
+                {/* Filter out pages that are already in the quote */}
+                {(allPages || [])
+                  .filter(page => 
+                    !editablePages.some(ep => ep.pageId === page.id)
+                  )
+                  .filter(page => 
+                    page.projectTypeId === null || 
+                    page.projectTypeId === quote?.projectTypeId
+                  )
+                  .filter(page => page.isActive) // Only show active pages
+                  .map(page => (
+                    <div 
+                      key={page.id}
+                      className="flex items-center justify-between p-3 my-1 border rounded-md hover:bg-gray-50 cursor-pointer"
+                      onClick={() => addPageToQuote(page.id)}
+                    >
+                      <div>
+                        <h4 className="font-medium">{page.name}</h4>
+                        <p className="text-sm text-gray-500">{page.description}</p>
+                      </div>
+                      <div className="text-sm font-medium">
+                        {formatCurrency(page.pricePerPage)}
+                      </div>
+                    </div>
+                  ))}
+                  
+                {/* Show a notice if all pages are already added */}
+                {(allPages || [])
+                  .filter(page => 
+                    page.projectTypeId === null || 
+                    page.projectTypeId === quote?.projectTypeId
+                  )
+                  .filter(page => page.isActive)
+                  .filter(page => 
+                    !editablePages.some(ep => ep.pageId === page.id)
+                  ).length === 0 && (
+                    <p className="text-center py-8 text-gray-500">
+                      All available pages for this project type have already been added
+                    </p>
+                  )}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500">No pages found</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Close
+              </Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
