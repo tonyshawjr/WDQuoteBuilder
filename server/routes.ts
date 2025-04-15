@@ -7,7 +7,9 @@ import {
   insertPageSchema,
   insertQuoteSchema,
   type SelectedFeature,
-  type SelectedPage
+  type SelectedPage,
+  type User,
+  type Quote
 } from "@shared/schema";
 import express from "express";
 import session from "express-session";
@@ -377,7 +379,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Quotes routes
   app.get('/api/quotes', isAuthenticated, async (req, res) => {
     try {
-      const quotes = await storage.getQuotes();
+      // Get user from session
+      const user = req.user as User;
+      
+      // Admins can see all quotes, regular users only see their own quotes
+      let quotes: Quote[];
+      if (user.isAdmin) {
+        quotes = await storage.getQuotes();
+      } else {
+        quotes = await storage.getQuotesByUser(user.id);
+      }
+      
       res.json(quotes);
     } catch (err) {
       res.status(500).json({ message: 'Server error' });
@@ -393,6 +405,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Quote not found' });
       }
       
+      // Get user from session
+      const user = req.user as User;
+      
+      // If not admin, ensure the user can only access their own quotes
+      if (!user.isAdmin && quote.createdBy !== user.id.toString()) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+      
       res.json(quote);
     } catch (err) {
       res.status(500).json({ message: 'Server error' });
@@ -406,6 +426,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!quote) {
         return res.status(404).json({ message: 'Quote not found' });
+      }
+      
+      // Get user from session
+      const user = req.user as User;
+      
+      // If not admin, ensure the user can only access their own quotes
+      if (!user.isAdmin && quote.createdBy !== user.id.toString()) {
+        return res.status(403).json({ message: 'Access denied' });
       }
       
       const features = await storage.getQuoteFeatures(id);
@@ -491,6 +519,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!quote) {
         return res.status(404).json({ message: 'Quote not found' });
+      }
+      
+      // Get user from session
+      const user = req.user as User;
+      
+      // If not admin, ensure the user can only access their own quotes
+      if (!user.isAdmin && quote.createdBy !== user.id.toString()) {
+        return res.status(403).json({ message: 'Access denied' });
       }
       
       const pages = await storage.getQuotePages(id);
