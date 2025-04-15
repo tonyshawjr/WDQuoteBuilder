@@ -47,6 +47,8 @@ export interface IStorage {
   deleteQuote(id: number): Promise<boolean>;
   getQuoteFeatures(quoteId: number): Promise<QuoteFeature[]>;
   getQuotePages(quoteId: number): Promise<QuotePage[]>;
+  updateQuoteFeature(quoteId: number, featureId: number, data: { quantity: number, price: number }): Promise<QuoteFeature | undefined>;
+  updateQuotePage(quoteId: number, pageId: number, data: { quantity: number, price: number }): Promise<QuotePage | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -329,6 +331,44 @@ export class MemStorage implements IStorage {
     return Array.from(this.quotePagesMap.values()).filter(
       page => page.quoteId === quoteId
     );
+  }
+  
+  async updateQuoteFeature(quoteId: number, featureId: number, data: { quantity: number, price: number }): Promise<QuoteFeature | undefined> {
+    // Find the quote feature by quoteId and featureId
+    const quoteFeature = Array.from(this.quoteFeaturesMap.values()).find(
+      feature => feature.quoteId === quoteId && feature.featureId === featureId
+    );
+    
+    if (!quoteFeature) return undefined;
+    
+    // Update the quote feature with new data
+    const updatedQuoteFeature: QuoteFeature = {
+      ...quoteFeature,
+      quantity: data.quantity,
+      price: data.price
+    };
+    
+    this.quoteFeaturesMap.set(quoteFeature.id, updatedQuoteFeature);
+    return updatedQuoteFeature;
+  }
+  
+  async updateQuotePage(quoteId: number, pageId: number, data: { quantity: number, price: number }): Promise<QuotePage | undefined> {
+    // Find the quote page by quoteId and pageId
+    const quotePage = Array.from(this.quotePagesMap.values()).find(
+      page => page.quoteId === quoteId && page.pageId === pageId
+    );
+    
+    if (!quotePage) return undefined;
+    
+    // Update the quote page with new data
+    const updatedQuotePage: QuotePage = {
+      ...quotePage,
+      quantity: data.quantity,
+      price: data.price
+    };
+    
+    this.quotePagesMap.set(quotePage.id, updatedQuotePage);
+    return updatedQuotePage;
   }
   
   // Initialize with sample data

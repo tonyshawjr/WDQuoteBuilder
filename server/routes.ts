@@ -422,6 +422,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Update a quote feature
+  app.put('/api/quotes/:quoteId/features/:featureId', isAuthenticated, async (req, res) => {
+    try {
+      const quoteId = parseInt(req.params.quoteId);
+      const featureId = parseInt(req.params.featureId);
+      const { quantity, price } = req.body;
+      
+      if (isNaN(quoteId) || isNaN(featureId) || typeof quantity !== 'number' || typeof price !== 'number') {
+        return res.status(400).json({ message: 'Invalid parameters' });
+      }
+      
+      const updatedFeature = await storage.updateQuoteFeature(quoteId, featureId, { quantity, price });
+      
+      if (!updatedFeature) {
+        return res.status(404).json({ message: 'Quote feature not found' });
+      }
+      
+      // After updating a quote feature, we should also update the total price in the quote
+      const quoteFeatures = await storage.getQuoteFeatures(quoteId);
+      const quotePages = await storage.getQuotePages(quoteId);
+      
+      // Calculate total price based on features and pages
+      const featuresTotal = quoteFeatures.reduce((sum, feature) => sum + feature.price, 0);
+      const pagesTotal = quotePages.reduce((sum, page) => sum + page.price, 0);
+      
+      // Base price is typically 30% of the total
+      const basePrice = featuresTotal * 0.3;
+      const totalPrice = basePrice + featuresTotal + pagesTotal;
+      
+      // Update the quote with the new total price
+      await storage.updateQuote(quoteId, { totalPrice });
+      
+      res.json(updatedFeature);
+    } catch (err) {
+      res.status(400).json({ message: err instanceof Error ? err.message : 'Invalid data' });
+    }
+  });
+  
+  // Update a quote page
+  app.put('/api/quotes/:quoteId/pages/:pageId', isAuthenticated, async (req, res) => {
+    try {
+      const quoteId = parseInt(req.params.quoteId);
+      const pageId = parseInt(req.params.pageId);
+      const { quantity, price } = req.body;
+      
+      if (isNaN(quoteId) || isNaN(pageId) || typeof quantity !== 'number' || typeof price !== 'number') {
+        return res.status(400).json({ message: 'Invalid parameters' });
+      }
+      
+      const updatedPage = await storage.updateQuotePage(quoteId, pageId, { quantity, price });
+      
+      if (!updatedPage) {
+        return res.status(404).json({ message: 'Quote page not found' });
+      }
+      
+      // After updating a quote page, we should also update the total price in the quote
+      const quoteFeatures = await storage.getQuoteFeatures(quoteId);
+      const quotePages = await storage.getQuotePages(quoteId);
+      
+      // Calculate total price based on features and pages
+      const featuresTotal = quoteFeatures.reduce((sum, feature) => sum + feature.price, 0);
+      const pagesTotal = quotePages.reduce((sum, page) => sum + page.price, 0);
+      
+      // Base price is typically 30% of the total
+      const basePrice = featuresTotal * 0.3;
+      const totalPrice = basePrice + featuresTotal + pagesTotal;
+      
+      // Update the quote with the new total price
+      await storage.updateQuote(quoteId, { totalPrice });
+      
+      res.json(updatedPage);
+    } catch (err) {
+      res.status(400).json({ message: err instanceof Error ? err.message : 'Invalid data' });
+    }
+  });
+  
   app.post('/api/quotes', isAuthenticated, async (req, res) => {
     try {
       const { quote, selectedFeatures, selectedPages } = req.body;

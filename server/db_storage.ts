@@ -269,4 +269,54 @@ export class DatabaseStorage implements IStorage {
       .from(quotePages)
       .where(eq(quotePages.quoteId, quoteId));
   }
+  
+  async updateQuoteFeature(quoteId: number, featureId: number, data: { quantity: number, price: number }): Promise<QuoteFeature | undefined> {
+    // Find the quote feature by quoteId and featureId
+    const [existingQuoteFeature] = await db.select()
+      .from(quoteFeatures)
+      .where(
+        and(
+          eq(quoteFeatures.quoteId, quoteId),
+          eq(quoteFeatures.featureId, featureId)
+        )
+      );
+      
+    if (!existingQuoteFeature) return undefined;
+    
+    // Update the quote feature with new data
+    const [updatedQuoteFeature] = await db.update(quoteFeatures)
+      .set({
+        quantity: data.quantity,
+        price: data.price
+      })
+      .where(eq(quoteFeatures.id, existingQuoteFeature.id))
+      .returning();
+      
+    return updatedQuoteFeature;
+  }
+  
+  async updateQuotePage(quoteId: number, pageId: number, data: { quantity: number, price: number }): Promise<QuotePage | undefined> {
+    // Find the quote page by quoteId and pageId
+    const [existingQuotePage] = await db.select()
+      .from(quotePages)
+      .where(
+        and(
+          eq(quotePages.quoteId, quoteId),
+          eq(quotePages.pageId, pageId)
+        )
+      );
+      
+    if (!existingQuotePage) return undefined;
+    
+    // Update the quote page with new data
+    const [updatedQuotePage] = await db.update(quotePages)
+      .set({
+        quantity: data.quantity,
+        price: data.price
+      })
+      .where(eq(quotePages.id, existingQuotePage.id))
+      .returning();
+      
+    return updatedQuotePage;
+  }
 }
