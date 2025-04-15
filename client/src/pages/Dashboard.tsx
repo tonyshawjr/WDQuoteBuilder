@@ -269,7 +269,7 @@ export default function Dashboard() {
           </Card>
         </div>
         
-        <Tabs defaultValue="analytics" className="mb-8">
+        <Tabs defaultValue="quotes" className="mb-8">
           <TabsList>
             <TabsTrigger value="quotes">Quotes</TabsTrigger>
             <TabsTrigger value="analytics">Reports</TabsTrigger>
