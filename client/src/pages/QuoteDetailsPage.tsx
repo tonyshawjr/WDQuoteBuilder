@@ -627,11 +627,23 @@ export default function QuoteDetailsPage() {
         credentials: 'include'
       });
       
+      // Check for errors in the response
       if (!response.ok) {
-        throw new Error(`Failed to add feature: ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`Failed to add feature: ${errorText}`);
       }
       
-      const newQuoteFeature = await response.json();
+      let newQuoteFeature;
+      try {
+        // Try to parse the response as JSON
+        newQuoteFeature = await response.json();
+      } catch (parseError) {
+        throw new Error('Invalid response format from the server');
+      }
+      
+      if (!newQuoteFeature || !newQuoteFeature.id) {
+        throw new Error('Invalid feature data returned from server');
+      }
       
       // Add the feature to the local state
       const extendedFeature: QuoteFeatureExtended = {
@@ -1234,7 +1246,7 @@ export default function QuoteDetailsPage() {
                               {formatDate(quote.createdAt)} at {new Date(quote.createdAt).toLocaleTimeString()}
                             </div>
                             <div className="text-sm text-gray-500">
-                              Quote created by {quote.createdBy || 'Admin'}
+                              Quote created by {quote.createdBy || (user?.isAdmin ? 'Admin' : user?.username) || 'Unknown'}
                             </div>
                           </div>
                           
@@ -1245,7 +1257,7 @@ export default function QuoteDetailsPage() {
                                 {formatDate(quote.updatedAt)} at {new Date(quote.updatedAt).toLocaleTimeString()}
                               </div>
                               <div className="text-sm text-gray-500">
-                                Quote last updated by {quote.updatedBy || user.username}
+                                Quote last updated by {quote.updatedBy || (user?.isAdmin ? 'Admin' : user?.username) || 'Unknown'}
                               </div>
                             </div>
                           )}
