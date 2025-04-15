@@ -253,7 +253,7 @@ export default function QuoteDetailsPage() {
   
   // Update quote mutation
   const updateQuoteMutation = useMutation({
-    mutationFn: async (data: { notes?: string, internalNotes?: string, totalPrice?: number }) => {
+    mutationFn: async (data: { notes?: string, internalNotes?: string, totalPrice?: number, createdBy?: string }) => {
       return await apiRequest(`/api/quotes/${quoteId}`, {
         method: 'PUT',
         headers: {
@@ -351,7 +351,8 @@ export default function QuoteDetailsPage() {
     updateQuoteMutation.mutate({
       notes: clientNotes,
       internalNotes: internalNotes,
-      totalPrice: newTotalPrice
+      totalPrice: newTotalPrice,
+      createdBy: assignedUser
     }, {
       onSuccess: (updatedQuote) => {
         // Update the quote data locally to avoid needing a refresh
@@ -362,6 +363,7 @@ export default function QuoteDetailsPage() {
             totalPrice: newTotalPrice,
             notes: clientNotes,
             internalNotes: internalNotes,
+            createdBy: assignedUser,
             updatedAt: new Date().toISOString()
           };
           
