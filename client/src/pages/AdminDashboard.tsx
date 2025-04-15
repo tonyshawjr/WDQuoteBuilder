@@ -81,31 +81,30 @@ export default function AdminDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-          <Button onClick={() => setLocation("/calculator")} className="self-start sm:self-auto">
-            <PlusCircle className="h-4 w-4 mr-2" />
-            <span className="sm:inline">Create New Quote</span>
-          </Button>
-        </div>
-        
-        <div className="mb-6">
-          <div className="flex items-center space-x-2">
-            <Users className="h-4 w-4 text-gray-500" />
-            <Select
-              value={selectedUserId || "all"}
-              onValueChange={(value) => setSelectedUserId(value === "all" ? null : value)}
-            >
-              <SelectTrigger className="w-full sm:w-[220px]">
-                <SelectValue placeholder="All team members" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All team members</SelectItem>
-                {users.map((u) => (
-                  <SelectItem key={u.id} value={u.id.toString()}>
-                    {u.username}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <div className="flex items-center space-x-2 self-start">
+              <Users className="h-4 w-4 text-gray-500" />
+              <Select
+                value={selectedUserId || "all"}
+                onValueChange={(value) => setSelectedUserId(value === "all" ? null : value)}
+              >
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="All team members" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All team members</SelectItem>
+                  {users?.map((u) => (
+                    <SelectItem key={u.id} value={u.id.toString()}>
+                      {u.username}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button onClick={() => setLocation("/calculator")} className="self-start sm:self-auto">
+              <PlusCircle className="h-4 w-4 mr-2" />
+              <span className="sm:inline">Create New Quote</span>
+            </Button>
           </div>
         </div>
         
