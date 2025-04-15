@@ -50,6 +50,9 @@ export function PageTable() {
     mutationFn: async (id: number) => {
       const response = await apiRequest(`/api/pages/${id}`, {
         method: "DELETE",
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
       return response;
     },

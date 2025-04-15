@@ -78,7 +78,10 @@ export function PageForm({ isOpen, onClose, page }: PageFormProps) {
     mutationFn: async (data: FormData) => {
       const response = await apiRequest("/api/pages", {
         method: "POST",
-        data,
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
       return response;
     },
@@ -108,7 +111,10 @@ export function PageForm({ isOpen, onClose, page }: PageFormProps) {
     mutationFn: async (data: FormData) => {
       const response = await apiRequest(`/api/pages/${page?.id}`, {
         method: "PUT",
-        data,
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
       return response;
     },
@@ -210,9 +216,9 @@ export function PageForm({ isOpen, onClose, page }: PageFormProps) {
                   <FormLabel>Project Type (Optional)</FormLabel>
                   <Select
                     onValueChange={(value) =>
-                      field.onChange(value ? parseInt(value) : null)
+                      field.onChange(value === "0" ? null : parseInt(value))
                     }
-                    value={field.value?.toString() || ""}
+                    value={field.value?.toString() || "0"}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -220,7 +226,7 @@ export function PageForm({ isOpen, onClose, page }: PageFormProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">No specific project type</SelectItem>
+                      <SelectItem value="0">No specific project type</SelectItem>
                       {projectTypes.map((projectType: ProjectType) => (
                         <SelectItem
                           key={projectType.id}
