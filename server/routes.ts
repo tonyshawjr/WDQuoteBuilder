@@ -365,6 +365,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Quotes routes
+  app.get('/api/quotes', isAuthenticated, async (req, res) => {
+    try {
+      const quotes = await storage.getQuotes();
+      res.json(quotes);
+    } catch (err) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
+  app.get('/api/quotes/:id', isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const quote = await storage.getQuote(id);
+      
+      if (!quote) {
+        return res.status(404).json({ message: 'Quote not found' });
+      }
+      
+      // Get quote details (features and pages)
+      const features = await storage.getQuoteFeatures(id);
+      const pages = await storage.getQuotePages(id);
+      
+      res.json({
+        quote,
+        features,
+        pages
+      });
+    } catch (err) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
+  app.post('/api/quotes', isAuthenticated, async (req, res) => {
+    try {
+      const { quote, selectedFeatures, selectedPages } = req.body;
+      
+      // Validate quote data
+      const validatedQuote = insertQuoteSchema.parse(quote);
+      
+      // Create the quote and its related items
+      const createdQuote = await storage.createQuote(
+        validatedQuote,
+        selectedFeatures,
+        selectedPages
+      );
+      
+      res.status(201).json(createdQuote);
+    } catch (err) {
+      res.status(400).json({ message: err instanceof Error ? err.message : 'Invalid data' });
+    }
+  });
+  
+  app.put('/api/quotes/:id', isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertQuoteSchema.partial().parse(req.body);
+      const quote = await storage.updateQuote(id, validatedData);
+      
+      if (!quote) {
+        return res.status(404).json({ message: 'Quote not found' });
+      }
+      
+      res.json(quote);
+    } catch (err) {
+      res.status(400).json({ message: err instanceof Error ? err.message : 'Invalid data' });
+    }
+  });
+  
+  app.delete('/api/quotes/:id', isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteQuote(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: 'Quote not found' });
+      }
+      
+      res.json({ success });
+    } catch (err) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
