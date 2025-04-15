@@ -914,6 +914,31 @@ export default function QuoteDetailsPage() {
                       </Badge>
                     )}
                   </div>
+
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-500 mr-2">Assigned to:</span>
+                    {isEditing ? (
+                      <Select 
+                        value={assignedUser}
+                        onValueChange={setAssignedUser}
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Select User" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {users.map((user: any) => (
+                            <SelectItem key={user.id} value={user.username}>
+                              {user.username}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <span className="font-medium">
+                        {quote.createdBy || "Unassigned"}
+                      </span>
+                    )}
+                  </div>
                   
                   <div className="flex items-center">
                     <Mail className="h-4 w-4 mr-2 text-gray-500" />
@@ -1264,7 +1289,7 @@ export default function QuoteDetailsPage() {
                               {formatDate(quote.createdAt)} at {new Date(quote.createdAt).toLocaleTimeString()}
                             </div>
                             <div className="text-sm text-gray-500">
-                              Quote created by {users.find((u: any) => u.id.toString() === quote.createdBy?.toString())?.username || quote.createdBy || 'Unknown'}
+                              Quote created by {quote.createdBy || 'Unknown'}
                             </div>
                           </div>
                           
@@ -1275,7 +1300,7 @@ export default function QuoteDetailsPage() {
                                 {formatDate(quote.updatedAt)} at {new Date(quote.updatedAt).toLocaleTimeString()}
                               </div>
                               <div className="text-sm text-gray-500">
-                                Quote last updated by {users.find((u: any) => u.id.toString() === quote.updatedBy?.toString())?.username || quote.updatedBy || 'Unknown'}
+                                Quote last updated by {quote.updatedBy || 'Unknown'}
                               </div>
                             </div>
                           )}
