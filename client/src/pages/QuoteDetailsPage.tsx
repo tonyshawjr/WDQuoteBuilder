@@ -14,6 +14,15 @@ import {
   CardTitle,
   CardFooter
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose
+} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -81,6 +90,10 @@ export default function QuoteDetailsPage() {
   const [editablePages, setEditablePages] = useState<QuotePageExtended[]>([]);
   const [basePrice, setBasePrice] = useState(0);
   const [projectTypeName, setProjectTypeName] = useState("");
+  
+  // Dialog state for adding features and pages
+  const [featureDialogOpen, setFeatureDialogOpen] = useState(false);
+  const [pageDialogOpen, setPageDialogOpen] = useState(false);
   
   // Redirect if not logged in
   useEffect(() => {
@@ -558,6 +571,154 @@ export default function QuoteDetailsPage() {
   // Remove a page from the quote
   const removePage = (pageId: number) => {
     setEditablePages(prev => prev.filter(page => page.id !== pageId));
+  };
+  
+  // Add a feature to the quote
+  const addFeatureToQuote = async (featureId: number) => {
+    if (!quote) return;
+    
+    try {
+      // Find the feature in the allFeatures list
+      const feature = allFeatures?.find(f => f.id === featureId);
+      if (!feature) {
+        toast({
+          title: "Error",
+          description: "Feature not found",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Calculate initial price based on feature pricing type
+      let initialPrice = 0;
+      if (feature.pricingType === 'hourly' && feature.hourlyRate && feature.estimatedHours) {
+        initialPrice = feature.hourlyRate * feature.estimatedHours;
+      } else if (feature.flatPrice) {
+        initialPrice = feature.flatPrice;
+      }
+      
+      // Create new feature entry for the quote
+      const response = await fetch(`/api/quotes/${quoteId}/features`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          featureId: feature.id,
+          quantity: feature.supportsQuantity ? 1 : 1, // Default to 1
+          price: initialPrice
+        }),
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to add feature: ${response.statusText}`);
+      }
+      
+      const newQuoteFeature = await response.json();
+      
+      // Add the feature to the local state
+      const extendedFeature: QuoteFeatureExtended = {
+        ...newQuoteFeature,
+        featureName: feature.name,
+        pricingType: feature.pricingType,
+        hourlyRate: feature.hourlyRate,
+        estimatedHours: feature.estimatedHours,
+        flatPrice: feature.flatPrice,
+        supportsQuantity: feature.supportsQuantity,
+        adminPricePerUnit: feature.pricingType === 'hourly' && feature.hourlyRate && feature.estimatedHours 
+          ? feature.hourlyRate * feature.estimatedHours 
+          : feature.flatPrice || 0
+      };
+      
+      setEditableFeatures(prev => [...prev, extendedFeature]);
+      
+      // Close the dialog
+      setFeatureDialogOpen(false);
+      
+      toast({
+        title: "Feature added",
+        description: `${feature.name} has been added to the quote`
+      });
+      
+      // Update the total price
+      handleSaveQuote();
+      
+    } catch (error) {
+      console.error("Error adding feature:", error);
+      toast({
+        title: "Error adding feature",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  // Add a page to the quote
+  const addPageToQuote = async (pageId: number) => {
+    if (!quote) return;
+    
+    try {
+      // Find the page in the allPages list
+      const page = allPages?.find(p => p.id === pageId);
+      if (!page) {
+        toast({
+          title: "Error",
+          description: "Page not found",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Create new page entry for the quote
+      const response = await fetch(`/api/quotes/${quoteId}/pages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          pageId: page.id,
+          quantity: page.defaultQuantity || 1,
+          price: page.pricePerPage * (page.defaultQuantity || 1)
+        }),
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to add page: ${response.statusText}`);
+      }
+      
+      const newQuotePage = await response.json();
+      
+      // Add the page to the local state
+      const extendedPage: QuotePageExtended = {
+        ...newQuotePage,
+        pageName: page.name,
+        pricePerPage: page.pricePerPage,
+        adminPricePerPage: page.pricePerPage
+      };
+      
+      setEditablePages(prev => [...prev, extendedPage]);
+      
+      // Close the dialog
+      setPageDialogOpen(false);
+      
+      toast({
+        title: "Page added",
+        description: `${page.name} has been added to the quote`
+      });
+      
+      // Update the total price
+      handleSaveQuote();
+      
+    } catch (error) {
+      console.error("Error adding page:", error);
+      toast({
+        title: "Error adding page",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive"
+      });
+    }
   };
   
   // Update base price
