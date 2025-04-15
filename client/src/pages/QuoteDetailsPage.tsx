@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Header } from "@/components/layout/Header";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, getQueryFn } from "@/lib/queryClient";
 import { Quote, QuoteFeature, QuotePage, Feature, Page } from "@shared/schema";
 import { 
   Card, 
@@ -99,10 +99,16 @@ export default function QuoteDetailsPage() {
     }
   });
   
+  // Fetch all features for reference
+  const { data: allFeatures } = useQuery<Feature[]>({
+    queryKey: ['/api/features'],
+    queryFn: getQueryFn<Feature[]>({ on401: 'throw' })
+  });
+
   // Fetch quote features
   const { data: quoteFeatures, isLoading: featuresLoading } = useQuery<QuoteFeatureExtended[]>({
     queryKey: [`/api/quotes/${quoteId}/features`],
-    enabled: !!quoteId,
+    enabled: !!quoteId && !!allFeatures,
     queryFn: async () => {
       const response = await fetch(`/api/quotes/${quoteId}/features`, {
         credentials: "include",
@@ -115,18 +121,28 @@ export default function QuoteDetailsPage() {
       const quoteFeatureData: QuoteFeature[] = await response.json();
       
       // Create extended features with proper naming/data
-      return quoteFeatureData.map(qf => ({
-        ...qf,
-        featureName: `Feature #${qf.featureId}`, // Ideally fetched from features table
-        pricingType: 'fixed', // Default to fixed pricing
-      })) as QuoteFeatureExtended[];
+      return quoteFeatureData.map(qf => {
+        // Find the matching feature
+        const feature = allFeatures?.find(f => f.id === qf.featureId);
+        return {
+          ...qf,
+          featureName: feature?.name || `Feature #${qf.featureId}`,
+          pricingType: feature?.pricingType || 'fixed', // Use actual pricing type
+        };
+      }) as QuoteFeatureExtended[];
     }
   });
   
+  // Fetch all pages for reference
+  const { data: allPages } = useQuery<Page[]>({
+    queryKey: ['/api/pages'],
+    queryFn: getQueryFn<Page[]>({ on401: 'throw' })
+  });
+
   // Fetch quote pages
   const { data: quotePages, isLoading: pagesLoading } = useQuery<QuotePageExtended[]>({
     queryKey: [`/api/quotes/${quoteId}/pages`],
-    enabled: !!quoteId,
+    enabled: !!quoteId && !!allPages,
     queryFn: async () => {
       const response = await fetch(`/api/quotes/${quoteId}/pages`, {
         credentials: "include",
@@ -139,11 +155,15 @@ export default function QuoteDetailsPage() {
       const quotePagesData: QuotePage[] = await response.json();
       
       // Create extended pages with proper naming/data
-      return quotePagesData.map(qp => ({
-        ...qp,
-        pageName: `Page #${qp.pageId}`, // Ideally fetched from pages table
-        pricePerPage: qp.price / qp.quantity, // Calculate price per page
-      })) as QuotePageExtended[];
+      return quotePagesData.map(qp => {
+        // Find the matching page
+        const page = allPages?.find(p => p.id === qp.pageId);
+        return {
+          ...qp,
+          pageName: page?.name || `Page #${qp.pageId}`,
+          pricePerPage: qp.price / qp.quantity // Calculate price per page
+        };
+      }) as QuotePageExtended[];
     }
   });
   
