@@ -104,6 +104,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Create a new user (admin only)
+  app.post('/api/users', isAdmin, async (req, res) => {
+    try {
+      // This will validate the user data against our schema
+      const { username, password, isAdmin } = req.body;
+      
+      // Check if username already exists
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ message: 'Username already exists' });
+      }
+      
+      const newUser = await storage.createUser({ 
+        username, 
+        password, 
+        isAdmin: !!isAdmin 
+      });
+      
+      res.status(201).json(newUser);
+    } catch (err) {
+      res.status(400).json({ message: err instanceof Error ? err.message : 'Invalid data' });
+    }
+  });
+  
+  // Delete a user (admin only)
+  app.delete('/api/users/:id', isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      // Prevent deleting yourself
+      if (id === req.user.id) {
+        return res.status(400).json({ message: 'Cannot delete your own account' });
+      }
+      
+      const success = await storage.deleteUser(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      res.json({ success });
+    } catch (err) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
+  // Update current user's profile
+  app.put('/api/me/profile', isAuthenticated, async (req, res) => {
+    try {
+      const { username, password, currentPassword } = req.body;
+      const userId = req.user.id;
+      
+      // Get the current user
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Verify current password
+      if (currentPassword !== user.password) {
+        return res.status(401).json({ message: 'Current password is incorrect' });
+      }
+      
+      // Check if new username already exists (and it's not the current user)
+      if (username !== user.username) {
+        const existingUser = await storage.getUserByUsername(username);
+        if (existingUser && existingUser.id !== userId) {
+          return res.status(400).json({ message: 'Username already exists' });
+        }
+      }
+      
+      // Update the user profile
+      const updatedUser = await storage.updateUser(userId, {
+        username: username || user.username,
+        password: password || user.password,
+        isAdmin: user.isAdmin // Preserve admin status
+      });
+      
+      // Update the user in the session
+      req.login(updatedUser, (err) => {
+        if (err) {
+          console.error('Session update error:', err);
+          return res.status(500).json({ message: 'Profile updated but session refresh failed' });
+        }
+        res.json(updatedUser);
+      });
+    } catch (err) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
   // Auth routes
   app.post('/api/login', (req, res, next) => {
     passport.authenticate('local', (err: any, user: any, info: any) => {
