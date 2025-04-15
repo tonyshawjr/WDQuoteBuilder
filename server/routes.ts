@@ -15,6 +15,15 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import MemoryStore from "memorystore";
 
+// Add to InsertQuote to match our SQL schema
+declare module "@shared/schema" {
+  interface InsertQuote {
+    updatedAt?: string;
+    createdBy?: string;
+    updatedBy?: string;
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Configure session storage
   const MemoryStoreSession = MemoryStore(session);
@@ -406,6 +415,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Add a feature to a quote
+  app.post('/api/quotes/:quoteId/features', isAuthenticated, async (req, res) => {
+    try {
+      const quoteId = parseInt(req.params.quoteId);
+      const { featureId, quantity, price } = req.body;
+      
+      if (isNaN(quoteId) || isNaN(featureId) || typeof quantity !== 'number' || typeof price !== 'number') {
+        return res.status(400).json({ message: 'Invalid parameters' });
+      }
+      
+      // Get the quote to make sure it exists
+      const quote = await storage.getQuote(quoteId);
+      if (!quote) {
+        return res.status(404).json({ message: 'Quote not found' });
+      }
+      
+      // Get all current quote features
+      const quoteFeatures = await storage.getQuoteFeatures(quoteId);
+      
+      // Check if this feature is already added to the quote
+      if (quoteFeatures.some(f => f.featureId === featureId)) {
+        return res.status(400).json({ message: 'Feature already added to quote' });
+      }
+      
+      // Create a new quote feature entry
+      const username = req.user ? (req.user as any).username || 'unknown' : 'unknown';
+      const quoteFeature = {
+        quoteId,
+        featureId,
+        quantity,
+        price
+      };
+      
+      // Add the feature and get pages to calculate the new total price
+      const newQuoteFeature = await storage.updateQuoteFeature(quoteId, featureId, quoteFeature);
+      const quotePages = await storage.getQuotePages(quoteId);
+      
+      // Get the project type to use its base price
+      const projectTypeId = quote.projectTypeId || 0;
+      const projectType = await storage.getProjectType(projectTypeId);
+      if (!projectType) {
+        return res.status(404).json({ message: 'Project type not found' });
+      }
+      
+      // Get updated features list including the new one
+      const updatedQuoteFeatures = await storage.getQuoteFeatures(quoteId);
+      
+      // Calculate total price based on features and pages plus the new feature
+      const featuresTotal = updatedQuoteFeatures.reduce((sum, feature) => sum + feature.price, 0);
+      const pagesTotal = quotePages.reduce((sum, page) => sum + page.price, 0);
+      
+      // Use the project type base price from admin settings
+      const basePrice = projectType.basePrice || 0;
+      const totalPrice = basePrice + featuresTotal + pagesTotal;
+      
+      // Update the quote with the new total price and set updatedBy
+      await storage.updateQuote(quoteId, { 
+        totalPrice,
+        updatedBy: username,
+        updatedAt: new Date().toISOString()
+      });
+      
+      res.status(201).json(newQuoteFeature);
+    } catch (err) {
+      console.error('Error adding feature to quote:', err);
+      res.status(400).json({ message: err instanceof Error ? err.message : 'Invalid data' });
+    }
+  });
+  
   app.get('/api/quotes/:id/pages', isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -419,6 +497,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(pages);
     } catch (err) {
       res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
+  // Add a page to a quote
+  app.post('/api/quotes/:quoteId/pages', isAuthenticated, async (req, res) => {
+    try {
+      const quoteId = parseInt(req.params.quoteId);
+      const { pageId, quantity, price } = req.body;
+      
+      if (isNaN(quoteId) || isNaN(pageId) || typeof quantity !== 'number' || typeof price !== 'number') {
+        return res.status(400).json({ message: 'Invalid parameters' });
+      }
+      
+      // Get the quote to make sure it exists
+      const quote = await storage.getQuote(quoteId);
+      if (!quote) {
+        return res.status(404).json({ message: 'Quote not found' });
+      }
+      
+      // Get all current quote pages
+      const quotePages = await storage.getQuotePages(quoteId);
+      
+      // Check if this page is already added to the quote
+      if (quotePages.some(p => p.pageId === pageId)) {
+        return res.status(400).json({ message: 'Page already added to quote' });
+      }
+      
+      // Create a new quote page entry
+      const username = req.user ? (req.user as any).username || 'unknown' : 'unknown';
+      const quotePage = {
+        quoteId,
+        pageId,
+        quantity,
+        price
+      };
+      
+      // We need to get all features to calculate the new total price
+      const quoteFeatures = await storage.getQuoteFeatures(quoteId);
+      
+      // Get the project type to use its base price
+      const projectTypeId = quote.projectTypeId || 0;
+      const projectType = await storage.getProjectType(projectTypeId);
+      if (!projectType) {
+        return res.status(404).json({ message: 'Project type not found' });
+      }
+      
+      // Add the page
+      const newQuotePage = await storage.updateQuotePage(quoteId, pageId, quotePage);
+      
+      // Calculate total price based on features and pages plus the new page
+      const featuresTotal = quoteFeatures.reduce((sum, feature) => sum + feature.price, 0);
+      
+      // Get updated pages list including the new one
+      const updatedQuotePages = await storage.getQuotePages(quoteId);
+      const pagesTotal = updatedQuotePages.reduce((sum, page) => sum + page.price, 0);
+      
+      // Use the project type base price from admin settings
+      const basePrice = projectType.basePrice || 0;
+      const totalPrice = basePrice + featuresTotal + pagesTotal;
+      
+      // Update the quote with the new total price and set updatedBy
+      await storage.updateQuote(quoteId, { 
+        totalPrice,
+        updatedBy: username,
+        updatedAt: new Date().toISOString()
+      });
+      
+      res.status(201).json(newQuotePage);
+    } catch (err) {
+      console.error('Error adding page to quote:', err);
+      res.status(400).json({ message: err instanceof Error ? err.message : 'Invalid data' });
     }
   });
   

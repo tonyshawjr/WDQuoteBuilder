@@ -111,7 +111,9 @@ export const quotes = pgTable("quotes", {
   closeDate: text("close_date"),
   totalPrice: doublePrecision("total_price").notNull(),
   createdAt: text("created_at").notNull().default(""),
-  updatedAt: text("updated_at").notNull().default("")
+  updatedAt: text("updated_at").notNull().default(""),
+  createdBy: text("created_by"),
+  updatedBy: text("updated_by")
 });
 
 export const quoteFeatures = pgTable("quote_features", {
