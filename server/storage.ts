@@ -1,7 +1,8 @@
 import { 
   users, type User, type InsertUser,
   projectTypes, type ProjectType, type InsertProjectType,
-  features, type Feature, type InsertFeature
+  features, type Feature, type InsertFeature,
+  pages, type Page, type InsertPage
 } from "@shared/schema";
 
 export interface IStorage {
@@ -24,23 +25,36 @@ export interface IStorage {
   createFeature(feature: InsertFeature): Promise<Feature>;
   updateFeature(id: number, feature: InsertFeature): Promise<Feature | undefined>;
   deleteFeature(id: number): Promise<boolean>;
+  
+  // Page operations
+  getPages(): Promise<Page[]>;
+  getPagesByProjectType(projectTypeId: number): Promise<Page[]>;
+  getPage(id: number): Promise<Page | undefined>;
+  createPage(page: InsertPage): Promise<Page>;
+  updatePage(id: number, page: InsertPage): Promise<Page | undefined>;
+  deletePage(id: number): Promise<boolean>;
+  getActivePagesOnly(): Promise<Page[]>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private projectTypesMap: Map<number, ProjectType>;
   private featuresMap: Map<number, Feature>;
+  private pagesMap: Map<number, Page>;
   userCurrentId: number;
   projectTypeCurrentId: number;
   featureCurrentId: number;
+  pageCurrentId: number;
 
   constructor() {
     this.users = new Map();
     this.projectTypesMap = new Map();
     this.featuresMap = new Map();
+    this.pagesMap = new Map();
     this.userCurrentId = 1;
     this.projectTypeCurrentId = 1;
     this.featureCurrentId = 1;
+    this.pageCurrentId = 1;
     
     // Initialize with admin user
     this.createUser({
@@ -140,6 +154,47 @@ export class MemStorage implements IStorage {
   
   async deleteFeature(id: number): Promise<boolean> {
     return this.featuresMap.delete(id);
+  }
+  
+  // Page operations
+  async getPages(): Promise<Page[]> {
+    return Array.from(this.pagesMap.values());
+  }
+  
+  async getActivePagesOnly(): Promise<Page[]> {
+    return Array.from(this.pagesMap.values()).filter(
+      page => page.isActive
+    );
+  }
+  
+  async getPagesByProjectType(projectTypeId: number): Promise<Page[]> {
+    return Array.from(this.pagesMap.values()).filter(
+      page => page.projectTypeId === projectTypeId
+    );
+  }
+  
+  async getPage(id: number): Promise<Page | undefined> {
+    return this.pagesMap.get(id);
+  }
+  
+  async createPage(page: InsertPage): Promise<Page> {
+    const id = this.pageCurrentId++;
+    const newPage: Page = { ...page, id };
+    this.pagesMap.set(id, newPage);
+    return newPage;
+  }
+  
+  async updatePage(id: number, page: InsertPage): Promise<Page | undefined> {
+    const existingPage = this.pagesMap.get(id);
+    if (!existingPage) return undefined;
+    
+    const updatedPage: Page = { ...page, id };
+    this.pagesMap.set(id, updatedPage);
+    return updatedPage;
+  }
+  
+  async deletePage(id: number): Promise<boolean> {
+    return this.pagesMap.delete(id);
   }
   
   // Initialize with sample data
@@ -293,6 +348,79 @@ export class MemStorage implements IStorage {
       hourlyRate: null,
       estimatedHours: null,
       supportsQuantity: false,
+    });
+    
+    // Create sample pages
+    await this.createPage({
+      name: "Home Page",
+      description: "Main landing page of the website",
+      pricePerPage: 350,
+      defaultQuantity: 1,
+      isActive: true,
+      projectTypeId: wordpressType.id,
+    });
+    
+    await this.createPage({
+      name: "About Us",
+      description: "Company information and history page",
+      pricePerPage: 250,
+      defaultQuantity: 1,
+      isActive: true,
+      projectTypeId: wordpressType.id,
+    });
+    
+    await this.createPage({
+      name: "Services",
+      description: "Detailed list of services offered",
+      pricePerPage: 300,
+      defaultQuantity: 1,
+      isActive: true,
+      projectTypeId: wordpressType.id,
+    });
+    
+    await this.createPage({
+      name: "Contact",
+      description: "Contact information and form",
+      pricePerPage: 200,
+      defaultQuantity: 1,
+      isActive: true,
+      projectTypeId: wordpressType.id,
+    });
+    
+    await this.createPage({
+      name: "Blog",
+      description: "Blog landing page with excerpts of recent posts",
+      pricePerPage: 275,
+      defaultQuantity: 1,
+      isActive: true,
+      projectTypeId: wordpressType.id,
+    });
+    
+    await this.createPage({
+      name: "Product Page",
+      description: "Individual product page template",
+      pricePerPage: 175,
+      defaultQuantity: 5,
+      isActive: true,
+      projectTypeId: shopifyType.id,
+    });
+    
+    await this.createPage({
+      name: "Category Page",
+      description: "Product category listing page",
+      pricePerPage: 225,
+      defaultQuantity: 3,
+      isActive: true,
+      projectTypeId: shopifyType.id,
+    });
+    
+    await this.createPage({
+      name: "Cart & Checkout",
+      description: "Shopping cart and checkout process pages",
+      pricePerPage: 400,
+      defaultQuantity: 1,
+      isActive: true,
+      projectTypeId: shopifyType.id,
     });
   }
 }

@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertProjectTypeSchema, insertFeatureSchema } from "@shared/schema";
+import { insertProjectTypeSchema, insertFeatureSchema, insertPageSchema } from "@shared/schema";
 import express from "express";
 import session from "express-session";
 import passport from "passport";
@@ -265,6 +265,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!success) {
         return res.status(404).json({ message: 'Feature not found' });
+      }
+      
+      res.json({ success });
+    } catch (err) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
+  // Pages routes
+  app.get('/api/pages', async (req, res) => {
+    try {
+      const pages = await storage.getPages();
+      res.json(pages);
+    } catch (err) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
+  app.get('/api/pages/active', async (req, res) => {
+    try {
+      const pages = await storage.getActivePagesOnly();
+      res.json(pages);
+    } catch (err) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
+  app.get('/api/project-types/:projectTypeId/pages', async (req, res) => {
+    try {
+      const projectTypeId = parseInt(req.params.projectTypeId);
+      const pages = await storage.getPagesByProjectType(projectTypeId);
+      res.json(pages);
+    } catch (err) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
+  app.get('/api/pages/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const page = await storage.getPage(id);
+      
+      if (!page) {
+        return res.status(404).json({ message: 'Page not found' });
+      }
+      
+      res.json(page);
+    } catch (err) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
+  app.post('/api/pages', isAdmin, async (req, res) => {
+    try {
+      const validatedData = insertPageSchema.parse(req.body);
+      const page = await storage.createPage(validatedData);
+      res.status(201).json(page);
+    } catch (err) {
+      res.status(400).json({ message: err instanceof Error ? err.message : 'Invalid data' });
+    }
+  });
+  
+  app.put('/api/pages/:id', isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertPageSchema.parse(req.body);
+      const page = await storage.updatePage(id, validatedData);
+      
+      if (!page) {
+        return res.status(404).json({ message: 'Page not found' });
+      }
+      
+      res.json(page);
+    } catch (err) {
+      res.status(400).json({ message: err instanceof Error ? err.message : 'Invalid data' });
+    }
+  });
+  
+  app.delete('/api/pages/:id', isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deletePage(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: 'Page not found' });
       }
       
       res.json({ success });
