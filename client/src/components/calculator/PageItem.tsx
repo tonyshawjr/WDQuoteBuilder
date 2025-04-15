@@ -40,7 +40,7 @@ export function PageItem({
     onSelect(page, checked, localQuantity);
   };
   
-  const totalPrice = page.pricePerPage * localQuantity;
+  const totalPrice = (page.pricePerPage || 0) * localQuantity;
   
   return (
     <Card className={cn(
@@ -64,7 +64,7 @@ export function PageItem({
                 {page.name}
               </Label>
               <p className="text-xs text-gray-500 mt-1">{page.description}</p>
-              <p className="text-xs font-medium mt-1">${page.pricePerPage.toFixed(2)} per page</p>
+              <p className="text-xs font-medium mt-1">${page.pricePerPage?.toFixed(2) || '0.00'} per page</p>
             </div>
           </div>
           

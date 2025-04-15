@@ -42,7 +42,7 @@ export function EstimateSummary({
   };
 
   const calculatePagePrice = (page: SelectedPage): number => {
-    return page.pricePerPage * page.quantity;
+    return (page.pricePerPage || 0) * (page.quantity || 1);
   };
   
   const basePrice = selectedProjectType?.basePrice || 0;
@@ -143,7 +143,7 @@ export function EstimateSummary({
                           {page.name}{page.quantity > 1 ? ` (x${page.quantity})` : ''}
                         </p>
                         <p className="text-xs text-gray-500">
-                          ${page.pricePerPage} per page
+                          ${page.pricePerPage?.toFixed(2) || '0.00'} per page
                         </p>
                       </div>
                       <span className="text-sm font-medium">{formatCurrency(calculatePagePrice(page))}</span>
