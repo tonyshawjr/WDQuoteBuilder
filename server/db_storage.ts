@@ -26,6 +26,39 @@ import {
 import { IStorage } from "./storage";
 
 export class DatabaseStorage implements IStorage {
+  constructor() {
+    // Initialize with a test admin user if none exists
+    this.initTestUsers();
+  }
+  
+  private async initTestUsers() {
+    try {
+      const adminUser = await this.getUserByUsername('admin');
+      if (!adminUser) {
+        console.log('Creating admin user...');
+        await this.createUser({
+          username: 'admin',
+          password: 'admin123',
+          isAdmin: true
+        });
+        console.log('Admin user created successfully');
+      }
+      
+      const salesUser = await this.getUserByUsername('sales');
+      if (!salesUser) {
+        console.log('Creating sales user...');
+        await this.createUser({
+          username: 'sales',
+          password: 'sales123',
+          isAdmin: false
+        });
+        console.log('Sales user created successfully');
+      }
+    } catch (error) {
+      console.error('Error initializing test users:', error);
+    }
+  }
+  
   // User operations
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
