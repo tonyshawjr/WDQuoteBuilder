@@ -48,12 +48,7 @@ export function PageTable() {
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await apiRequest(`/api/pages/${id}`, {
-        method: "DELETE",
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await apiRequest("DELETE", `/api/pages/${id}`);
       return response;
     },
     onSuccess: () => {

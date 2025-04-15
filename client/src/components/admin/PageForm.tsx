@@ -76,13 +76,7 @@ export function PageForm({ isOpen, onClose, page }: PageFormProps) {
   // Create mutation
   const createMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const response = await apiRequest("/api/pages", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await apiRequest("POST", "/api/pages", data);
       return response;
     },
     onSuccess: () => {
@@ -109,13 +103,7 @@ export function PageForm({ isOpen, onClose, page }: PageFormProps) {
   // Update mutation
   const updateMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const response = await apiRequest(`/api/pages/${page?.id}`, {
-        method: "PUT",
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await apiRequest("PUT", `/api/pages/${page?.id}`, data);
       return response;
     },
     onSuccess: () => {
