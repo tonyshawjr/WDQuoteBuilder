@@ -998,7 +998,7 @@ export default function QuoteDetailsPage() {
                                   </div>
                                 )}
                                 <div className="space-y-2">
-                                  {((isEditing ? editableFeatures : quoteFeatures) || []).map((item, index) => (
+                                  {((isEditing ? editableFeatures : (quoteFeatures || [])) || []).map((item, index) => (
                                     <div 
                                       key={item.id} 
                                       className="bg-gray-50 p-3 rounded-md"
