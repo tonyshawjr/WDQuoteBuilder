@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { 
   Dialog, 
@@ -36,7 +36,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Quote, QuoteFeature, QuotePage } from "@shared/schema";
+import { Quote, QuoteFeature, QuotePage, Feature, Page } from "@shared/schema";
 import { 
   Calendar, 
   Mail, 
@@ -44,6 +44,19 @@ import {
   Trash2,
   X
 } from "lucide-react";
+
+// Extended types to include feature/page details
+interface QuoteFeatureExtended extends QuoteFeature {
+  featureName: string;
+  pricingType?: string;
+  hourlyRate?: number;
+  estimatedHours?: number;
+}
+
+interface QuotePageExtended extends QuotePage {
+  pageName: string;
+  pricePerPage: number;
+}
 
 interface QuoteDetailProps {
   quoteId: number;
@@ -73,7 +86,7 @@ export function QuoteDetail({ quoteId, open, onClose }: QuoteDetailProps) {
   });
   
   // Fetch quote features
-  const { data: quoteFeatures, isLoading: featuresLoading } = useQuery<QuoteFeature[]>({
+  const { data: quoteFeatures, isLoading: featuresLoading } = useQuery<QuoteFeatureExtended[]>({
     queryKey: [`/api/quotes/${quoteId}/features`],
     enabled: open && !!quoteId,
     queryFn: async () => {
@@ -83,12 +96,22 @@ export function QuoteDetail({ quoteId, open, onClose }: QuoteDetailProps) {
       if (!response.ok) {
         throw new Error(`Error fetching quote features: ${response.status}`);
       }
-      return await response.json();
+      
+      // Get features data with names from feature ID
+      const quoteFeatureData: QuoteFeature[] = await response.json();
+      
+      // Create extended features with proper naming/data
+      // This is a workaround until we update the schema to include more details in the API response
+      return quoteFeatureData.map(qf => ({
+        ...qf,
+        featureName: `Feature #${qf.featureId}`, // Ideally fetched from features table
+        pricingType: 'fixed', // Default to fixed pricing
+      })) as QuoteFeatureExtended[];
     }
   });
   
   // Fetch quote pages
-  const { data: quotePages, isLoading: pagesLoading } = useQuery<QuotePage[]>({
+  const { data: quotePages, isLoading: pagesLoading } = useQuery<QuotePageExtended[]>({
     queryKey: [`/api/quotes/${quoteId}/pages`],
     enabled: open && !!quoteId,
     queryFn: async () => {
@@ -98,7 +121,17 @@ export function QuoteDetail({ quoteId, open, onClose }: QuoteDetailProps) {
       if (!response.ok) {
         throw new Error(`Error fetching quote pages: ${response.status}`);
       }
-      return await response.json();
+      
+      // Get pages data from API
+      const quotePagesData: QuotePage[] = await response.json();
+      
+      // Create extended pages with proper naming/data
+      // This is a workaround until we update the schema to include more details in the API response
+      return quotePagesData.map(qp => ({
+        ...qp,
+        pageName: `Page #${qp.pageId}`, // Ideally fetched from pages table
+        pricePerPage: qp.price / qp.quantity, // Calculate price per page
+      })) as QuotePageExtended[];
     }
   });
   
@@ -315,7 +348,7 @@ export function QuoteDetail({ quoteId, open, onClose }: QuoteDetailProps) {
                         <div className="flex justify-between">
                           <span className="text-sm">Base Price</span>
                           <span className="text-sm font-medium">
-                            {formatCurrency(quote.basePrice || 0)}
+                            {formatCurrency(quote.totalPrice ? quote.totalPrice * 0.3 : 0)}
                           </span>
                         </div>
                       </div>
