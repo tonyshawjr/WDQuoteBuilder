@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, isNull, or } from "drizzle-orm";
 import {
   users,
   projectTypes,
@@ -147,11 +147,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPagesByProjectType(projectTypeId: number): Promise<Page[]> {
+    // Return both project-specific pages and general pages (those with projectTypeId = null)
     return db.select()
       .from(pages)
       .where(
         and(
-          eq(pages.projectTypeId, projectTypeId),
+          or(
+            eq(pages.projectTypeId, projectTypeId),
+            isNull(pages.projectTypeId)
+          ),
           eq(pages.isActive, true)
         )
       );
