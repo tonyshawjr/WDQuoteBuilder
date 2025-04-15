@@ -440,15 +440,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // After updating a quote feature, we should also update the total price in the quote
+      const quote = await storage.getQuote(quoteId);
+      if (!quote) {
+        return res.status(404).json({ message: 'Quote not found' });
+      }
+      
       const quoteFeatures = await storage.getQuoteFeatures(quoteId);
       const quotePages = await storage.getQuotePages(quoteId);
+      
+      // Get the project type to use its base price
+      const projectType = await storage.getProjectType(quote.projectTypeId);
+      if (!projectType) {
+        return res.status(404).json({ message: 'Project type not found' });
+      }
       
       // Calculate total price based on features and pages
       const featuresTotal = quoteFeatures.reduce((sum, feature) => sum + feature.price, 0);
       const pagesTotal = quotePages.reduce((sum, page) => sum + page.price, 0);
       
-      // Base price is typically 30% of the total
-      const basePrice = featuresTotal * 0.3;
+      // Use the project type base price from admin settings
+      const basePrice = projectType.basePrice || 0;
       const totalPrice = basePrice + featuresTotal + pagesTotal;
       
       // Update the quote with the new total price
@@ -478,15 +489,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // After updating a quote page, we should also update the total price in the quote
+      const quote = await storage.getQuote(quoteId);
+      if (!quote) {
+        return res.status(404).json({ message: 'Quote not found' });
+      }
+      
       const quoteFeatures = await storage.getQuoteFeatures(quoteId);
       const quotePages = await storage.getQuotePages(quoteId);
+      
+      // Get the project type to use its base price
+      const projectType = await storage.getProjectType(quote.projectTypeId);
+      if (!projectType) {
+        return res.status(404).json({ message: 'Project type not found' });
+      }
       
       // Calculate total price based on features and pages
       const featuresTotal = quoteFeatures.reduce((sum, feature) => sum + feature.price, 0);
       const pagesTotal = quotePages.reduce((sum, page) => sum + page.price, 0);
       
-      // Base price is typically 30% of the total
-      const basePrice = featuresTotal * 0.3;
+      // Use the project type base price from admin settings
+      const basePrice = projectType.basePrice || 0;
       const totalPrice = basePrice + featuresTotal + pagesTotal;
       
       // Update the quote with the new total price
