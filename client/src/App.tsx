@@ -8,6 +8,7 @@ import Home from "@/pages/Home";
 import Calculator from "@/pages/Calculator";
 import AdminDashboard from "@/pages/AdminDashboard";
 import SimpleDashboard from "@/pages/SimpleDashboard";
+import DashboardRouter from "@/pages/DashboardRouter";
 import QuoteDetailsPage from "@/pages/QuoteDetailsPage";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/Login";
@@ -16,9 +17,11 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/dashboard-router" component={DashboardRouter} /> {/* Smart router */}
       <Route path="/dashboard" component={SimpleDashboard} />
+      <Route path="/admin-dashboard" component={AdminDashboard} />
       <Route path="/calculator" component={Calculator} />
-      <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin" component={AdminDashboard} /> {/* Keep for backward compatibility */}
       <Route path="/login" component={Login} />
       <Route path="/quotes/:id" component={QuoteDetailsPage} />
       <Route component={NotFound} />

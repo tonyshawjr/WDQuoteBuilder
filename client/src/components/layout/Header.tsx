@@ -39,6 +39,11 @@ export function Header() {
     setIsOpen(false);
   };
   
+  // Get appropriate dashboard route based on user role
+  const getDashboardRoute = () => {
+    return "/dashboard-router";  // Our smart router will handle the redirection
+  };
+  
   // Close the mobile menu when changing from mobile to desktop view
   useEffect(() => {
     if (!isMobile) {
@@ -65,8 +70,8 @@ export function Header() {
               <div className="hidden md:flex items-center">
                 <nav className="flex space-x-4 mr-4">
                   <Button 
-                    variant={location === "/" || location === "/dashboard" ? "default" : "ghost"} 
-                    onClick={() => navigateTo("/dashboard")}
+                    variant={location === "/" || location.includes("/dashboard") ? "default" : "ghost"} 
+                    onClick={() => navigateTo(getDashboardRoute())}
                     size="sm"
                   >
                     <LayoutDashboard className="h-4 w-4 mr-2" />
@@ -84,12 +89,12 @@ export function Header() {
                   
                   {isAdmin && (
                     <Button 
-                      variant={location === "/admin" ? "default" : "ghost"} 
-                      onClick={() => navigateTo("/admin")}
+                      variant={location === "/admin" || location === "/admin-dashboard" ? "default" : "ghost"} 
+                      onClick={() => navigateTo("/admin-dashboard")}
                       size="sm"
                     >
                       <Settings className="h-4 w-4 mr-2" />
-                      Admin
+                      Admin Dashboard
                     </Button>
                   )}
                 </nav>
@@ -156,12 +161,12 @@ export function Header() {
                         
                         {isAdmin && (
                           <Button 
-                            variant={location === "/admin" ? "default" : "ghost"} 
-                            onClick={() => navigateTo("/admin")}
+                            variant={location === "/admin" || location === "/admin-dashboard" ? "default" : "ghost"} 
+                            onClick={() => navigateTo("/admin-dashboard")}
                             className="justify-start"
                           >
                             <Settings className="h-5 w-5 mr-2" />
-                            Admin
+                            Admin Dashboard
                             <ChevronRight className="h-4 w-4 ml-auto" />
                           </Button>
                         )}
