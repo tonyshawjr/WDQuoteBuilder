@@ -88,16 +88,14 @@ export function Header() {
                     Calculator
                   </Button>
                   
-                  {isAdmin && (
-                    <Button 
-                      variant={location === "/admin" || location === "/admin-dashboard" ? "default" : "ghost"} 
-                      onClick={() => navigateTo("/admin-dashboard")}
-                      size="sm"
-                    >
-                      <Settings className="h-4 w-4 mr-2" />
-                      Admin Dashboard
-                    </Button>
-                  )}
+                  <Button 
+                    variant={location === "/settings" ? "default" : "ghost"} 
+                    onClick={() => navigateTo("/settings")}
+                    size="sm"
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    Settings
+                  </Button>
                 </nav>
                 
                 <DropdownMenu>
@@ -164,18 +162,6 @@ export function Header() {
                           Calculator
                           <ChevronRight className="h-4 w-4 ml-auto" />
                         </Button>
-                        
-                        {isAdmin && (
-                          <Button 
-                            variant={location === "/admin" || location === "/admin-dashboard" ? "default" : "ghost"} 
-                            onClick={() => navigateTo("/admin-dashboard")}
-                            className="justify-start"
-                          >
-                            <Settings className="h-5 w-5 mr-2" />
-                            Admin Dashboard
-                            <ChevronRight className="h-4 w-4 ml-auto" />
-                          </Button>
-                        )}
                         
                         <Button 
                           variant={location === "/settings" ? "default" : "ghost"} 
