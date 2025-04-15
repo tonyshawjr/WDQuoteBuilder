@@ -565,7 +565,7 @@ export default function QuoteDetailsPage() {
                               </div>
                             </div>
                             
-                            {quoteFeatures && quoteFeatures.length > 0 && (
+                            {((isEditing ? editableFeatures : quoteFeatures) || []).length > 0 && (
                               <div>
                                 <div className="flex justify-between items-center mb-2">
                                   <h3 className="text-sm font-medium">Selected Features</h3>
@@ -586,7 +586,7 @@ export default function QuoteDetailsPage() {
                                   )}
                                 </div>
                                 <div className="space-y-2">
-                                  {quoteFeatures.map((item, index) => (
+                                  {((isEditing ? editableFeatures : quoteFeatures) || []).map((item, index) => (
                                     <div 
                                       key={item.id} 
                                       className="bg-gray-50 p-3 rounded-md"
@@ -606,10 +606,8 @@ export default function QuoteDetailsPage() {
                                                   min={1}
                                                   value={item.quantity}
                                                   onChange={(e) => {
-                                                    // Handle quantity change
                                                     const newQuantity = parseInt(e.target.value) || 1;
-                                                    // Update local state for quoteFeatures
-                                                    // We'd need additional state management
+                                                    updateFeatureQuantity(item.id, newQuantity);
                                                   }}
                                                 />
                                               </div>
@@ -620,9 +618,8 @@ export default function QuoteDetailsPage() {
                                                   className="h-8"
                                                   value={item.price}
                                                   onChange={(e) => {
-                                                    // Handle price change
                                                     const newPrice = parseFloat(e.target.value) || 0;
-                                                    // Update local state for quoteFeatures
+                                                    updateFeaturePrice(item.id, newPrice);
                                                   }}
                                                 />
                                               </div>
@@ -637,11 +634,10 @@ export default function QuoteDetailsPage() {
                                             variant="ghost"
                                             className="h-8 text-red-500 hover:text-red-700"
                                             onClick={() => {
-                                              // Remove feature
-                                              // Would need to manage in local state
+                                              removeFeature(item.id);
                                               toast({
-                                                title: "Remove feature",
-                                                description: "This would remove the feature from the quote",
+                                                title: "Feature removed",
+                                                description: "Feature has been removed from the quote",
                                               });
                                             }}
                                           >
@@ -664,7 +660,7 @@ export default function QuoteDetailsPage() {
                               </div>
                             )}
                             
-                            {quotePages && quotePages.length > 0 && (
+                            {((isEditing ? editablePages : quotePages) || []).length > 0 && (
                               <div>
                                 <div className="flex justify-between items-center mb-2">
                                   <h3 className="text-sm font-medium">Selected Pages</h3>
@@ -685,7 +681,7 @@ export default function QuoteDetailsPage() {
                                   )}
                                 </div>
                                 <div className="space-y-2">
-                                  {quotePages.map(item => (
+                                  {((isEditing ? editablePages : quotePages) || []).map(item => (
                                     <div 
                                       key={item.id} 
                                       className="bg-gray-50 p-3 rounded-md"
@@ -705,9 +701,8 @@ export default function QuoteDetailsPage() {
                                                   min={1}
                                                   value={item.quantity}
                                                   onChange={(e) => {
-                                                    // Handle quantity change
                                                     const newQuantity = parseInt(e.target.value) || 1;
-                                                    // Update local state
+                                                    updatePageQuantity(item.id, newQuantity);
                                                   }}
                                                 />
                                               </div>
@@ -718,9 +713,8 @@ export default function QuoteDetailsPage() {
                                                   className="h-8"
                                                   value={item.price}
                                                   onChange={(e) => {
-                                                    // Handle price change
                                                     const newPrice = parseFloat(e.target.value) || 0;
-                                                    // Update local state
+                                                    updatePagePrice(item.id, newPrice);
                                                   }}
                                                 />
                                               </div>
@@ -735,10 +729,10 @@ export default function QuoteDetailsPage() {
                                             variant="ghost"
                                             className="h-8 text-red-500 hover:text-red-700"
                                             onClick={() => {
-                                              // Remove page
+                                              removePage(item.id);
                                               toast({
-                                                title: "Remove page",
-                                                description: "This would remove the page from the quote",
+                                                title: "Page removed",
+                                                description: "Page has been removed from the quote",
                                               });
                                             }}
                                           >
