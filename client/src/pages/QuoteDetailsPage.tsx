@@ -53,6 +53,7 @@ interface QuoteFeatureExtended extends QuoteFeature {
   estimatedHours?: number;
   flatPrice?: number;
   adminPricePerUnit?: number;
+  supportsQuantity?: boolean;
 }
 
 interface QuotePageExtended extends QuotePage {
@@ -143,6 +144,7 @@ export default function QuoteDetailsPage() {
           hourlyRate: feature.hourlyRate,
           estimatedHours: feature.estimatedHours,
           flatPrice: feature.flatPrice,
+          supportsQuantity: feature.supportsQuantity,
           // Store admin pricing for later use
           adminPricePerUnit: feature.pricingType === 'hourly' && feature.hourlyRate && feature.estimatedHours 
             ? feature.hourlyRate * feature.estimatedHours 
@@ -327,6 +329,34 @@ export default function QuoteDetailsPage() {
       notes: clientNotes,
       internalNotes: internalNotes,
       totalPrice: newTotalPrice
+    }, {
+      onSuccess: (updatedQuote) => {
+        // Update the quote data locally to avoid needing a refresh
+        if (quote) {
+          // Create a new version of the quote with updated price for immediate display
+          const updatedQuoteObject = {
+            ...quote,
+            totalPrice: newTotalPrice,
+            notes: clientNotes,
+            internalNotes: internalNotes,
+            updatedAt: new Date().toISOString()
+          };
+          
+          // Update the query cache directly to trigger UI updates
+          queryClient.setQueryData([`/api/quotes/${quoteId}`], updatedQuoteObject);
+          
+          // Also update any modified features/pages in the query cache
+          if (quoteFeatures) {
+            // Replace the displayed quote features with the edited ones 
+            queryClient.setQueryData([`/api/quotes/${quoteId}/features`], [...editableFeatures]);
+          }
+          
+          if (quotePages) {
+            // Replace the displayed quote pages with the edited ones
+            queryClient.setQueryData([`/api/quotes/${quoteId}/pages`], [...editablePages]);
+          }
+        }
+      }
     });
     
     // Ensure all feature and page changes are synchronized with the backend
@@ -753,19 +783,21 @@ export default function QuoteDetailsPage() {
                                           </span>
                                           {isEditing ? (
                                             <div className="flex mt-2 space-x-2">
-                                              <div className="w-24">
-                                                <div className="text-xs text-gray-500 mb-1">Quantity</div>
-                                                <Input 
-                                                  type="number"
-                                                  className="h-8"
-                                                  min={1}
-                                                  value={item.quantity}
-                                                  onChange={(e) => {
-                                                    const newQuantity = parseInt(e.target.value) || 1;
-                                                    updateFeatureQuantity(item.id, newQuantity);
-                                                  }}
-                                                />
-                                              </div>
+                                              {item.supportsQuantity && (
+                                                <div className="w-24">
+                                                  <div className="text-xs text-gray-500 mb-1">Quantity</div>
+                                                  <Input 
+                                                    type="number"
+                                                    className="h-8"
+                                                    min={1}
+                                                    value={item.quantity}
+                                                    onChange={(e) => {
+                                                      const newQuantity = parseInt(e.target.value) || 1;
+                                                      updateFeatureQuantity(item.id, newQuantity);
+                                                    }}
+                                                  />
+                                                </div>
+                                              )}
                                               <div className="w-32">
                                                 <div className="text-xs text-gray-500 mb-1">Price</div>
                                                 <Input 
