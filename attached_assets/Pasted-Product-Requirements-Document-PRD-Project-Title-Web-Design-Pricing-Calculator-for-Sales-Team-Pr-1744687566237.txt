@@ -1,0 +1,194 @@
+Product Requirements Document (PRD)
+
+Project Title: Web Design Pricing Calculator for Sales Team
+
+Prepared For: AI Developer
+Prepared By: Tony Shaw
+Date: April 14, 2025
+
+OVERVIEW
+
+The purpose of this project is to build an internal pricing calculator for web design and development services, to be used by sales team members at Matthew Woodard's agency. The goal is to streamline the quoting process and eliminate the need for sales reps to consult Matthew for every estimate. The calculator should allow for fast configuration of a project scope and automatically calculate an accurate ballpark estimate based on a simple database of services and pricing logic.
+
+The tool must support a modular setup, allowing prices and features to be configured in an admin interface. All data should be stored in a lightweight database such as MySQL or Supabase.
+
+USERS
+
+Sales Reps – primary users creating quick estimates
+
+Admins – configure pricing, feature sets, and default rates
+
+TECH STACK RECOMMENDATION
+
+Frontend: HTML + TailwindCSS + Alpine.js or Vue.js (lightweight and quick UI)
+
+Backend: PHP or Node.js
+
+Database: MySQL (recommended for fast local dev) or Supabase (if hosting in the cloud)
+
+CORE FEATURES
+
+1. Project Types
+
+Admin can define project types (e.g. WordPress Site, Shopify Store, Branding Package)
+
+Each project type has a base starting price
+
+2. Services / Feature Library
+
+Admin defines features per project type
+
+Each feature includes:
+
+Name
+
+Description (optional)
+
+Pricing Type: Fixed or Hourly
+
+Rate (if hourly) or Flat Price
+
+Estimated Hours (if hourly)
+
+Service Category (optional grouping like Pages, Integrations, Design, etc.)
+
+3. Pricing Logic
+
+Calculator determines price per feature:
+
+If Fixed, uses flat price
+
+If Hourly, multiplies hours x hourly rate
+
+Adds up all selected features + base price
+
+Optional: Show a low/high range using min/max hour ranges per feature
+
+4. Calculator Front-End (Sales View)
+
+Dropdown: Select Project Type
+
+Dynamic checklist of features based on selected type
+
+Quantity fields for features that support multiples (e.g. number of pages)
+
+Running estimate view:
+
+Line-item summary
+
+Total estimate
+
+Option to export estimate
+
+5. Export & Output
+
+Copy-to-clipboard
+
+PDF export (optional)
+
+Save project configuration as a quote (optional phase)
+
+6. Admin Interface
+
+Login required
+
+Manage project types
+
+Manage feature sets
+
+Set default hourly rate(s)
+
+Edit pricing and hours inline
+
+7. Optional Phases
+
+Save projects/quotes
+
+Allow partial ranges (e.g. min/max hours per feature)
+
+Include notes for sales team
+
+Admin reporting (most selected features, average quote size)
+
+DATA STRUCTURE
+
+project_types
+
+id
+
+name (e.g. WordPress Site)
+
+base_price
+
+features
+
+id
+
+project_type_id (foreign key)
+
+name
+
+description
+
+pricing_type (fixed/hourly)
+
+flat_price (nullable)
+
+hourly_rate (nullable)
+
+estimated_hours (nullable)
+
+category
+
+quotes (optional future phase)
+
+id
+
+project_type_id
+
+selected_feature_ids (array or join table if normalized)
+
+total_estimate
+
+created_by (user_id)
+
+created_at
+
+UI FLOW
+
+Admin logs in
+
+Adds or updates services and pricing
+
+Sales rep visits calculator
+
+Selects project type
+
+Selects relevant features (with optional quantities)
+
+Total auto-calculates
+
+Rep can copy or export estimate
+
+FUTURE IDEAS
+
+Client-facing version with limited pricing (e.g. "Starts at $6,500")
+
+Tiered pricing by agency partner level
+
+AI-powered scope recommendation based on brief
+
+Integration with proposal software
+
+NOTES
+
+The tool must be fast, clean, and mobile-friendly.
+
+A clean layout with grouped features will help reps move quickly.
+
+Pricing updates must be easy to manage without dev help.
+
+GOAL
+
+Make quoting faster, more consistent, and less dependent on leadership involvement. Give the sales team a reliable tool that reflects current pricing and service structure.
+
