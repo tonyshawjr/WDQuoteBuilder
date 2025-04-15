@@ -565,7 +565,23 @@ export default function QuoteDetailsPage() {
   
   // Remove a feature from the quote
   const removeFeature = (featureId: number) => {
-    setEditableFeatures(prev => prev.filter(feature => feature.id !== featureId));
+    setEditableFeatures(prev => {
+      const filteredFeatures = prev.filter(feature => feature.id !== featureId);
+      
+      // If we're removing the last feature, we'll ensure the section stays visible
+      if (prev.length === 1) {
+        setTimeout(() => {
+          setFeatureDialogOpen(true); // Open the dialog to add a new feature
+        }, 100);
+        
+        toast({
+          title: "All features removed",
+          description: "You've removed all features. Add a new one to continue.",
+        });
+      }
+      
+      return filteredFeatures;
+    });
   };
   
   // Remove a page from the quote
@@ -684,11 +700,23 @@ export default function QuoteDetailsPage() {
         credentials: 'include'
       });
       
+      // Check for errors in the response
       if (!response.ok) {
-        throw new Error(`Failed to add page: ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`Failed to add page: ${errorText}`);
       }
       
-      const newQuotePage = await response.json();
+      let newQuotePage;
+      try {
+        // Try to parse the response as JSON
+        newQuotePage = await response.json();
+      } catch (parseError) {
+        throw new Error('Invalid response format from the server');
+      }
+      
+      if (!newQuotePage || !newQuotePage.id) {
+        throw new Error('Invalid page data returned from server');
+      }
       
       // Add the page to the local state
       const extendedPage: QuotePageExtended = {
@@ -916,7 +944,8 @@ export default function QuoteDetailsPage() {
                               </div>
                             </div>
                             
-                            {((isEditing ? editableFeatures : quoteFeatures) || []).length > 0 && (
+                            {/* Features Section - Always show when editing */}
+                            {(isEditing || (editableFeatures.length > 0 || quoteFeatures.length > 0)) && (
                               <div>
                                 <div className="flex justify-between items-center mb-2">
                                   <h3 className="text-sm font-medium">Selected Features</h3>
@@ -930,6 +959,18 @@ export default function QuoteDetailsPage() {
                                     </Button>
                                   )}
                                 </div>
+                                {((isEditing ? editableFeatures : quoteFeatures) || []).length === 0 && isEditing && (
+                                  <div className="bg-gray-50 p-4 rounded-md text-center">
+                                    <p className="text-gray-500 mb-2">No features added yet</p>
+                                    <Button 
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => setFeatureDialogOpen(true)}
+                                    >
+                                      Add your first feature
+                                    </Button>
+                                  </div>
+                                )}
                                 <div className="space-y-2">
                                   {((isEditing ? editableFeatures : quoteFeatures) || []).map((item, index) => (
                                     <div 
@@ -1007,7 +1048,8 @@ export default function QuoteDetailsPage() {
                               </div>
                             )}
                             
-                            {((isEditing ? editablePages : quotePages) || []).length > 0 && (
+                            {/* Pages Section - Always show when editing */}
+                            {(isEditing || (editablePages.length > 0 || quotePages.length > 0)) && (
                               <div>
                                 <div className="flex justify-between items-center mb-2">
                                   <h3 className="text-sm font-medium">Selected Pages</h3>
@@ -1021,6 +1063,18 @@ export default function QuoteDetailsPage() {
                                     </Button>
                                   )}
                                 </div>
+                                {((isEditing ? editablePages : quotePages) || []).length === 0 && isEditing && (
+                                  <div className="bg-gray-50 p-4 rounded-md text-center">
+                                    <p className="text-gray-500 mb-2">No pages added yet</p>
+                                    <Button 
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => setPageDialogOpen(true)}
+                                    >
+                                      Add your first page
+                                    </Button>
+                                  </div>
+                                )}
                                 <div className="space-y-2">
                                   {((isEditing ? editablePages : quotePages) || []).map(item => (
                                     <div 
@@ -1176,15 +1230,23 @@ export default function QuoteDetailsPage() {
                         <div className="space-y-4">
                           <div className="relative pl-6 border-l-2 border-gray-200 pb-4">
                             <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-green-500"></div>
-                            <div className="font-medium">{formatDate(quote.createdAt)}</div>
-                            <div className="text-sm text-gray-500">Quote created</div>
+                            <div className="font-medium">
+                              {formatDate(quote.createdAt)} at {new Date(quote.createdAt).toLocaleTimeString()}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              Quote created by {quote.createdBy || 'Admin'}
+                            </div>
                           </div>
                           
                           {quote.updatedAt && quote.updatedAt !== quote.createdAt && (
                             <div className="relative pl-6 border-l-2 border-gray-200 pb-4">
                               <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-500"></div>
-                              <div className="font-medium">{formatDate(quote.updatedAt)}</div>
-                              <div className="text-sm text-gray-500">Quote last updated</div>
+                              <div className="font-medium">
+                                {formatDate(quote.updatedAt)} at {new Date(quote.updatedAt).toLocaleTimeString()}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                Quote last updated by {quote.updatedBy || user.username}
+                              </div>
                             </div>
                           )}
                           
