@@ -20,6 +20,9 @@ export function useQuotes() {
     mutationFn: async ({ quote, selectedFeatures, selectedPages }: SaveQuoteParams) => {
       return apiRequest('/api/quotes', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
           quote,
           selectedFeatures,
@@ -36,6 +39,9 @@ export function useQuotes() {
     mutationFn: async ({ id, ...data }: Partial<Quote> & { id: number }) => {
       return apiRequest(`/api/quotes/${id}`, {
         method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(data)
       });
     },
