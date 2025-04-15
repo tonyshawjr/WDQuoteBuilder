@@ -10,14 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Quote } from "@shared/schema";
 import { PlusCircle, FileText, BarChart, Eye } from "lucide-react";
-import { QuoteDetail } from "@/components/quotes/QuoteDetail";
 
 export default function Dashboard() {
   const { user, loading } = useAuth();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("quotes");
-  const [selectedQuoteId, setSelectedQuoteId] = useState<number | null>(null);
-  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   
   // Fetch quotes
   const { data: quotes = [], isLoading: quotesLoading } = useQuery<Quote[]>({
@@ -136,10 +133,7 @@ export default function Dashboard() {
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                onClick={() => {
-                                  setSelectedQuoteId(quote.id);
-                                  setDetailDialogOpen(true);
-                                }}
+                                onClick={() => setLocation(`/quotes/${quote.id}`)}
                               >
                                 <Eye className="h-4 w-4 mr-2" />
                                 View
@@ -223,18 +217,7 @@ export default function Dashboard() {
           </TabsContent>
         </Tabs>
       </div>
-      
-      {/* Quote Detail Dialog */}
-      {selectedQuoteId && (
-        <QuoteDetail
-          quoteId={selectedQuoteId}
-          open={detailDialogOpen}
-          onClose={() => {
-            setDetailDialogOpen(false);
-            setSelectedQuoteId(null);
-          }}
-        />
-      )}
+
     </div>
   );
 }

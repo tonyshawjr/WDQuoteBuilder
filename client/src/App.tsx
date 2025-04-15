@@ -8,6 +8,7 @@ import Home from "@/pages/Home";
 import Calculator from "@/pages/Calculator";
 import AdminDashboard from "@/pages/AdminDashboard";
 import Dashboard from "@/pages/Dashboard";
+import QuoteDetailsPage from "@/pages/QuoteDetailsPage";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/Login";
 
@@ -19,6 +20,7 @@ function Router() {
       <Route path="/calculator" component={Calculator} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/login" component={Login} />
+      <Route path="/quotes/:id" component={QuoteDetailsPage} />
       <Route component={NotFound} />
     </Switch>
   );
