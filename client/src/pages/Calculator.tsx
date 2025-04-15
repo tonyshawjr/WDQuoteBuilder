@@ -83,7 +83,7 @@ export default function Calculator() {
           leadStatus: clientInfo.leadStatus,
           totalPrice,
           closeDate: null,
-          createdBy: user.id.toString() // Now we're sure user is not null
+          createdBy: user.username // Use username instead of ID for filtering
         },
         selectedFeatures,
         selectedPages

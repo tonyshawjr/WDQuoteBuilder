@@ -84,6 +84,7 @@ export default function QuoteDetailsPage() {
   const [clientNotes, setClientNotes] = useState("");
   const [internalNotes, setInternalNotes] = useState("");
   const [activeTab, setActiveTab] = useState("details");
+  const [assignedUser, setAssignedUser] = useState<string>("");
   
   // State for editing quote features and pages
   const [editableFeatures, setEditableFeatures] = useState<QuoteFeatureExtended[]>([]);
@@ -388,6 +389,7 @@ export default function QuoteDetailsPage() {
       setLeadStatus(quote.leadStatus || "In Progress");
       setClientNotes(quote.notes || "");
       setInternalNotes(quote.internalNotes || "");
+      setAssignedUser(quote.createdBy || "");
     }
   }, [quote]);
   
