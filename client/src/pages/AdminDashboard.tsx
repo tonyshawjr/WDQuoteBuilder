@@ -67,7 +67,11 @@ export default function AdminDashboard() {
     if (!selectedUserId) {
       return quotes;
     }
-    return quotes.filter(quote => quote.createdBy === selectedUserId);
+    
+    // Convert both to string for proper comparison
+    return quotes.filter(quote => 
+      quote.createdBy && quote.createdBy.toString() === selectedUserId.toString()
+    );
   }, [quotes, selectedUserId]);
 
   return (

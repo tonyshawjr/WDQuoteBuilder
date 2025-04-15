@@ -66,7 +66,9 @@ export default function SimpleDashboard() {
     
     if (!user.isAdmin) {
       // Regular users only see their own quotes
-      return quotes;
+      return quotes.filter(quote => 
+        quote.createdBy && quote.createdBy.toString() === user.id.toString()
+      );
     }
     
     if (!selectedUserId) {
@@ -75,7 +77,9 @@ export default function SimpleDashboard() {
     }
     
     // Admin sees quotes for the selected user
-    return quotes.filter(quote => quote.createdBy === selectedUserId);
+    return quotes.filter(quote => 
+      quote.createdBy && quote.createdBy.toString() === selectedUserId.toString()
+    );
   }, [quotes, user, selectedUserId]);
 
   // Redirect if not logged in

@@ -58,6 +58,16 @@ export default function Calculator() {
       return;
     }
     
+    // Check if user is authenticated
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "You must be logged in to save a quote."
+      });
+      return;
+    }
+    
     const totalPrice = calculateTotalPrice();
     
     try {
@@ -72,7 +82,8 @@ export default function Calculator() {
           internalNotes: clientInfo.internalNotes || "",
           leadStatus: clientInfo.leadStatus,
           totalPrice,
-          closeDate: null
+          closeDate: null,
+          createdBy: user.id.toString() // Now we're sure user is not null
         },
         selectedFeatures,
         selectedPages
