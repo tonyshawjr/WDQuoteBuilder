@@ -449,7 +449,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const quotePages = await storage.getQuotePages(quoteId);
       
       // Get the project type to use its base price
-      const projectType = await storage.getProjectType(quote.projectTypeId);
+      const projectTypeId = quote.projectTypeId || 0;
+      const projectType = await storage.getProjectType(projectTypeId);
       if (!projectType) {
         return res.status(404).json({ message: 'Project type not found' });
       }
@@ -498,7 +499,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const quotePages = await storage.getQuotePages(quoteId);
       
       // Get the project type to use its base price
-      const projectType = await storage.getProjectType(quote.projectTypeId);
+      const projectTypeId = quote.projectTypeId || 0;
+      const projectType = await storage.getProjectType(projectTypeId);
       if (!projectType) {
         return res.status(404).json({ message: 'Project type not found' });
       }

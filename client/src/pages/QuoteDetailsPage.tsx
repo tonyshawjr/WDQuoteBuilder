@@ -343,14 +343,38 @@ export default function QuoteDetailsPage() {
     }
   }, [quote]);
   
+  // Fetch the project type to get base price when quote is loaded
+  useEffect(() => {
+    if (quote) {
+      // Fetch the project type to get the correct base price
+      const fetchProjectType = async () => {
+        try {
+          const response = await fetch(`/api/project-types/${quote.projectTypeId}`);
+          if (response.ok) {
+            const projectType = await response.json();
+            // Use the admin-defined base price from the project type
+            setBasePrice(projectType.basePrice || 0);
+          } else {
+            // Fallback to calculated base price if we can't get the project type
+            setBasePrice(quote.totalPrice ? quote.totalPrice * 0.3 : 0);
+          }
+        } catch (error) {
+          console.error("Error fetching project type:", error);
+          setBasePrice(quote.totalPrice ? quote.totalPrice * 0.3 : 0);
+        }
+      };
+      
+      fetchProjectType();
+    }
+  }, [quote]);
+  
   // Initialize editable features and pages when the data is loaded or edit mode is activated
   useEffect(() => {
-    if (isEditing && quoteFeatures && quotePages && quote) {
+    if (isEditing && quoteFeatures && quotePages) {
       setEditableFeatures([...quoteFeatures]);
       setEditablePages([...quotePages]);
-      setBasePrice(quote.totalPrice ? quote.totalPrice * 0.3 : 0);
     }
-  }, [isEditing, quoteFeatures, quotePages, quote]);
+  }, [isEditing, quoteFeatures, quotePages]);
   
   // Calculate total price based on current items
   const calculateTotalPrice = () => {
@@ -689,7 +713,7 @@ export default function QuoteDetailsPage() {
                                     </div>
                                   ) : (
                                     <span className="text-sm font-medium">
-                                      {formatCurrency(quote.totalPrice ? quote.totalPrice * 0.3 : 0)}
+                                      {formatCurrency(basePrice)}
                                     </span>
                                   )}
                                 </div>
