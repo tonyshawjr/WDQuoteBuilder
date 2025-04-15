@@ -42,7 +42,7 @@ export function Header() {
   
   // Get appropriate dashboard route based on user role
   const getDashboardRoute = () => {
-    return "/dashboard-router";  // Our smart router will handle the redirection
+    return "/dashboard";  // Direct to our unified dashboard
   };
   
   // Close the mobile menu when changing from mobile to desktop view
