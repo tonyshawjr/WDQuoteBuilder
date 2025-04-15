@@ -30,7 +30,8 @@ export function Header() {
   
   const handleLogout = async () => {
     await logout();
-    setLocation("/login");
+    // Force the page reload to fully clear any cached data and state
+    window.location.href = "/login";
     setIsOpen(false);
   };
 
