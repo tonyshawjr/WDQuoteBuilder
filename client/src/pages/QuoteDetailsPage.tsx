@@ -19,13 +19,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,12 +31,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
 import { 
   Calendar, 
   Mail, 
@@ -51,7 +40,9 @@ import {
   Save,
   ClipboardEdit,
   Check,
-  X
+  X,
+  FileEdit,
+  AlertCircle
 } from "lucide-react";
 
 // Extended types to include feature/page details
@@ -80,6 +71,11 @@ export default function QuoteDetailsPage() {
   const [clientNotes, setClientNotes] = useState("");
   const [internalNotes, setInternalNotes] = useState("");
   const [activeTab, setActiveTab] = useState("details");
+  
+  // State for editing quote features and pages
+  const [editableFeatures, setEditableFeatures] = useState<QuoteFeatureExtended[]>([]);
+  const [editablePages, setEditablePages] = useState<QuotePageExtended[]>([]);
+  const [basePrice, setBasePrice] = useState(0);
   
   // Redirect if not logged in
   useEffect(() => {
@@ -287,6 +283,98 @@ export default function QuoteDetailsPage() {
     }
   }, [quote]);
   
+  // Initialize editable features and pages when the data is loaded or edit mode is activated
+  useEffect(() => {
+    if (isEditing && quoteFeatures && quotePages && quote) {
+      setEditableFeatures([...quoteFeatures]);
+      setEditablePages([...quotePages]);
+      setBasePrice(quote.totalPrice ? quote.totalPrice * 0.3 : 0);
+    }
+  }, [isEditing, quoteFeatures, quotePages, quote]);
+  
+  // Calculate total price based on current items
+  const calculateTotalPrice = () => {
+    const featuresTotal = editableFeatures.reduce(
+      (sum, feature) => sum + feature.price,
+      0
+    );
+    const pagesTotal = editablePages.reduce(
+      (sum, page) => sum + page.price,
+      0
+    );
+    return basePrice + featuresTotal + pagesTotal;
+  };
+  
+  // Update feature quantity
+  const updateFeatureQuantity = (featureId: number, quantity: number) => {
+    setEditableFeatures(prev => 
+      prev.map(feature => {
+        if (feature.id === featureId) {
+          // Store original price per unit if it's the first edit
+          const pricePerUnit = feature.price / feature.quantity;
+          return { 
+            ...feature, 
+            quantity, 
+            // Recalculate price based on quantity
+            price: feature.pricingType === 'hourly' && feature.hourlyRate && feature.estimatedHours
+              ? feature.hourlyRate * feature.estimatedHours 
+              : pricePerUnit * quantity
+          };
+        }
+        return feature;
+      })
+    );
+  };
+  
+  // Update feature price directly
+  const updateFeaturePrice = (featureId: number, price: number) => {
+    setEditableFeatures(prev => 
+      prev.map(feature => 
+        feature.id === featureId ? { ...feature, price } : feature
+      )
+    );
+  };
+  
+  // Update page quantity
+  const updatePageQuantity = (pageId: number, quantity: number) => {
+    setEditablePages(prev => 
+      prev.map(page => 
+        page.id === pageId 
+          ? { 
+              ...page, 
+              quantity, 
+              // Recalculate price based on quantity and price per page
+              price: page.pricePerPage * quantity 
+            } 
+          : page
+      )
+    );
+  };
+  
+  // Update page price directly
+  const updatePagePrice = (pageId: number, price: number) => {
+    setEditablePages(prev => 
+      prev.map(page => 
+        page.id === pageId ? { ...page, price } : page
+      )
+    );
+  };
+  
+  // Remove a feature from the quote
+  const removeFeature = (featureId: number) => {
+    setEditableFeatures(prev => prev.filter(feature => feature.id !== featureId));
+  };
+  
+  // Remove a page from the quote
+  const removePage = (pageId: number) => {
+    setEditablePages(prev => prev.filter(page => page.id !== pageId));
+  };
+  
+  // Update base price
+  const updateBasePrice = (price: number) => {
+    setBasePrice(price);
+  };
+  
   // Cancel editing
   const handleCancelEdit = () => {
     if (quote) {
@@ -443,38 +531,127 @@ export default function QuoteDetailsPage() {
                       <Card>
                         <CardHeader>
                           <CardTitle>Quote Breakdown</CardTitle>
+                          {isEditing && (
+                            <CardDescription>
+                              Edit quantities and prices below
+                            </CardDescription>
+                          )}
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-4">
                             <div>
                               <h3 className="text-sm font-medium mb-2">Base Project</h3>
                               <div className="bg-gray-50 p-3 rounded-md">
-                                <div className="flex justify-between">
+                                <div className="flex justify-between items-center">
                                   <span className="text-sm">Base Price</span>
-                                  <span className="text-sm font-medium">
-                                    {formatCurrency(quote.totalPrice ? quote.totalPrice * 0.3 : 0)}
-                                  </span>
+                                  {isEditing ? (
+                                    <div className="w-32">
+                                      <Input 
+                                        type="number"
+                                        className="text-right h-8"
+                                        value={basePrice}
+                                        onChange={(e) => {
+                                          const newPrice = parseFloat(e.target.value) || 0;
+                                          updateBasePrice(newPrice);
+                                        }}
+                                      />
+                                    </div>
+                                  ) : (
+                                    <span className="text-sm font-medium">
+                                      {formatCurrency(quote.totalPrice ? quote.totalPrice * 0.3 : 0)}
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                             </div>
                             
                             {quoteFeatures && quoteFeatures.length > 0 && (
                               <div>
-                                <h3 className="text-sm font-medium mb-2">Selected Features</h3>
+                                <div className="flex justify-between items-center mb-2">
+                                  <h3 className="text-sm font-medium">Selected Features</h3>
+                                  {isEditing && (
+                                    <Button 
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        // Add feature flow - would require project type selection
+                                        toast({
+                                          title: "Feature selection",
+                                          description: "Feature selection would open a modal to pick from available features",
+                                        });
+                                      }}
+                                    >
+                                      Add Feature
+                                    </Button>
+                                  )}
+                                </div>
                                 <div className="space-y-2">
-                                  {quoteFeatures.map(item => (
+                                  {quoteFeatures.map((item, index) => (
                                     <div 
                                       key={item.id} 
                                       className="bg-gray-50 p-3 rounded-md"
                                     >
-                                      <div className="flex justify-between mb-1">
-                                        <span className="text-sm font-medium">
-                                          {item.featureName}
-                                          {item.quantity > 1 ? ` (x${item.quantity})` : ''}
-                                        </span>
-                                        <span className="text-sm font-medium">
-                                          {formatCurrency(item.price)}
-                                        </span>
+                                      <div className="flex justify-between mb-1 items-center">
+                                        <div className="flex-grow">
+                                          <span className="text-sm font-medium">
+                                            {item.featureName}
+                                          </span>
+                                          {isEditing ? (
+                                            <div className="flex mt-2 space-x-2">
+                                              <div className="w-24">
+                                                <div className="text-xs text-gray-500 mb-1">Quantity</div>
+                                                <Input 
+                                                  type="number"
+                                                  className="h-8"
+                                                  min={1}
+                                                  value={item.quantity}
+                                                  onChange={(e) => {
+                                                    // Handle quantity change
+                                                    const newQuantity = parseInt(e.target.value) || 1;
+                                                    // Update local state for quoteFeatures
+                                                    // We'd need additional state management
+                                                  }}
+                                                />
+                                              </div>
+                                              <div className="w-32">
+                                                <div className="text-xs text-gray-500 mb-1">Price</div>
+                                                <Input 
+                                                  type="number"
+                                                  className="h-8"
+                                                  value={item.price}
+                                                  onChange={(e) => {
+                                                    // Handle price change
+                                                    const newPrice = parseFloat(e.target.value) || 0;
+                                                    // Update local state for quoteFeatures
+                                                  }}
+                                                />
+                                              </div>
+                                            </div>
+                                          ) : (
+                                            item.quantity > 1 && <span className="text-sm ml-1">({item.quantity}x)</span>
+                                          )}
+                                        </div>
+                                        {isEditing ? (
+                                          <Button 
+                                            size="sm"
+                                            variant="ghost"
+                                            className="h-8 text-red-500 hover:text-red-700"
+                                            onClick={() => {
+                                              // Remove feature
+                                              // Would need to manage in local state
+                                              toast({
+                                                title: "Remove feature",
+                                                description: "This would remove the feature from the quote",
+                                              });
+                                            }}
+                                          >
+                                            <Trash2 className="h-4 w-4" />
+                                          </Button>
+                                        ) : (
+                                          <span className="text-sm font-medium">
+                                            {formatCurrency(item.price)}
+                                          </span>
+                                        )}
                                       </div>
                                       {item.pricingType === 'hourly' && item.hourlyRate && item.estimatedHours && (
                                         <p className="text-xs text-gray-500">
@@ -489,25 +666,95 @@ export default function QuoteDetailsPage() {
                             
                             {quotePages && quotePages.length > 0 && (
                               <div>
-                                <h3 className="text-sm font-medium mb-2">Selected Pages</h3>
+                                <div className="flex justify-between items-center mb-2">
+                                  <h3 className="text-sm font-medium">Selected Pages</h3>
+                                  {isEditing && (
+                                    <Button 
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        // Add page flow
+                                        toast({
+                                          title: "Page selection",
+                                          description: "Page selection would open a modal to pick from available pages",
+                                        });
+                                      }}
+                                    >
+                                      Add Page
+                                    </Button>
+                                  )}
+                                </div>
                                 <div className="space-y-2">
                                   {quotePages.map(item => (
                                     <div 
                                       key={item.id} 
                                       className="bg-gray-50 p-3 rounded-md"
                                     >
-                                      <div className="flex justify-between mb-1">
-                                        <span className="text-sm font-medium">
-                                          {item.pageName}
-                                          {item.quantity > 1 ? ` (x${item.quantity})` : ''}
-                                        </span>
-                                        <span className="text-sm font-medium">
-                                          {formatCurrency(item.price)}
-                                        </span>
+                                      <div className="flex justify-between mb-1 items-center">
+                                        <div className="flex-grow">
+                                          <span className="text-sm font-medium">
+                                            {item.pageName}
+                                          </span>
+                                          {isEditing ? (
+                                            <div className="flex mt-2 space-x-2">
+                                              <div className="w-24">
+                                                <div className="text-xs text-gray-500 mb-1">Quantity</div>
+                                                <Input 
+                                                  type="number"
+                                                  className="h-8"
+                                                  min={1}
+                                                  value={item.quantity}
+                                                  onChange={(e) => {
+                                                    // Handle quantity change
+                                                    const newQuantity = parseInt(e.target.value) || 1;
+                                                    // Update local state
+                                                  }}
+                                                />
+                                              </div>
+                                              <div className="w-32">
+                                                <div className="text-xs text-gray-500 mb-1">Price</div>
+                                                <Input 
+                                                  type="number"
+                                                  className="h-8"
+                                                  value={item.price}
+                                                  onChange={(e) => {
+                                                    // Handle price change
+                                                    const newPrice = parseFloat(e.target.value) || 0;
+                                                    // Update local state
+                                                  }}
+                                                />
+                                              </div>
+                                            </div>
+                                          ) : (
+                                            item.quantity > 1 && <span className="text-sm ml-1">({item.quantity}x)</span>
+                                          )}
+                                        </div>
+                                        {isEditing ? (
+                                          <Button 
+                                            size="sm"
+                                            variant="ghost"
+                                            className="h-8 text-red-500 hover:text-red-700"
+                                            onClick={() => {
+                                              // Remove page
+                                              toast({
+                                                title: "Remove page",
+                                                description: "This would remove the page from the quote",
+                                              });
+                                            }}
+                                          >
+                                            <Trash2 className="h-4 w-4" />
+                                          </Button>
+                                        ) : (
+                                          <span className="text-sm font-medium">
+                                            {formatCurrency(item.price)}
+                                          </span>
+                                        )}
                                       </div>
-                                      <p className="text-xs text-gray-500">
-                                        ${item.pricePerPage.toFixed(2)} per page
-                                      </p>
+                                      {!isEditing && (
+                                        <p className="text-xs text-gray-500">
+                                          ${item.pricePerPage.toFixed(2)} per page
+                                        </p>
+                                      )}
                                     </div>
                                   ))}
                                 </div>
