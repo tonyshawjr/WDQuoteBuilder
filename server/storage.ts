@@ -41,6 +41,7 @@ export interface IStorage {
   
   // Quote operations
   getQuotes(): Promise<Quote[]>;
+  getQuotesByUser(userId: number): Promise<Quote[]>; // Added new method to get quotes by user
   getQuote(id: number): Promise<Quote | undefined>;
   createQuote(quote: InsertQuote, selectedFeatures: SelectedFeature[], selectedPages: SelectedPage[]): Promise<Quote>;
   updateQuote(id: number, quote: Partial<InsertQuote>): Promise<Quote | undefined>;
@@ -229,6 +230,12 @@ export class MemStorage implements IStorage {
   // Quote operations
   async getQuotes(): Promise<Quote[]> {
     return Array.from(this.quotesMap.values());
+  }
+  
+  async getQuotesByUser(userId: number): Promise<Quote[]> {
+    return Array.from(this.quotesMap.values()).filter(
+      quote => quote.createdBy === userId.toString()
+    );
   }
   
   async getQuote(id: number): Promise<Quote | undefined> {

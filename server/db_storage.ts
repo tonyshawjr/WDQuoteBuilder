@@ -189,6 +189,10 @@ export class DatabaseStorage implements IStorage {
   async getQuotes(): Promise<Quote[]> {
     return db.select().from(quotes);
   }
+  
+  async getQuotesByUser(userId: number): Promise<Quote[]> {
+    return db.select().from(quotes).where(eq(quotes.createdBy, userId.toString()));
+  }
 
   async getQuote(id: number): Promise<Quote | undefined> {
     const [quote] = await db.select().from(quotes).where(eq(quotes.id, id));
