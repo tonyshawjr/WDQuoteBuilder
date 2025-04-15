@@ -44,12 +44,8 @@ export function LoginForm() {
       
       // Slight delay to ensure session is established
       setTimeout(() => {
-        // Redirect based on user role
-        if (user.isAdmin) {
-          setLocation("/admin");
-        } else {
-          setLocation("/calculator");
-        }
+        // Always redirect to dashboard regardless of role
+        setLocation("/dashboard");
       }, 500);
     } catch (error) {
       console.error("Login error:", error);
