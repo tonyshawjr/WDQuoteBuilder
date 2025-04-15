@@ -4,12 +4,13 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { Header } from "@/components/layout/Header";
 import { CalculatorPanel } from "@/components/calculator/CalculatorPanel";
 import { EstimateSummary } from "@/components/calculator/EstimateSummary";
-import { ProjectType, SelectedFeature } from "@shared/schema";
+import { ProjectType, SelectedFeature, SelectedPage } from "@shared/schema";
 
 export default function Calculator() {
   const { user, loading } = useAuth();
   const [, setLocation] = useLocation();
   const [selectedFeatures, setSelectedFeatures] = useState<SelectedFeature[]>([]);
+  const [selectedPages, setSelectedPages] = useState<SelectedPage[]>([]);
   const [selectedProjectType, setSelectedProjectType] = useState<ProjectType | null>(null);
   
   useEffect(() => {
@@ -32,6 +33,7 @@ export default function Calculator() {
             <CalculatorPanel
               onSelectedFeaturesChange={setSelectedFeatures}
               onSelectedProjectTypeChange={setSelectedProjectType}
+              onSelectedPagesChange={setSelectedPages}
             />
           </div>
           
@@ -39,6 +41,7 @@ export default function Calculator() {
             <EstimateSummary
               selectedFeatures={selectedFeatures}
               selectedProjectType={selectedProjectType}
+              selectedPages={selectedPages}
             />
           </div>
         </div>

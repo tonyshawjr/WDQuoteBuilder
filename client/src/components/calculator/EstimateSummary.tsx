@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ProjectType, SelectedFeature } from "@shared/schema";
+import { ProjectType, SelectedFeature, SelectedPage } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -12,11 +12,13 @@ import { useToast } from "@/hooks/use-toast";
 
 interface EstimateSummaryProps {
   selectedFeatures: SelectedFeature[];
+  selectedPages: SelectedPage[];
   selectedProjectType: ProjectType | null;
 }
 
 export function EstimateSummary({ 
-  selectedFeatures, 
+  selectedFeatures,
+  selectedPages,
   selectedProjectType 
 }: EstimateSummaryProps) {
   const { toast } = useToast();
@@ -38,25 +40,41 @@ export function EstimateSummary({
       return (feature.hourlyRate as number) * (feature.estimatedHours as number) * feature.quantity;
     }
   };
+
+  const calculatePagePrice = (page: SelectedPage): number => {
+    return page.pricePerPage * page.quantity;
+  };
   
   const basePrice = selectedProjectType?.basePrice || 0;
   const featuresPrice = selectedFeatures.reduce((sum, feature) => sum + calculateFeaturePrice(feature), 0);
-  const totalPrice = basePrice + featuresPrice;
+  const pagesPrice = selectedPages.reduce((sum, page) => sum + calculatePagePrice(page), 0);
+  const totalPrice = basePrice + featuresPrice + pagesPrice;
   
   const handleCopyEstimate = () => {
     if (!selectedProjectType) return;
     
     let text = `Project Estimate: ${selectedProjectType.name}\n\n`;
     text += `Base Price: ${formatCurrency(basePrice)}\n\n`;
-    text += "Selected Features:\n";
     
-    selectedFeatures.forEach(feature => {
-      const price = calculateFeaturePrice(feature);
-      text += `- ${feature.name}${feature.quantity > 1 ? ` (x${feature.quantity})` : ''}: ${formatCurrency(price)}\n`;
-      if (feature.pricingType === 'hourly') {
-        text += `  ${(feature.estimatedHours as number) * feature.quantity} hours @ ${formatCurrency(feature.hourlyRate as number)}/hr\n`;
-      }
-    });
+    if (selectedPages.length > 0) {
+      text += "Selected Pages:\n";
+      selectedPages.forEach(page => {
+        const price = calculatePagePrice(page);
+        text += `- ${page.name}${page.quantity > 1 ? ` (x${page.quantity})` : ''}: ${formatCurrency(price)}\n`;
+      });
+      text += "\n";
+    }
+    
+    if (selectedFeatures.length > 0) {
+      text += "Selected Features:\n";
+      selectedFeatures.forEach(feature => {
+        const price = calculateFeaturePrice(feature);
+        text += `- ${feature.name}${feature.quantity > 1 ? ` (x${feature.quantity})` : ''}: ${formatCurrency(price)}\n`;
+        if (feature.pricingType === 'hourly') {
+          text += `  ${(feature.estimatedHours as number) * feature.quantity} hours @ ${formatCurrency(feature.hourlyRate as number)}/hr\n`;
+        }
+      });
+    }
     
     text += `\nTotal Estimate: ${formatCurrency(totalPrice)}`;
     
@@ -91,6 +109,8 @@ export function EstimateSummary({
       description: "Save quote is not implemented in this demo",
     });
   };
+
+  const hasSelections = selectedProjectType && (selectedFeatures.length > 0 || selectedPages.length > 0);
   
   return (
     <Card className="sticky top-6">
@@ -99,9 +119,9 @@ export function EstimateSummary({
       </CardHeader>
       <CardContent>
         <div className="mb-6">
-          {!selectedProjectType || selectedFeatures.length === 0 ? (
+          {!hasSelections ? (
             <div className="text-center text-gray-500 py-8">
-              No features selected yet
+              No items selected yet
             </div>
           ) : (
             <div>
@@ -113,23 +133,45 @@ export function EstimateSummary({
                 </div>
               </div>
               
-              <div className="space-y-3 mb-6">
-                {selectedFeatures.map(feature => (
-                  <div key={feature.id} className="flex justify-between items-start">
-                    <div>
-                      <p className="text-sm font-medium text-gray-700">
-                        {feature.name}{feature.quantity > 1 ? ` (x${feature.quantity})` : ''}
-                      </p>
-                      {feature.pricingType === 'hourly' && (
-                        <p className="text-xs text-gray-500">
-                          {(feature.estimatedHours as number) * feature.quantity} hours @ {formatCurrency(feature.hourlyRate as number)}/hr
+              {selectedPages.length > 0 && (
+                <div className="space-y-3 mb-4">
+                  <h4 className="text-sm font-medium text-gray-600">Pages</h4>
+                  {selectedPages.map(page => (
+                    <div key={page.id} className="flex justify-between items-start">
+                      <div>
+                        <p className="text-sm font-medium text-gray-700">
+                          {page.name}{page.quantity > 1 ? ` (x${page.quantity})` : ''}
                         </p>
-                      )}
+                        <p className="text-xs text-gray-500">
+                          ${page.pricePerPage} per page
+                        </p>
+                      </div>
+                      <span className="text-sm font-medium">{formatCurrency(calculatePagePrice(page))}</span>
                     </div>
-                    <span className="text-sm font-medium">{formatCurrency(calculateFeaturePrice(feature))}</span>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
+              
+              {selectedFeatures.length > 0 && (
+                <div className="space-y-3 mb-4">
+                  <h4 className="text-sm font-medium text-gray-600">Features</h4>
+                  {selectedFeatures.map(feature => (
+                    <div key={feature.id} className="flex justify-between items-start">
+                      <div>
+                        <p className="text-sm font-medium text-gray-700">
+                          {feature.name}{feature.quantity > 1 ? ` (x${feature.quantity})` : ''}
+                        </p>
+                        {feature.pricingType === 'hourly' && (
+                          <p className="text-xs text-gray-500">
+                            {(feature.estimatedHours as number) * feature.quantity} hours @ {formatCurrency(feature.hourlyRate as number)}/hr
+                          </p>
+                        )}
+                      </div>
+                      <span className="text-sm font-medium">{formatCurrency(calculateFeaturePrice(feature))}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
               
               <div className="border-t border-gray-200 pt-4">
                 <div className="flex justify-between items-center font-medium">
@@ -145,7 +187,7 @@ export function EstimateSummary({
           <Button 
             className="w-full" 
             onClick={handleCopyEstimate}
-            disabled={!selectedProjectType || selectedFeatures.length === 0 || isCopied}
+            disabled={!hasSelections || isCopied}
           >
             {isCopied ? (
               <>
@@ -164,7 +206,7 @@ export function EstimateSummary({
             className="w-full" 
             variant="outline"
             onClick={handleExportPDF}
-            disabled={!selectedProjectType || selectedFeatures.length === 0}
+            disabled={!hasSelections}
           >
             <FileDown className="h-4 w-4 mr-2" />
             Export PDF
@@ -174,7 +216,7 @@ export function EstimateSummary({
             className="w-full" 
             variant="outline"
             onClick={handleSaveQuote}
-            disabled={!selectedProjectType || selectedFeatures.length === 0}
+            disabled={!hasSelections}
           >
             <Save className="h-4 w-4 mr-2" />
             Save Quote
