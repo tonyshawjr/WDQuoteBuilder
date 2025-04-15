@@ -13,16 +13,24 @@ interface CalculatorPanelProps {
   onSelectedFeaturesChange: (features: SelectedFeature[]) => void;
   onSelectedProjectTypeChange: (projectType: ProjectType | null) => void;
   onSelectedPagesChange: (pages: SelectedPage[]) => void;
+  initialSelectedFeatures?: SelectedFeature[];
+  initialSelectedPages?: SelectedPage[];
+  initialSelectedProjectType?: ProjectType | null;
 }
 
 export function CalculatorPanel({ 
   onSelectedFeaturesChange,
   onSelectedProjectTypeChange,
-  onSelectedPagesChange
+  onSelectedPagesChange,
+  initialSelectedFeatures = [],
+  initialSelectedPages = [],
+  initialSelectedProjectType = null
 }: CalculatorPanelProps) {
-  const [selectedProjectTypeId, setSelectedProjectTypeId] = useState<string | null>(null);
-  const [selectedFeatures, setSelectedFeatures] = useState<SelectedFeature[]>([]);
-  const [selectedPages, setSelectedPages] = useState<SelectedPage[]>([]);
+  const [selectedProjectTypeId, setSelectedProjectTypeId] = useState<string | null>(
+    initialSelectedProjectType ? initialSelectedProjectType.id.toString() : null
+  );
+  const [selectedFeatures, setSelectedFeatures] = useState<SelectedFeature[]>(initialSelectedFeatures);
+  const [selectedPages, setSelectedPages] = useState<SelectedPage[]>(initialSelectedPages);
   const [activeTab, setActiveTab] = useState<string>("features");
   
   // Fetch project types

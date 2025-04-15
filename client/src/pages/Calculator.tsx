@@ -83,7 +83,8 @@ export default function Calculator() {
         description: "Your quote has been successfully saved."
       });
       
-      // Reset form and go back to calculator
+      // Just go back to calculator without resetting the form
+      // The selections will be preserved
       setActiveTab("calculator");
       
     } catch (error) {
@@ -128,6 +129,9 @@ export default function Calculator() {
                   onSelectedFeaturesChange={setSelectedFeatures}
                   onSelectedProjectTypeChange={setSelectedProjectType}
                   onSelectedPagesChange={setSelectedPages}
+                  initialSelectedFeatures={selectedFeatures}
+                  initialSelectedPages={selectedPages}
+                  initialSelectedProjectType={selectedProjectType}
                 />
               </div>
               
