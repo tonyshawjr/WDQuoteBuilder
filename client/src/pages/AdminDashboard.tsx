@@ -16,7 +16,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Quote, User } from "@shared/schema";
-import { PlusCircle, FileText, Eye, BarChart, Users } from "lucide-react";
+import { PlusCircle, FileText, Eye, BarChart, Users, UserCog, User as UserIcon } from "lucide-react";
+import { UserManagement } from "@/components/admin/UserManagement";
+import { ProfileEditor } from "@/components/profile/ProfileEditor";
 
 // Utility functions
 const formatCurrency = (amount: number) => {
@@ -109,9 +111,11 @@ export default function AdminDashboard() {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 mb-6 sm:w-auto sm:inline-flex">
+          <TabsList className="grid w-full grid-cols-4 mb-6 sm:w-auto sm:inline-flex">
             <TabsTrigger value="quotes">Quotes</TabsTrigger>
             <TabsTrigger value="reports">Reports</TabsTrigger>
+            <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="profile">My Profile</TabsTrigger>
           </TabsList>
           
           <TabsContent value="quotes">
@@ -281,6 +285,16 @@ export default function AdminDashboard() {
                   )}
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="users">
+            <UserManagement />
+          </TabsContent>
+          
+          <TabsContent value="profile">
+            <div className="max-w-3xl mx-auto">
+              <ProfileEditor />
             </div>
           </TabsContent>
         </Tabs>
