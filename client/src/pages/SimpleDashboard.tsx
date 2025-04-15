@@ -149,7 +149,7 @@ export default function SimpleDashboard() {
                     <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                     Loading quotes...
                   </div>
-                ) : quotes.length === 0 ? (
+                ) : !filteredQuotes || filteredQuotes.length === 0 ? (
                   <div className="py-8 text-center text-gray-500">
                     <div className="text-4xl mb-4">📊</div>
                     <h3 className="text-lg font-medium mb-2">No quotes found</h3>
@@ -255,7 +255,7 @@ export default function SimpleDashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="px-4 sm:px-6">
-                  {filteredQuotes.length === 0 ? (
+                  {!filteredQuotes || filteredQuotes.length === 0 ? (
                     <div className="py-8 text-center text-gray-500">
                       <p>No data available yet</p>
                       <p className="text-sm mt-2">Create quotes to see your sales pipeline</p>
@@ -291,7 +291,7 @@ export default function SimpleDashboard() {
                   <CardTitle className="text-lg">Financial Summary</CardTitle>
                 </CardHeader>
                 <CardContent className="px-4 sm:px-6">
-                  {filteredQuotes.length === 0 ? (
+                  {!filteredQuotes || filteredQuotes.length === 0 ? (
                     <div className="py-8 text-center text-gray-500">
                       <p>No financial data available</p>
                       <p className="text-sm mt-2">Create quotes to see financial metrics</p>
