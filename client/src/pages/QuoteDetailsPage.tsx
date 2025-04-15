@@ -368,15 +368,11 @@ export default function QuoteDetailsPage() {
           queryClient.setQueryData([`/api/quotes/${quoteId}`], updatedQuoteObject);
           
           // Also update any modified features/pages in the query cache
-          if (quoteFeatures) {
-            // Replace the displayed quote features with the edited ones 
-            queryClient.setQueryData([`/api/quotes/${quoteId}/features`], [...editableFeatures]);
-          }
+          // Replace the displayed quote features with the edited ones 
+          queryClient.setQueryData([`/api/quotes/${quoteId}/features`], [...editableFeatures]);
           
-          if (quotePages) {
-            // Replace the displayed quote pages with the edited ones
-            queryClient.setQueryData([`/api/quotes/${quoteId}/pages`], [...editablePages]);
-          }
+          // Replace the displayed quote pages with the edited ones
+          queryClient.setQueryData([`/api/quotes/${quoteId}/pages`], [...editablePages]);
         }
       }
     });
@@ -975,7 +971,7 @@ export default function QuoteDetailsPage() {
                             </div>
                             
                             {/* Features Section - Always show when editing */}
-                            {(isEditing || (editableFeatures.length > 0 || quoteFeatures.length > 0)) && (
+                            {(isEditing || (editableFeatures.length > 0 || (quoteFeatures && quoteFeatures.length > 0))) && (
                               <div>
                                 <div className="flex justify-between items-center mb-2">
                                   <h3 className="text-sm font-medium">Selected Features</h3>
@@ -989,7 +985,7 @@ export default function QuoteDetailsPage() {
                                     </Button>
                                   )}
                                 </div>
-                                {((isEditing ? editableFeatures : quoteFeatures) || []).length === 0 && isEditing && (
+                                {((isEditing ? editableFeatures : (quoteFeatures || [])) || []).length === 0 && isEditing && (
                                   <div className="bg-gray-50 p-4 rounded-md text-center">
                                     <p className="text-gray-500 mb-2">No features added yet</p>
                                     <Button 
@@ -1079,7 +1075,7 @@ export default function QuoteDetailsPage() {
                             )}
                             
                             {/* Pages Section - Always show when editing */}
-                            {(isEditing || (editablePages.length > 0 || quotePages.length > 0)) && (
+                            {(isEditing || (editablePages.length > 0 || (quotePages && quotePages.length > 0))) && (
                               <div>
                                 <div className="flex justify-between items-center mb-2">
                                   <h3 className="text-sm font-medium">Selected Pages</h3>
@@ -1093,7 +1089,7 @@ export default function QuoteDetailsPage() {
                                     </Button>
                                   )}
                                 </div>
-                                {((isEditing ? editablePages : quotePages) || []).length === 0 && isEditing && (
+                                {((isEditing ? editablePages : (quotePages || [])) || []).length === 0 && isEditing && (
                                   <div className="bg-gray-50 p-4 rounded-md text-center">
                                     <p className="text-gray-500 mb-2">No pages added yet</p>
                                     <Button 
@@ -1106,7 +1102,7 @@ export default function QuoteDetailsPage() {
                                   </div>
                                 )}
                                 <div className="space-y-2">
-                                  {((isEditing ? editablePages : quotePages) || []).map(item => (
+                                  {((isEditing ? editablePages : (quotePages || [])) || []).map(item => (
                                     <div 
                                       key={item.id} 
                                       className="bg-gray-50 p-3 rounded-md"
@@ -1275,7 +1271,7 @@ export default function QuoteDetailsPage() {
                                 {formatDate(quote.updatedAt)} at {new Date(quote.updatedAt).toLocaleTimeString()}
                               </div>
                               <div className="text-sm text-gray-500">
-                                Quote last updated by {users.find(u => u.id.toString() === quote.updatedBy?.toString())?.username || quote.updatedBy || 'Unknown'}
+                                Quote last updated by {users.find((u: any) => u.id.toString() === quote.updatedBy?.toString())?.username || quote.updatedBy || 'Unknown'}
                               </div>
                             </div>
                           )}
