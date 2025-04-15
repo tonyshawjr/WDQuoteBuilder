@@ -1,7 +1,14 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertProjectTypeSchema, insertFeatureSchema, insertPageSchema } from "@shared/schema";
+import { 
+  insertProjectTypeSchema, 
+  insertFeatureSchema, 
+  insertPageSchema,
+  insertQuoteSchema,
+  type SelectedFeature,
+  type SelectedPage
+} from "@shared/schema";
 import express from "express";
 import session from "express-session";
 import passport from "passport";

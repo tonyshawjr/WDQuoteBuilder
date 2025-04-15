@@ -2,7 +2,11 @@ import {
   users, type User, type InsertUser,
   projectTypes, type ProjectType, type InsertProjectType,
   features, type Feature, type InsertFeature,
-  pages, type Page, type InsertPage
+  pages, type Page, type InsertPage,
+  quotes, type Quote, type InsertQuote,
+  quoteFeatures, type QuoteFeature, type InsertQuoteFeature,
+  quotePages, type QuotePage, type InsertQuotePage,
+  type SelectedFeature, type SelectedPage
 } from "@shared/schema";
 
 export interface IStorage {
@@ -34,6 +38,15 @@ export interface IStorage {
   updatePage(id: number, page: InsertPage): Promise<Page | undefined>;
   deletePage(id: number): Promise<boolean>;
   getActivePagesOnly(): Promise<Page[]>;
+  
+  // Quote operations
+  getQuotes(): Promise<Quote[]>;
+  getQuote(id: number): Promise<Quote | undefined>;
+  createQuote(quote: InsertQuote, selectedFeatures: SelectedFeature[], selectedPages: SelectedPage[]): Promise<Quote>;
+  updateQuote(id: number, quote: Partial<InsertQuote>): Promise<Quote | undefined>;
+  deleteQuote(id: number): Promise<boolean>;
+  getQuoteFeatures(quoteId: number): Promise<QuoteFeature[]>;
+  getQuotePages(quoteId: number): Promise<QuotePage[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -41,20 +54,34 @@ export class MemStorage implements IStorage {
   private projectTypesMap: Map<number, ProjectType>;
   private featuresMap: Map<number, Feature>;
   private pagesMap: Map<number, Page>;
+  private quotesMap: Map<number, Quote>;
+  private quoteFeaturesMap: Map<number, QuoteFeature>;
+  private quotePagesMap: Map<number, QuotePage>;
+  
   userCurrentId: number;
   projectTypeCurrentId: number;
   featureCurrentId: number;
   pageCurrentId: number;
+  quoteCurrentId: number;
+  quoteFeatureCurrentId: number;
+  quotePageCurrentId: number;
 
   constructor() {
     this.users = new Map();
     this.projectTypesMap = new Map();
     this.featuresMap = new Map();
     this.pagesMap = new Map();
+    this.quotesMap = new Map();
+    this.quoteFeaturesMap = new Map();
+    this.quotePagesMap = new Map();
+    
     this.userCurrentId = 1;
     this.projectTypeCurrentId = 1;
     this.featureCurrentId = 1;
     this.pageCurrentId = 1;
+    this.quoteCurrentId = 1;
+    this.quoteFeatureCurrentId = 1;
+    this.quotePageCurrentId = 1;
     
     // Initialize with admin user
     this.createUser({
@@ -195,6 +222,113 @@ export class MemStorage implements IStorage {
   
   async deletePage(id: number): Promise<boolean> {
     return this.pagesMap.delete(id);
+  }
+  
+  // Quote operations
+  async getQuotes(): Promise<Quote[]> {
+    return Array.from(this.quotesMap.values());
+  }
+  
+  async getQuote(id: number): Promise<Quote | undefined> {
+    return this.quotesMap.get(id);
+  }
+  
+  async createQuote(quote: InsertQuote, selectedFeatures: SelectedFeature[], selectedPages: SelectedPage[]): Promise<Quote> {
+    // Generate current date as string in ISO format
+    const currentDate = new Date().toISOString();
+    
+    // Create the quote
+    const id = this.quoteCurrentId++;
+    const newQuote: Quote = { 
+      ...quote, 
+      id,
+      createdAt: currentDate,
+      updatedAt: currentDate
+    };
+    this.quotesMap.set(id, newQuote);
+    
+    // Create quote features
+    for (const feature of selectedFeatures) {
+      const quoteFeatureId = this.quoteFeatureCurrentId++;
+      const price = feature.quantity * (
+        feature.pricingType === 'fixed' ? 
+          (feature.flatPrice || 0) : 
+          (feature.hourlyRate || 0) * (feature.estimatedHours || 0)
+      );
+      
+      const quoteFeature: QuoteFeature = {
+        id: quoteFeatureId,
+        quoteId: id,
+        featureId: feature.id,
+        quantity: feature.quantity,
+        price
+      };
+      
+      this.quoteFeaturesMap.set(quoteFeatureId, quoteFeature);
+    }
+    
+    // Create quote pages
+    for (const page of selectedPages) {
+      const quotePageId = this.quotePageCurrentId++;
+      const price = page.quantity * page.pricePerPage;
+      
+      const quotePage: QuotePage = {
+        id: quotePageId,
+        quoteId: id,
+        pageId: page.id,
+        quantity: page.quantity,
+        price
+      };
+      
+      this.quotePagesMap.set(quotePageId, quotePage);
+    }
+    
+    return newQuote;
+  }
+  
+  async updateQuote(id: number, quote: Partial<InsertQuote>): Promise<Quote | undefined> {
+    const existingQuote = this.quotesMap.get(id);
+    if (!existingQuote) return undefined;
+    
+    const updatedQuote: Quote = { 
+      ...existingQuote, 
+      ...quote,
+      updatedAt: new Date().toISOString()
+    };
+    
+    this.quotesMap.set(id, updatedQuote);
+    return updatedQuote;
+  }
+  
+  async deleteQuote(id: number): Promise<boolean> {
+    // Delete quote features
+    for (const [featureId, feature] of this.quoteFeaturesMap.entries()) {
+      if (feature.quoteId === id) {
+        this.quoteFeaturesMap.delete(featureId);
+      }
+    }
+    
+    // Delete quote pages
+    for (const [pageId, page] of this.quotePagesMap.entries()) {
+      if (page.quoteId === id) {
+        this.quotePagesMap.delete(pageId);
+      }
+    }
+    
+    // Delete the quote itself
+    return this.quotesMap.delete(id);
+  }
+  
+  async getQuoteFeatures(quoteId: number): Promise<QuoteFeature[]> {
+    return Array.from(this.quoteFeaturesMap.values()).filter(
+      feature => feature.quoteId === quoteId
+    );
+  }
+  
+  async getQuotePages(quoteId: number): Promise<QuotePage[]> {
+    return Array.from(this.quotePagesMap.values()).filter(
+      page => page.quoteId === quoteId
+    );
   }
   
   // Initialize with sample data
