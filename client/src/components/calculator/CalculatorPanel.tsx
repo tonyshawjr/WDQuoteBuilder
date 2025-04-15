@@ -32,20 +32,56 @@ export function CalculatorPanel({
   
   // Fetch features for selected project type
   const { data: features, isLoading: featuresLoading } = useQuery<Feature[]>({
-    queryKey: ['/api/project-types', selectedProjectTypeId, 'features'],
+    queryKey: [`/api/project-types/${selectedProjectTypeId}/features`],
     enabled: !!selectedProjectTypeId,
+    queryFn: async () => {
+      console.log(`Fetching features for project type ${selectedProjectTypeId}`);
+      const response = await fetch(`/api/project-types/${selectedProjectTypeId}/features`, {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`Error fetching features: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('Fetched features:', data);
+      return data;
+    }
   });
   
   // Fetch pages for selected project type
   const { data: pages, isLoading: pagesLoading } = useQuery<Page[]>({
-    queryKey: ['/api/project-types', selectedProjectTypeId, 'pages'],
+    queryKey: [`/api/project-types/${selectedProjectTypeId}/pages`],
     enabled: !!selectedProjectTypeId,
+    queryFn: async () => {
+      console.log(`Fetching pages for project type ${selectedProjectTypeId}`);
+      const response = await fetch(`/api/project-types/${selectedProjectTypeId}/pages`, {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`Error fetching pages: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('Fetched pages:', data);
+      return data;
+    }
   });
 
   // Alternatively, fetch all active pages if project-specific pages aren't available
   const { data: allPages, isLoading: allPagesLoading } = useQuery<Page[]>({
     queryKey: ['/api/pages/active'],
     enabled: !pages || pages.length === 0,
+    queryFn: async () => {
+      console.log('Fetching all active pages');
+      const response = await fetch('/api/pages/active', {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`Error fetching active pages: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('Fetched active pages:', data);
+      return data;
+    }
   });
 
   // Combine pages from project-specific or all active pages
