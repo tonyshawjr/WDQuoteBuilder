@@ -86,6 +86,12 @@ export default function Dashboard() {
     }
     
     // Admin with specific user selected
+    if (selectedUser === user?.id) {
+      // If admin selected their own username
+      return quote.createdBy === user?.username;
+    }
+    
+    // For other users selected by admin
     const selectedUserName = Array.isArray(users) ? 
       users.find((u: UserType) => u.id === selectedUser)?.username : 
       '';
