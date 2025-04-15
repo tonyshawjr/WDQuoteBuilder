@@ -54,11 +54,11 @@ export default function Dashboard() {
   });
   
   useEffect(() => {
-    // Set the initial selected user to the current user
+    // Set the initial selected user to "all" for admin, or current user for non-admin
     if (user) {
-      setSelectedUser(user.id);
+      setSelectedUser(isAdmin ? "all" : user.id);
     }
-  }, [user]);
+  }, [user, isAdmin]);
   
   if (isLoadingQuotes || isLoadingUsers) {
     return (
@@ -74,21 +74,23 @@ export default function Dashboard() {
   }
   
   // Filter quotes based on selected user
-  const filteredQuotes = quotes.filter((quote: Quote) => {
+  const filteredQuotes = Array.isArray(quotes) ? quotes.filter((quote: Quote) => {
+    // Admin with "all" selected sees all quotes
+    if (isAdmin && selectedUser === "all") {
+      return true;
+    }
+    
     if (!isAdmin) {
       // Regular users only see their own quotes
       return quote.createdBy === user?.username;
     }
     
-    // Admin with "all" selected sees all quotes
-    if (selectedUser === "all") {
-      return true;
-    }
-    
     // Admin with specific user selected
-    const selectedUserName = users.find((u: UserType) => u.id === selectedUser)?.username;
+    const selectedUserName = Array.isArray(users) ? 
+      users.find((u: UserType) => u.id === selectedUser)?.username : 
+      '';
     return quote.createdBy === selectedUserName;
-  });
+  }) : [];
   
   // Further filter by time
   const timeFilteredQuotes = filteredQuotes.filter((quote: Quote) => {
@@ -121,10 +123,10 @@ export default function Dashboard() {
   const lostQuotes = timeFilteredQuotes.filter((quote: Quote) => quote.leadStatus === "Lost").length;
   
   // Calculate total value of quotes
-  const totalValue = timeFilteredQuotes.reduce((sum, quote: Quote) => sum + (quote.totalPrice || 0), 0);
+  const totalValue = timeFilteredQuotes.reduce((sum: number, quote: Quote) => sum + (quote.totalPrice || 0), 0);
   const wonValue = timeFilteredQuotes
     .filter((quote: Quote) => quote.leadStatus === "Won")
-    .reduce((sum, quote: Quote) => sum + (quote.totalPrice || 0), 0);
+    .reduce((sum: number, quote: Quote) => sum + (quote.totalPrice || 0), 0);
   
   // Data for pie chart
   const statusData = [
@@ -152,7 +154,7 @@ export default function Dashboard() {
   }, []);
   
   // Sort months chronologically
-  monthlyData.sort((a, b) => {
+  monthlyData.sort((a: any, b: any) => {
     return monthNames.indexOf(a.name) - monthNames.indexOf(b.name);
   });
   
@@ -177,7 +179,7 @@ export default function Dashboard() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Users</SelectItem>
-                  {users.map((u: UserType) => (
+                  {Array.isArray(users) && users.map((u: UserType) => (
                     <SelectItem key={u.id} value={u.id.toString()}>
                       {u.username}
                     </SelectItem>
@@ -267,10 +269,10 @@ export default function Dashboard() {
           </Card>
         </div>
         
-        <Tabs defaultValue="quotes" className="mb-8">
+        <Tabs defaultValue="analytics" className="mb-8">
           <TabsList>
             <TabsTrigger value="quotes">Quotes</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="analytics">Reports</TabsTrigger>
           </TabsList>
           
           <TabsContent value="quotes" className="pt-6">
