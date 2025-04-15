@@ -10,8 +10,12 @@ export default function Home() {
   const [, setLocation] = useLocation();
   
   useEffect(() => {
-    if (!loading && !user) {
-      setLocation("/login");
+    if (!loading) {
+      if (!user) {
+        setLocation("/login");
+      } else {
+        setLocation("/dashboard");
+      }
     }
   }, [loading, user, setLocation]);
   

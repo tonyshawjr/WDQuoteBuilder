@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User, Calculator, Settings } from "lucide-react";
+import { LogOut, User, Calculator, Settings, LayoutDashboard } from "lucide-react";
 
 export function Header() {
   const { user, logout, isAdmin } = useAuth();
@@ -33,30 +33,29 @@ export function Header() {
           {user && (
             <div className="flex items-center">
               <nav className="flex space-x-4 mr-4">
-                {isAdmin ? (
-                  <>
-                    <Button 
-                      variant={location === "/calculator" ? "default" : "ghost"} 
-                      onClick={() => setLocation("/calculator")}
-                    >
-                      <Calculator className="h-4 w-4 mr-2" />
-                      Calculator
-                    </Button>
-                    <Button 
-                      variant={location === "/admin" ? "default" : "ghost"} 
-                      onClick={() => setLocation("/admin")}
-                    >
-                      <Settings className="h-4 w-4 mr-2" />
-                      Admin
-                    </Button>
-                  </>
-                ) : (
+                <Button 
+                  variant={location === "/" || location === "/dashboard" ? "default" : "ghost"} 
+                  onClick={() => setLocation("/dashboard")}
+                >
+                  <LayoutDashboard className="h-4 w-4 mr-2" />
+                  Dashboard
+                </Button>
+                
+                <Button 
+                  variant={location === "/calculator" ? "default" : "ghost"} 
+                  onClick={() => setLocation("/calculator")}
+                >
+                  <Calculator className="h-4 w-4 mr-2" />
+                  Calculator
+                </Button>
+                
+                {isAdmin && (
                   <Button 
-                    variant={location === "/calculator" ? "default" : "ghost"} 
-                    onClick={() => setLocation("/calculator")}
+                    variant={location === "/admin" ? "default" : "ghost"} 
+                    onClick={() => setLocation("/admin")}
                   >
-                    <Calculator className="h-4 w-4 mr-2" />
-                    Calculator
+                    <Settings className="h-4 w-4 mr-2" />
+                    Admin
                   </Button>
                 )}
               </nav>

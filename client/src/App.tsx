@@ -7,6 +7,7 @@ import { AuthProvider } from "@/components/auth/AuthProvider";
 import Home from "@/pages/Home";
 import Calculator from "@/pages/Calculator";
 import AdminDashboard from "@/pages/AdminDashboard";
+import Dashboard from "@/pages/Dashboard";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/Login";
 
@@ -14,6 +15,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/dashboard" component={Dashboard} />
       <Route path="/calculator" component={Calculator} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/login" component={Login} />
