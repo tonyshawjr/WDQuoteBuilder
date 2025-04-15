@@ -222,7 +222,7 @@ export class DatabaseStorage implements IStorage {
   async deleteQuote(id: number): Promise<boolean> {
     // Due to CASCADE on delete, quote features and pages will be deleted automatically
     const result = await db.delete(quotes).where(eq(quotes.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   async getQuoteFeatures(quoteId: number): Promise<QuoteFeature[]> {
