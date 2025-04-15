@@ -14,7 +14,8 @@ export default function Home() {
       if (!user) {
         setLocation("/login");
       } else {
-        setLocation("/dashboard");
+        // Use our smart dashboard router that will redirect based on user role
+        setLocation("/dashboard-router");
       }
     }
   }, [loading, user, setLocation]);
@@ -55,18 +56,18 @@ export default function Home() {
           {isAdmin && (
             <Card>
               <CardHeader>
-                <CardTitle>Admin Panel</CardTitle>
+                <CardTitle>Admin Dashboard</CardTitle>
                 <CardDescription>
-                  Manage project types and features
+                  Manage quotes, team performance, and project settings
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col items-center">
                 <p className="text-center mb-6">
                   Configure pricing, feature sets, and project types
                 </p>
-                <Button onClick={() => setLocation("/admin")}>
+                <Button onClick={() => setLocation("/admin-dashboard")}>
                   <Settings className="h-5 w-5 mr-2" />
-                  Go to Admin Panel
+                  Go to Admin Dashboard
                 </Button>
               </CardContent>
             </Card>

@@ -62,6 +62,8 @@ export default function AdminDashboard() {
 
   // Filter quotes based on selected user
   const filteredQuotes = useMemo(() => {
+    if (!quotes) return [];
+    
     if (!selectedUserId) {
       return quotes;
     }

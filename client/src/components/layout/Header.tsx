@@ -140,8 +140,8 @@ export function Header() {
                       
                       <nav className="flex flex-col space-y-2 flex-grow">
                         <Button 
-                          variant={location === "/" || location === "/dashboard" ? "default" : "ghost"} 
-                          onClick={() => navigateTo("/dashboard")}
+                          variant={location === "/" || location.includes("/dashboard") ? "default" : "ghost"} 
+                          onClick={() => navigateTo(getDashboardRoute())}
                           className="justify-start"
                         >
                           <LayoutDashboard className="h-5 w-5 mr-2" />
