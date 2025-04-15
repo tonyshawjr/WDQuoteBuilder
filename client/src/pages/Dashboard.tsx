@@ -349,68 +349,205 @@ export default function Dashboard() {
           </TabsContent>
           
           <TabsContent value="analytics" className="pt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quote Status Distribution</CardTitle>
-                  <CardDescription>Breakdown of quotes by status</CardDescription>
-                </CardHeader>
-                <CardContent className="h-80">
-                  {statusData.length > 0 ? (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={statusData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={100}
-                          paddingAngle={1}
-                          dataKey="value"
-                          label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-                        >
-                          {statusData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip 
-                          formatter={(value) => [`${value} quotes`, "Count"]}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <div className="flex items-center justify-center h-full">
-                      <p className="text-gray-500">No data available</p>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              <div className="space-y-6">
+                <Card className="overflow-hidden border-0 shadow-md bg-gradient-to-br from-blue-50 to-indigo-50">
+                  <CardHeader className="pb-0">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <CardTitle className="text-lg font-semibold text-gray-800">Quote Status</CardTitle>
+                        <CardDescription className="text-gray-600">Current pipeline overview</CardDescription>
+                      </div>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quote Value by Month</CardTitle>
-                  <CardDescription>Total quote value over time</CardDescription>
-                </CardHeader>
-                <CardContent className="h-80">
-                  {monthlyData.length > 0 ? (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={monthlyData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip 
-                          formatter={(value) => [`$${value.toLocaleString()}`, "Value"]}
-                        />
-                        <Bar dataKey="value" fill="#4f46e5" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <div className="flex items-center justify-center h-full">
-                      <p className="text-gray-500">No data available</p>
+                  </CardHeader>
+                  <CardContent className="h-72 pt-4">
+                    {statusData.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={statusData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={70}
+                            outerRadius={100}
+                            paddingAngle={2}
+                            dataKey="value"
+                            label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                          >
+                            {statusData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip 
+                            formatter={(value) => [`${value} quotes`, "Count"]}
+                            contentStyle={{ borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="flex items-center justify-center h-full">
+                        <p className="text-gray-500">No data available</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card className="overflow-hidden border-0 shadow-md">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg font-semibold text-gray-800">Sales Performance</CardTitle>
+                    <CardDescription className="text-gray-600">Win rate & conversion metrics</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      <div>
+                        <div className="flex justify-between mb-2">
+                          <span className="text-sm font-medium text-gray-600">Win Rate</span>
+                          <span className="text-sm font-bold text-gray-900">
+                            {totalQuotes > 0 ? Math.round((wonQuotes / totalQuotes) * 100) : 0}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                          <div 
+                            className="bg-green-600 h-2.5 rounded-full" 
+                            style={{ width: `${totalQuotes > 0 ? Math.round((wonQuotes / totalQuotes) * 100) : 0}%` }}
+                          ></div>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {wonQuotes} won of {totalQuotes} total quotes
+                        </p>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between mb-2">
+                          <span className="text-sm font-medium text-gray-600">Lost Opportunities</span>
+                          <span className="text-sm font-bold text-gray-900">
+                            {totalQuotes > 0 ? Math.round((lostQuotes / totalQuotes) * 100) : 0}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                          <div 
+                            className="bg-red-500 h-2.5 rounded-full" 
+                            style={{ width: `${totalQuotes > 0 ? Math.round((lostQuotes / totalQuotes) * 100) : 0}%` }}
+                          ></div>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {lostQuotes} lost of {totalQuotes} total quotes
+                        </p>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between mb-2">
+                          <span className="text-sm font-medium text-gray-600">Pending Review</span>
+                          <span className="text-sm font-bold text-gray-900">
+                            {totalQuotes > 0 ? Math.round((pendingQuotes / totalQuotes) * 100) : 0}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                          <div 
+                            className="bg-yellow-400 h-2.5 rounded-full" 
+                            style={{ width: `${totalQuotes > 0 ? Math.round((pendingQuotes / totalQuotes) * 100) : 0}%` }}
+                          ></div>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {pendingQuotes} pending of {totalQuotes} total quotes
+                        </p>
+                      </div>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-6">
+                <Card className="overflow-hidden border-0 shadow-md bg-gradient-to-br from-indigo-50 to-purple-50">
+                  <CardHeader className="pb-0">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <CardTitle className="text-lg font-semibold text-gray-800">Financial Summary</CardTitle>
+                        <CardDescription className="text-gray-600">Open vs. closed revenue</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-4">
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                        <h4 className="text-sm font-medium text-gray-500 mb-1">Open Opportunities</h4>
+                        <p className="text-2xl font-bold text-indigo-600">
+                          ${(totalValue - wonValue).toLocaleString()}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          From {pendingQuotes} pending quotes
+                        </p>
+                      </div>
+                      
+                      <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                        <h4 className="text-sm font-medium text-gray-500 mb-1">Closed Revenue</h4>
+                        <p className="text-2xl font-bold text-green-600">
+                          ${wonValue.toLocaleString()}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          From {wonQuotes} won quotes
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                      <h4 className="text-sm font-medium text-gray-500 mb-3">Total Pipeline Value</h4>
+                      <div className="flex items-center">
+                        <div className="flex-1 flex">
+                          <div 
+                            className="h-3 bg-green-500 rounded-l-full" 
+                            style={{ width: `${totalValue > 0 ? (wonValue / totalValue) * 100 : 0}%` }}
+                          ></div>
+                          <div 
+                            className="h-3 bg-yellow-400" 
+                            style={{ width: `${totalValue > 0 ? ((totalValue - wonValue) / totalValue) * 100 : 0}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-lg font-bold ml-4 text-gray-800">
+                          ${totalValue.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex text-xs text-gray-500 mt-2">
+                        <span className="flex items-center">
+                          <span className="w-2 h-2 inline-block bg-green-500 rounded-full mr-1"></span>
+                          Closed: {totalValue > 0 ? Math.round((wonValue / totalValue) * 100) : 0}%
+                        </span>
+                        <span className="flex items-center ml-4">
+                          <span className="w-2 h-2 inline-block bg-yellow-400 rounded-full mr-1"></span>
+                          Open: {totalValue > 0 ? Math.round(((totalValue - wonValue) / totalValue) * 100) : 0}%
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="overflow-hidden border-0 shadow-md">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg font-semibold text-gray-800">Monthly Performance</CardTitle>
+                    <CardDescription className="text-gray-600">Quote value trend over time</CardDescription>
+                  </CardHeader>
+                  <CardContent className="h-60">
+                    {monthlyData.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={monthlyData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                          <XAxis dataKey="name" tickLine={false} axisLine={false} />
+                          <YAxis tickLine={false} axisLine={false} />
+                          <Tooltip 
+                            formatter={(value) => [`$${value.toLocaleString()}`, "Value"]}
+                            contentStyle={{ borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                          />
+                          <Bar dataKey="value" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="flex items-center justify-center h-full">
+                        <p className="text-gray-500">No data available</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
