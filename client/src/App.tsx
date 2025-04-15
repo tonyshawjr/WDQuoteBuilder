@@ -12,6 +12,7 @@ import DashboardRouter from "@/pages/DashboardRouter";
 import QuoteDetailsPage from "@/pages/QuoteDetailsPage";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/Login";
+import UserProfile from "@/pages/UserProfile";
 
 function Router() {
   return (
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/admin" component={AdminDashboard} /> {/* Keep for backward compatibility */}
       <Route path="/login" component={Login} />
       <Route path="/quotes/:id" component={QuoteDetailsPage} />
+      <Route path="/profile" component={UserProfile} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -111,6 +111,11 @@ export function Header() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => navigateTo("/profile")}>
+                      <User className="h-4 w-4 mr-2" />
+                      My Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem className="text-red-500 cursor-pointer" onClick={handleLogout}>
                       <LogOut className="h-4 w-4 mr-2" />
                       Logout
@@ -171,6 +176,16 @@ export function Header() {
                             <ChevronRight className="h-4 w-4 ml-auto" />
                           </Button>
                         )}
+                        
+                        <Button 
+                          variant={location === "/profile" ? "default" : "ghost"} 
+                          onClick={() => navigateTo("/profile")}
+                          className="justify-start"
+                        >
+                          <User className="h-5 w-5 mr-2" />
+                          My Profile
+                          <ChevronRight className="h-4 w-4 ml-auto" />
+                        </Button>
                       </nav>
                       
                       <Button 
