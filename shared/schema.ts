@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, doublePrecision } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, doublePrecision, numeric, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -96,3 +96,59 @@ export type SelectedFeature = Feature & {
 export type SelectedPage = Page & {
   quantity: number;
 };
+
+// Quote management schema
+export const quotes = pgTable("quotes", {
+  id: serial("id").primaryKey(),
+  projectTypeId: integer("project_type_id").references(() => projectTypes.id),
+  clientName: text("client_name").notNull(),
+  businessName: text("business_name"),
+  email: text("email").notNull(),
+  phone: text("phone"),
+  notes: text("notes"),
+  internalNotes: text("internal_notes"),
+  leadStatus: text("lead_status").notNull().default("In Progress"),
+  closeDate: text("close_date"),
+  totalPrice: doublePrecision("total_price").notNull(),
+  createdAt: text("created_at").notNull().default(""),
+  updatedAt: text("updated_at").notNull().default("")
+});
+
+export const quoteFeatures = pgTable("quote_features", {
+  id: serial("id").primaryKey(),
+  quoteId: integer("quote_id").notNull().references(() => quotes.id, { onDelete: "cascade" }),
+  featureId: integer("feature_id").notNull().references(() => features.id),
+  quantity: integer("quantity").notNull().default(1),
+  price: doublePrecision("price").notNull()
+});
+
+export const quotePages = pgTable("quote_pages", {
+  id: serial("id").primaryKey(),
+  quoteId: integer("quote_id").notNull().references(() => quotes.id, { onDelete: "cascade" }),
+  pageId: integer("page_id").notNull().references(() => pages.id),
+  quantity: integer("quantity").notNull().default(1),
+  price: doublePrecision("price").notNull()
+});
+
+export const insertQuoteSchema = createInsertSchema(quotes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+export const insertQuoteFeatureSchema = createInsertSchema(quoteFeatures).omit({
+  id: true
+});
+
+export const insertQuotePageSchema = createInsertSchema(quotePages).omit({
+  id: true
+});
+
+export type Quote = typeof quotes.$inferSelect;
+export type InsertQuote = z.infer<typeof insertQuoteSchema>;
+
+export type QuoteFeature = typeof quoteFeatures.$inferSelect;
+export type InsertQuoteFeature = z.infer<typeof insertQuoteFeatureSchema>;
+
+export type QuotePage = typeof quotePages.$inferSelect;
+export type InsertQuotePage = z.infer<typeof insertQuotePageSchema>;
