@@ -51,11 +51,14 @@ interface QuoteFeatureExtended extends QuoteFeature {
   pricingType?: string;
   hourlyRate?: number;
   estimatedHours?: number;
+  flatPrice?: number;
+  adminPricePerUnit?: number;
 }
 
 interface QuotePageExtended extends QuotePage {
   pageName: string;
   pricePerPage: number;
+  adminPricePerPage?: number;
 }
 
 export default function QuoteDetailsPage() {
@@ -326,8 +329,9 @@ export default function QuoteDetailsPage() {
       totalPrice: newTotalPrice
     });
     
-    // TODO: Add API endpoints and handlers for updating features and pages
-    // Currently, we're just updating the total price
+    // Ensure all feature and page changes are synchronized with the backend
+    syncFeatureChanges();
+    syncPageChanges();
   };
   
   // Initialize form values when data is loaded
