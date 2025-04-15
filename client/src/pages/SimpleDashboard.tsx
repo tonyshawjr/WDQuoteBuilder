@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Quote } from "@shared/schema";
-import { PlusCircle, FileText, BarChart, Eye } from "lucide-react";
+import { PlusCircle, FileText, Eye } from "lucide-react";
 
 // Utility functions
 const formatCurrency = (amount: number) => {
@@ -36,7 +36,7 @@ const getStatusColor = (status: string | null) => {
   }
 };
 
-export default function Dashboard() {
+export default function SimpleDashboard() {
   const { user, loading } = useAuth();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("quotes");
@@ -55,18 +55,6 @@ export default function Dashboard() {
     setLocation("/login");
     return null;
   }
-  
-  // Simple calculations 
-  const statusCounts = {};
-  quotes.forEach(quote => {
-    const status = quote.leadStatus || "In Progress";
-    statusCounts[status] = (statusCounts[status] || 0) + 1;
-  });
-  
-  const totalValue = quotes.reduce((sum, quote) => sum + (quote.totalPrice || 0), 0);
-  const wonValue = quotes
-    .filter(quote => quote.leadStatus === "Won")
-    .reduce((sum, quote) => sum + (quote.totalPrice || 0), 0);
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -187,90 +175,10 @@ export default function Dashboard() {
           </TabsContent>
           
           <TabsContent value="reports">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-              <Card>
-                <CardHeader className="px-4 py-4 sm:px-6">
-                  <CardTitle className="flex items-center text-lg">
-                    <BarChart className="h-5 w-5 mr-2" />
-                    Sales Pipeline
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="px-4 sm:px-6">
-                  {quotes.length === 0 ? (
-                    <div className="py-8 text-center text-gray-500">
-                      <p>No data available yet</p>
-                      <p className="text-sm mt-2">Create quotes to see your sales pipeline</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {Object.entries(statusCounts).map(([status, count]) => (
-                        <div key={status} className="flex justify-between items-center">
-                          <div className="flex items-center">
-                            <Badge className={getStatusColor(status)}>{status}</Badge>
-                            <span className="ml-2 text-sm">
-                              {count} <span className="hidden sm:inline">quotes</span>
-                            </span>
-                          </div>
-                          <span className="font-medium">
-                            {Math.round((count / quotes.length) * 100)}%
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="px-4 py-4 sm:px-6">
-                  <CardTitle className="text-lg">Financial Summary</CardTitle>
-                  {user?.isAdmin && (
-                    <div className="mt-2 text-sm text-gray-500">
-                      Note: Admin reporting for individual team members is coming soon.
-                    </div>
-                  )}
-                </CardHeader>
-                <CardContent className="px-4 sm:px-6">
-                  {quotes.length === 0 ? (
-                    <div className="py-8 text-center text-gray-500">
-                      <p>No financial data available</p>
-                      <p className="text-sm mt-2">Create quotes to see financial metrics</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                        <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
-                          <p className="text-xs sm:text-sm text-gray-500">Total Pipeline</p>
-                          <p className="text-lg sm:text-2xl font-bold mt-1">{formatCurrency(totalValue)}</p>
-                        </div>
-                        <div className="bg-green-50 p-3 sm:p-4 rounded-lg">
-                          <p className="text-xs sm:text-sm text-gray-500">Won Value</p>
-                          <p className="text-lg sm:text-2xl font-bold mt-1 text-green-700">{formatCurrency(wonValue)}</p>
-                        </div>
-                      </div>
-                      
-                      <div className="pt-2">
-                        <p className="text-sm font-medium text-gray-500 mb-2">Conversion Rate</p>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-green-500 h-2 rounded-full" 
-                            style={{ 
-                              width: quotes.length 
-                                ? `${Math.round((statusCounts["Won"] || 0) / quotes.length * 100)}%` 
-                                : '0%' 
-                            }}
-                          />
-                        </div>
-                        <p className="text-right text-sm mt-1">
-                          {quotes.length 
-                            ? Math.round((statusCounts["Won"] || 0) / quotes.length * 100) 
-                            : 0}%
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+            <div className="py-8 text-center text-gray-500">
+              <h3 className="text-lg font-medium mb-2">Reporting Dashboard</h3>
+              <p className="mb-4">Financial reporting is currently being updated.</p>
+              <p>Check back soon for enhanced reporting capabilities including user filtering for administrators.</p>
             </div>
           </TabsContent>
         </Tabs>
