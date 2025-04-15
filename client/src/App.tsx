@@ -6,26 +6,32 @@ import { AuthProvider } from "@/components/auth/AuthProvider";
 
 import Home from "@/pages/Home";
 import Calculator from "@/pages/Calculator";
-import AdminDashboard from "@/pages/AdminDashboard";
-import SimpleDashboard from "@/pages/SimpleDashboard";
-import DashboardRouter from "@/pages/DashboardRouter";
+import Dashboard from "@/pages/Dashboard";
 import QuoteDetailsPage from "@/pages/QuoteDetailsPage";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/Login";
-import UserProfile from "@/pages/UserProfile";
+import Settings from "@/pages/Settings";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path="/dashboard-router" component={DashboardRouter} /> {/* Smart router */}
-      <Route path="/dashboard" component={SimpleDashboard} />
-      <Route path="/admin-dashboard" component={AdminDashboard} />
+      <Route path="/dashboard" component={Dashboard} />
       <Route path="/calculator" component={Calculator} />
-      <Route path="/admin" component={AdminDashboard} /> {/* Keep for backward compatibility */}
+      
+      {/* Redirect old routes to new dashboard */}
+      <Route path="/dashboard-router">
+        {() => { window.location.href = "/dashboard"; return null; }}
+      </Route>
+      <Route path="/admin-dashboard">
+        {() => { window.location.href = "/dashboard"; return null; }}
+      </Route>
+      <Route path="/admin">
+        {() => { window.location.href = "/dashboard"; return null; }}
+      </Route>
       <Route path="/login" component={Login} />
       <Route path="/quotes/:id" component={QuoteDetailsPage} />
-      <Route path="/profile" component={UserProfile} />
+      <Route path="/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>
   );
