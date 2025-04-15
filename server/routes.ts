@@ -384,15 +384,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Quote not found' });
       }
       
-      // Get quote details (features and pages)
-      const features = await storage.getQuoteFeatures(id);
-      const pages = await storage.getQuotePages(id);
+      res.json(quote);
+    } catch (err) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
+  app.get('/api/quotes/:id/features', isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const quote = await storage.getQuote(id);
       
-      res.json({
-        quote,
-        features,
-        pages
-      });
+      if (!quote) {
+        return res.status(404).json({ message: 'Quote not found' });
+      }
+      
+      const features = await storage.getQuoteFeatures(id);
+      res.json(features);
+    } catch (err) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
+  app.get('/api/quotes/:id/pages', isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const quote = await storage.getQuote(id);
+      
+      if (!quote) {
+        return res.status(404).json({ message: 'Quote not found' });
+      }
+      
+      const pages = await storage.getQuotePages(id);
+      res.json(pages);
     } catch (err) {
       res.status(500).json({ message: 'Server error' });
     }
@@ -423,6 +447,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const validatedData = insertQuoteSchema.partial().parse(req.body);
       const quote = await storage.updateQuote(id, validatedData);
+      
+      if (!quote) {
+        return res.status(404).json({ message: 'Quote not found' });
+      }
+      
+      res.json(quote);
+    } catch (err) {
+      res.status(400).json({ message: err instanceof Error ? err.message : 'Invalid data' });
+    }
+  });
+  
+  app.patch('/api/quotes/:id', isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { leadStatus } = req.body;
+      
+      // Only allow updating status
+      const quote = await storage.updateQuote(id, { leadStatus });
       
       if (!quote) {
         return res.status(404).json({ message: 'Quote not found' });
