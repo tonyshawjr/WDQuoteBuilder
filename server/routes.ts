@@ -459,6 +459,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Quote not found' });
       }
       
+      // Get user from session
+      const user = req.user as User;
+      
+      // If not admin, ensure the user can only access their own quotes
+      if (!user.isAdmin && quote.createdBy !== user.id.toString()) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+      
       // Get all current quote features
       const quoteFeatures = await storage.getQuoteFeatures(quoteId);
       
@@ -552,6 +560,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Quote not found' });
       }
       
+      // Get user from session
+      const user = req.user as User;
+      
+      // If not admin, ensure the user can only access their own quotes
+      if (!user.isAdmin && quote.createdBy !== user.id.toString()) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+      
       // Get all current quote pages
       const quotePages = await storage.getQuotePages(quoteId);
       
@@ -618,16 +634,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Invalid parameters' });
       }
       
+      // Get the quote to check permissions before updating
+      const quote = await storage.getQuote(quoteId);
+      if (!quote) {
+        return res.status(404).json({ message: 'Quote not found' });
+      }
+      
+      // Get user from session
+      const user = req.user as User;
+      
+      // If not admin, ensure the user can only modify their own quotes
+      if (!user.isAdmin && quote.createdBy !== user.id.toString()) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+      
       const updatedFeature = await storage.updateQuoteFeature(quoteId, featureId, { quantity, price });
       
       if (!updatedFeature) {
         return res.status(404).json({ message: 'Quote feature not found' });
-      }
-      
-      // After updating a quote feature, we should also update the total price in the quote
-      const quote = await storage.getQuote(quoteId);
-      if (!quote) {
-        return res.status(404).json({ message: 'Quote not found' });
       }
       
       const quoteFeatures = await storage.getQuoteFeatures(quoteId);
@@ -668,16 +692,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Invalid parameters' });
       }
       
+      // Get the quote to check permissions before updating
+      const quote = await storage.getQuote(quoteId);
+      if (!quote) {
+        return res.status(404).json({ message: 'Quote not found' });
+      }
+      
+      // Get user from session
+      const user = req.user as User;
+      
+      // If not admin, ensure the user can only modify their own quotes
+      if (!user.isAdmin && quote.createdBy !== user.id.toString()) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+      
       const updatedPage = await storage.updateQuotePage(quoteId, pageId, { quantity, price });
       
       if (!updatedPage) {
         return res.status(404).json({ message: 'Quote page not found' });
-      }
-      
-      // After updating a quote page, we should also update the total price in the quote
-      const quote = await storage.getQuote(quoteId);
-      if (!quote) {
-        return res.status(404).json({ message: 'Quote not found' });
       }
       
       const quoteFeatures = await storage.getQuoteFeatures(quoteId);
@@ -730,12 +762,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/quotes/:id', isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const validatedData = insertQuoteSchema.partial().parse(req.body);
-      const quote = await storage.updateQuote(id, validatedData);
       
-      if (!quote) {
+      // Get the quote first to check permissions
+      const existingQuote = await storage.getQuote(id);
+      if (!existingQuote) {
         return res.status(404).json({ message: 'Quote not found' });
       }
+      
+      // Get user from session
+      const user = req.user as User;
+      
+      // If not admin, ensure the user can only modify their own quotes
+      if (!user.isAdmin && existingQuote.createdBy !== user.id.toString()) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+      
+      const validatedData = insertQuoteSchema.partial().parse(req.body);
+      const quote = await storage.updateQuote(id, validatedData);
       
       res.json(quote);
     } catch (err) {
@@ -748,12 +791,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const { leadStatus } = req.body;
       
-      // Only allow updating status
-      const quote = await storage.updateQuote(id, { leadStatus });
-      
-      if (!quote) {
+      // Get the quote first to check permissions
+      const existingQuote = await storage.getQuote(id);
+      if (!existingQuote) {
         return res.status(404).json({ message: 'Quote not found' });
       }
+      
+      // Get user from session
+      const user = req.user as User;
+      
+      // If not admin, ensure the user can only modify their own quotes
+      if (!user.isAdmin && existingQuote.createdBy !== user.id.toString()) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+      
+      // Only allow updating status
+      const quote = await storage.updateQuote(id, { leadStatus });
       
       res.json(quote);
     } catch (err) {
@@ -764,11 +817,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/quotes/:id', isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const success = await storage.deleteQuote(id);
       
-      if (!success) {
+      // Get the quote first to check permissions
+      const existingQuote = await storage.getQuote(id);
+      if (!existingQuote) {
         return res.status(404).json({ message: 'Quote not found' });
       }
+      
+      // Get user from session
+      const user = req.user as User;
+      
+      // If not admin, ensure the user can only delete their own quotes
+      if (!user.isAdmin && existingQuote.createdBy !== user.id.toString()) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+      
+      const success = await storage.deleteQuote(id);
       
       res.json({ success });
     } catch (err) {
