@@ -108,11 +108,40 @@ export default function Calculator() {
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {!activeTab || activeTab === "calculator" ? (
-          <>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="calculator">Build Estimate</TabsTrigger>
+            <TabsTrigger value="save-quote" disabled={!isReadyToSaveQuote}>Save Quote</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="calculator" className="space-y-4">
             <h2 className="text-2xl font-bold mb-6">Create Web Design Estimate</h2>
-            <div className="md:flex md:space-x-6">
-              <div className="md:w-2/3">
+            
+            {/* On mobile, the summary will appear on top for better UX */}
+            <div className="block lg:hidden mb-6">
+              <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+                <EstimateSummary
+                  selectedFeatures={selectedFeatures}
+                  selectedProjectType={selectedProjectType}
+                  selectedPages={selectedPages}
+                  className="mb-4"
+                />
+                
+                {isReadyToSaveQuote && (
+                  <Button 
+                    className="mt-4 w-full"
+                    onClick={() => setActiveTab("save-quote")}
+                    size="sm"
+                  >
+                    Save Quote
+                  </Button>
+                )}
+              </div>
+            </div>
+            
+            {/* Main calculator layout - repositioned for better mobile experience */}
+            <div className="flex flex-col lg:flex-row lg:space-x-6">
+              <div className="lg:w-2/3">
                 <CalculatorPanel
                   onSelectedFeaturesChange={setSelectedFeatures}
                   onSelectedProjectTypeChange={setSelectedProjectType}
@@ -123,54 +152,73 @@ export default function Calculator() {
                 />
               </div>
               
-              <div className="md:w-1/3 mt-6 md:mt-0">
-                <EstimateSummary
-                  selectedFeatures={selectedFeatures}
-                  selectedProjectType={selectedProjectType}
-                  selectedPages={selectedPages}
-                />
-                
-                {isReadyToSaveQuote && (
-                  <Button 
-                    className="mt-4 w-full"
-                    onClick={() => setActiveTab("save-quote")}
-                  >
-                    Save Quote
-                  </Button>
-                )}
+              {/* Desktop summary is hidden on mobile */}
+              <div className="hidden lg:block lg:w-1/3">
+                <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100 sticky top-24">
+                  <EstimateSummary
+                    selectedFeatures={selectedFeatures}
+                    selectedProjectType={selectedProjectType}
+                    selectedPages={selectedPages}
+                  />
+                  
+                  {isReadyToSaveQuote && (
+                    <Button 
+                      className="mt-4 w-full"
+                      onClick={() => setActiveTab("save-quote")}
+                    >
+                      Save Quote
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
-          </>
-        ) : (
-          <>
-            <div className="flex justify-between items-center mb-6">
+            
+            {/* Floating action button for mobile to quickly save quote */}
+            {isReadyToSaveQuote && (
+              <div className="lg:hidden fixed bottom-6 right-6 z-10">
+                <Button 
+                  className="h-14 w-14 rounded-full shadow-lg"
+                  onClick={() => setActiveTab("save-quote")}
+                >
+                  Save
+                </Button>
+              </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="save-quote" className="space-y-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <h2 className="text-2xl font-bold">Save Quote</h2>
               <Button 
                 variant="outline" 
                 onClick={() => setActiveTab("calculator")}
+                size="sm"
               >
                 Back to Calculator
               </Button>
             </div>
-            <div className="md:flex md:space-x-6">
-              <div className="md:w-1/2">
+            
+            <div className="flex flex-col lg:flex-row lg:space-x-6">
+              <div className="lg:w-1/2">
                 <ClientInfoForm 
                   onSubmit={handleSaveQuote} 
                   isSubmitting={saveQuoteMutation.isPending}
                 />
               </div>
               
-              <div className="md:w-1/2 mt-6 md:mt-0">
-                <h2 className="text-xl font-bold mb-4">Quote Summary</h2>
-                <EstimateSummary
-                  selectedFeatures={selectedFeatures}
-                  selectedProjectType={selectedProjectType}
-                  selectedPages={selectedPages}
-                />
+              <div className="lg:w-1/2 mt-6 lg:mt-0">
+                <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+                  <h2 className="text-xl font-bold mb-4">Quote Summary</h2>
+                  <EstimateSummary
+                    selectedFeatures={selectedFeatures}
+                    selectedProjectType={selectedProjectType}
+                    selectedPages={selectedPages}
+                  />
+                </div>
               </div>
             </div>
-          </>
-        )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
