@@ -92,8 +92,13 @@ export function FeatureForm({ isOpen, onClose, feature }: FeatureFormProps) {
   // Create feature mutation
   const createMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const res = await apiRequest("POST", "/api/features", data);
-      return res.json();
+      return apiRequest("/api/features", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/features'] });
@@ -105,9 +110,10 @@ export function FeatureForm({ isOpen, onClose, feature }: FeatureFormProps) {
       onClose();
     },
     onError: (error) => {
+      console.error("Create error:", error);
       toast({
         title: "Error",
-        description: `Failed to create feature: ${error}`,
+        description: `Failed to create feature: ${error instanceof Error ? error.message : String(error)}`,
         variant: "destructive",
       });
     },
@@ -116,8 +122,13 @@ export function FeatureForm({ isOpen, onClose, feature }: FeatureFormProps) {
   // Update feature mutation
   const updateMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const res = await apiRequest("PUT", `/api/features/${feature?.id}`, data);
-      return res.json();
+      return apiRequest(`/api/features/${feature?.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/features'] });
@@ -129,9 +140,10 @@ export function FeatureForm({ isOpen, onClose, feature }: FeatureFormProps) {
       onClose();
     },
     onError: (error) => {
+      console.error("Update error:", error);
       toast({
         title: "Error",
-        description: `Failed to update feature: ${error}`,
+        description: `Failed to update feature: ${error instanceof Error ? error.message : String(error)}`,
         variant: "destructive",
       });
     },

@@ -76,8 +76,13 @@ export function PageForm({ isOpen, onClose, page }: PageFormProps) {
   // Create mutation
   const createMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const response = await apiRequest("POST", "/api/pages", data);
-      return response;
+      return apiRequest("/api/pages", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/pages"] });
@@ -89,6 +94,7 @@ export function PageForm({ isOpen, onClose, page }: PageFormProps) {
       onClose();
     },
     onError: (error) => {
+      console.error("Create error:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to add page",
@@ -103,8 +109,13 @@ export function PageForm({ isOpen, onClose, page }: PageFormProps) {
   // Update mutation
   const updateMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const response = await apiRequest("PUT", `/api/pages/${page?.id}`, data);
-      return response;
+      return apiRequest(`/api/pages/${page?.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/pages"] });
@@ -115,6 +126,7 @@ export function PageForm({ isOpen, onClose, page }: PageFormProps) {
       onClose();
     },
     onError: (error) => {
+      console.error("Update error:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to update page",

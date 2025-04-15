@@ -50,8 +50,13 @@ export function ProjectTypeForm({ isOpen, onClose, projectType }: ProjectTypeFor
   // Create project type mutation
   const createMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const res = await apiRequest("POST", "/api/project-types", data);
-      return res.json();
+      return apiRequest("/api/project-types", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/project-types'] });
@@ -63,9 +68,10 @@ export function ProjectTypeForm({ isOpen, onClose, projectType }: ProjectTypeFor
       onClose();
     },
     onError: (error) => {
+      console.error("Create error:", error);
       toast({
         title: "Error",
-        description: `Failed to create project type: ${error}`,
+        description: `Failed to create project type: ${error instanceof Error ? error.message : String(error)}`,
         variant: "destructive",
       });
     },
@@ -74,8 +80,13 @@ export function ProjectTypeForm({ isOpen, onClose, projectType }: ProjectTypeFor
   // Update project type mutation
   const updateMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const res = await apiRequest("PUT", `/api/project-types/${projectType?.id}`, data);
-      return res.json();
+      return apiRequest(`/api/project-types/${projectType?.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/project-types'] });
@@ -87,9 +98,10 @@ export function ProjectTypeForm({ isOpen, onClose, projectType }: ProjectTypeFor
       onClose();
     },
     onError: (error) => {
+      console.error("Update error:", error);
       toast({
         title: "Error",
-        description: `Failed to update project type: ${error}`,
+        description: `Failed to update project type: ${error instanceof Error ? error.message : String(error)}`,
         variant: "destructive",
       });
     },
