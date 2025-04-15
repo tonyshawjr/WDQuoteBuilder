@@ -790,30 +790,36 @@ export default function QuoteDetailsPage() {
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex items-center mb-6">
+        {/* Back and action buttons - responsive layout */}
+        <div className="flex flex-col sm:flex-row sm:items-center mb-6 gap-4">
           <Button 
             variant="ghost" 
-            className="mr-2"
+            className="mr-2 self-start"
             onClick={() => setLocation("/dashboard")}
+            size="sm"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
           
-          <div className="ml-auto flex space-x-2">
+          <div className="w-full sm:w-auto sm:ml-auto flex flex-wrap gap-2 sm:space-x-2">
             {isEditing ? (
               <>
                 <Button 
                   variant="outline" 
                   onClick={handleCancelEdit}
                   disabled={updateQuoteMutation.isPending}
+                  size="sm"
+                  className="flex-1 sm:flex-initial"
                 >
                   <X className="h-4 w-4 mr-2" />
-                  Cancel
+                  <span className="sm:inline">Cancel</span>
                 </Button>
                 <Button 
                   onClick={handleSaveQuote}
                   disabled={updateQuoteMutation.isPending}
+                  size="sm"
+                  className="flex-1 sm:flex-initial"
                 >
                   <Save className="h-4 w-4 mr-2" />
                   {updateQuoteMutation.isPending ? "Saving..." : "Save Changes"}
@@ -824,15 +830,19 @@ export default function QuoteDetailsPage() {
                 <Button 
                   variant="destructive" 
                   onClick={() => setDeleteDialogOpen(true)}
+                  size="sm"
+                  className="flex-1 sm:flex-initial"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Quote
+                  <span className="sm:inline">Delete</span>
                 </Button>
                 <Button 
                   onClick={() => setIsEditing(true)}
+                  size="sm"
+                  className="flex-1 sm:flex-initial"
                 >
                   <ClipboardEdit className="h-4 w-4 mr-2" />
-                  Edit Quote
+                  <span className="sm:inline">Edit</span>
                 </Button>
               </>
             )}
