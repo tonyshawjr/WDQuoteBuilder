@@ -4,6 +4,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { Header } from "@/components/layout/Header";
 import { ProjectTypeTable } from "@/components/admin/ProjectTypeTable";
 import { FeatureTable } from "@/components/admin/FeatureTable";
+import { PageTable } from "@/components/admin/PageTable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function AdminDashboard() {
@@ -33,6 +34,7 @@ export default function AdminDashboard() {
             <TabsList className="mb-6">
               <TabsTrigger value="project-types">Project Types</TabsTrigger>
               <TabsTrigger value="features">Feature Library</TabsTrigger>
+              <TabsTrigger value="pages">Pages</TabsTrigger>
             </TabsList>
             
             <TabsContent value="project-types">
@@ -41,6 +43,10 @@ export default function AdminDashboard() {
             
             <TabsContent value="features">
               <FeatureTable />
+            </TabsContent>
+            
+            <TabsContent value="pages">
+              <PageTable />
             </TabsContent>
           </Tabs>
         </div>
