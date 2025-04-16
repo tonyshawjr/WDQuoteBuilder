@@ -173,7 +173,7 @@ export function CalculatorPanel({
   return (
     <Card className="border-0 shadow-none">
       <CardHeader className="pb-3">
-        <CardTitle className="text-xl">Create Estimate</CardTitle>
+        <CardTitle className="text-xl">Create Quote</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="mb-6">

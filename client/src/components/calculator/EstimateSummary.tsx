@@ -112,7 +112,7 @@ export function EstimateSummary({
       // Add title
       doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
-      doc.text("Web Design Estimate", pageWidth / 2, y, { align: "center" });
+      doc.text("Web Design Quote", pageWidth / 2, y, { align: "center" });
       y += 10;
       
       // Add date
@@ -183,14 +183,14 @@ export function EstimateSummary({
       const footerY = doc.internal.pageSize.getHeight() - 10;
       doc.setFontSize(8);
       doc.setFont("helvetica", "italic");
-      doc.text("This is an estimate only. Final pricing may vary based on project requirements.", pageWidth / 2, footerY, { align: "center" });
+      doc.text("This is a quote only. Final pricing may vary based on project requirements.", pageWidth / 2, footerY, { align: "center" });
       
       // Save the PDF
-      doc.save(`web-design-estimate-${today.replace(/\//g, '-')}.pdf`);
+      doc.save(`web-design-quote-${today.replace(/\//g, '-')}.pdf`);
       
       toast({
         title: "PDF Exported",
-        description: "Your estimate has been exported as a PDF",
+        description: "Your quote has been exported as a PDF",
       });
     } catch (error) {
       console.error('PDF export error:', error);
@@ -207,7 +207,7 @@ export function EstimateSummary({
   return (
     <Card className={`${className} relative`}>
       <CardHeader className="px-4 py-3 sm:px-6 sm:py-4">
-        <CardTitle className="text-lg sm:text-xl">Estimate Summary</CardTitle>
+        <CardTitle className="text-lg sm:text-xl">Quote Summary</CardTitle>
       </CardHeader>
       <CardContent className="px-4 sm:px-6">
         <div className="mb-4 sm:mb-6">
