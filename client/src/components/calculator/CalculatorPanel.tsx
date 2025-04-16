@@ -98,10 +98,11 @@ export function CalculatorPanel({
   
   // Group features by category
   const featuresByCategory = features?.reduce<Record<string, Feature[]>>((acc, feature) => {
-    if (!acc[feature.category]) {
-      acc[feature.category] = [];
+    const category = feature.category || 'General';
+    if (!acc[category]) {
+      acc[category] = [];
     }
-    acc[feature.category].push(feature);
+    acc[category].push(feature);
     return acc;
   }, {}) || {};
   
@@ -170,8 +171,8 @@ export function CalculatorPanel({
   };
   
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-0 shadow-none">
+      <CardHeader className="pb-3">
         <CardTitle className="text-xl">Create Estimate</CardTitle>
       </CardHeader>
       <CardContent>
@@ -184,7 +185,7 @@ export function CalculatorPanel({
             <Skeleton className="h-10 w-full" />
           ) : (
             <Select onValueChange={handleProjectTypeChange} value={selectedProjectTypeId || undefined}>
-              <SelectTrigger id="project-type" className="w-full">
+              <SelectTrigger id="project-type" className="w-full border-yellow-500 focus:ring-yellow-500 bg-background text-foreground">
                 <SelectValue placeholder="Select a project type" />
               </SelectTrigger>
               <SelectContent>
@@ -200,27 +201,39 @@ export function CalculatorPanel({
         
         {selectedProjectTypeId && (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="features">Features</TabsTrigger>
-              <TabsTrigger value="pages">Pages</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-muted dark:bg-[#1F1F1F]">
+              <TabsTrigger 
+                value="features" 
+                className="data-[state=active]:bg-[#282828] dark:data-[state=active]:text-white"
+              >
+                Features
+              </TabsTrigger>
+              <TabsTrigger 
+                value="pages" 
+                className="data-[state=active]:bg-[#282828] dark:data-[state=active]:text-white"
+              >
+                Pages
+              </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="features">
+            <TabsContent value="features" className="mt-4">
               <div id="features-container">
                 {featuresLoading ? (
                   <div className="space-y-4">
                     <Skeleton className="h-48 w-full" />
                   </div>
                 ) : Object.keys(featuresByCategory).length === 0 ? (
-                  <div className="text-center text-gray-500 py-8">
+                  <div className="text-center text-gray-500 dark:text-gray-400 py-8">
                     No features available for this project type
                   </div>
                 ) : (
                   <div className="space-y-6">
                     {Object.entries(featuresByCategory).map(([category, categoryFeatures]) => (
-                      <div key={category} className="bg-gray-50 rounded-lg p-4">
-                        <h4 className="text-sm font-medium text-gray-700 mb-3">{category}</h4>
-                        <div className="space-y-3">
+                      <div key={category} className="bg-white dark:bg-[#1F1F1F] rounded-lg">
+                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-200 p-4 border-b border-gray-100 dark:border-gray-800">
+                          {category}
+                        </h4>
+                        <div>
                           {categoryFeatures.map(feature => (
                             <FeatureItem
                               key={feature.id}
@@ -238,31 +251,31 @@ export function CalculatorPanel({
               </div>
             </TabsContent>
             
-            <TabsContent value="pages">
+            <TabsContent value="pages" className="mt-4">
               <div id="pages-container">
                 {isPagesLoading ? (
                   <div className="space-y-4">
                     <Skeleton className="h-48 w-full" />
                   </div>
                 ) : availablePages.length === 0 ? (
-                  <div className="text-center text-gray-500 py-8">
+                  <div className="text-center text-gray-500 dark:text-gray-400 py-8">
                     No pages available for this project type
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="text-sm font-medium text-gray-700 mb-3">Available Pages</h4>
-                      <div className="space-y-3">
-                        {availablePages.map(page => (
-                          <PageItem
-                            key={page.id}
-                            page={page}
-                            onSelect={handlePageSelect}
-                            isSelected={selectedPages.some(p => p.id === page.id)}
-                            quantity={selectedPages.find(p => p.id === page.id)?.quantity || page.defaultQuantity || 1}
-                          />
-                        ))}
-                      </div>
+                  <div className="bg-white dark:bg-[#1F1F1F] rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-200 p-4 border-b border-gray-100 dark:border-gray-800">
+                      Available Pages
+                    </h4>
+                    <div>
+                      {availablePages.map(page => (
+                        <PageItem
+                          key={page.id}
+                          page={page}
+                          onSelect={handlePageSelect}
+                          isSelected={selectedPages.some(p => p.id === page.id)}
+                          quantity={selectedPages.find(p => p.id === page.id)?.quantity || page.defaultQuantity || 1}
+                        />
+                      ))}
                     </div>
                   </div>
                 )}

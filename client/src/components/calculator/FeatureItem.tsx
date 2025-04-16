@@ -37,36 +37,47 @@ export function FeatureItem({
   };
   
   return (
-    <div className="flex items-start">
-      <div className="flex items-center h-5 mt-1">
-        <Checkbox
-          id={`feature-${feature.id}`}
-          checked={isSelected}
-          onCheckedChange={handleCheckboxChange}
-        />
+    <div className={`flex items-start justify-between p-4 ${isSelected ? 'bg-[#282828]' : 'hover:bg-gray-50 dark:hover:bg-[#282828]/50'}`}>
+      <div className="flex items-start space-x-3">
+        <div className="flex items-center h-5 mt-1">
+          <Checkbox
+            id={`feature-${feature.id}`}
+            checked={isSelected}
+            onCheckedChange={handleCheckboxChange}
+            className="text-yellow-500 border-yellow-500 data-[state=checked]:border-yellow-500 data-[state=checked]:bg-yellow-500"
+          />
+        </div>
+        <div className="text-sm">
+          <Label htmlFor={`feature-${feature.id}`} className={`font-medium ${isSelected ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`}>
+            {feature.name}
+          </Label>
+          {feature.description && (
+            <p className={`${isSelected ? 'text-gray-300' : 'text-gray-500 dark:text-gray-400'} text-xs`}>
+              {feature.description}
+            </p>
+          )}
+        </div>
       </div>
-      <div className="ml-3 text-sm">
-        <Label htmlFor={`feature-${feature.id}`} className="font-medium text-gray-700">
-          {feature.name}
-        </Label>
-        {feature.description && (
-          <p className="text-gray-500">{feature.description}</p>
-        )}
+
+      <div className="flex items-center space-x-2">
         {feature.supportsQuantity && (
-          <div className="mt-1.5 flex items-center">
-            <Label htmlFor={`quantity-${feature.id}`} className="text-xs text-gray-500 mr-2">
-              Number of {feature.pricingType === 'hourly' ? 'Hours' : 'Units'}:
-            </Label>
+          <div className="flex items-center">
             <Input
               id={`quantity-${feature.id}`}
               type="number"
               min="1"
               value={quantityValue}
               onChange={handleQuantityChange}
-              className="max-w-[80px] text-sm h-8"
+              className="max-w-[80px] text-sm h-8 bg-gray-950 border-gray-700"
             />
           </div>
         )}
+        <span className={`text-sm font-medium whitespace-nowrap ${isSelected ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`}>
+          {feature.pricingType === 'flat' 
+            ? `$${feature.flatPrice?.toFixed(2) || '0.00'}`
+            : `$${((feature.hourlyRate || 0) * (feature.estimatedHours || 0) * quantityValue).toFixed(2)}`
+          }
+        </span>
       </div>
     </div>
   );
