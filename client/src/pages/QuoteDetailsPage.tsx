@@ -796,7 +796,7 @@ export default function QuoteDetailsPage() {
   const isLoading = quoteLoading || featuresLoading || pagesLoading;
   
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#1F1F1F]">
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -875,8 +875,8 @@ export default function QuoteDetailsPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-gray-200">
+            <div className="bg-[#282828] rounded-lg shadow-sm overflow-hidden border border-gray-800">
+              <div className="p-6 border-b border-gray-800">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div>
                     <h1 className="text-2xl font-bold">{quote.clientName}</h1>
@@ -972,7 +972,7 @@ export default function QuoteDetailsPage() {
                           <div className="space-y-4">
                             <div>
                               <h3 className="text-sm font-medium mb-2">{projectTypeName}</h3>
-                              <div className="bg-gray-50 p-3 rounded-md">
+                              <div className="bg-[#1F1F1F] border border-gray-800 p-3 rounded-md">
                                 <div className="flex justify-between items-center">
                                   <span className="text-sm">Base Price</span>
                                   {isEditing ? (
@@ -1012,8 +1012,8 @@ export default function QuoteDetailsPage() {
                                   )}
                                 </div>
                                 {((isEditing ? editableFeatures : (quoteFeatures || [])) || []).length === 0 && isEditing && (
-                                  <div className="bg-gray-50 p-4 rounded-md text-center">
-                                    <p className="text-gray-500 mb-2">No features added yet</p>
+                                  <div className="bg-[#1F1F1F] border border-gray-800 p-4 rounded-md text-center">
+                                    <p className="text-gray-400 mb-2">No features added yet</p>
                                     <Button 
                                       size="sm"
                                       variant="outline"
@@ -1116,8 +1116,8 @@ export default function QuoteDetailsPage() {
                                   )}
                                 </div>
                                 {((isEditing ? editablePages : (quotePages || [])) || []).length === 0 && isEditing && (
-                                  <div className="bg-gray-50 p-4 rounded-md text-center">
-                                    <p className="text-gray-500 mb-2">No pages added yet</p>
+                                  <div className="bg-[#1F1F1F] border border-gray-800 p-4 rounded-md text-center">
+                                    <p className="text-gray-400 mb-2">No pages added yet</p>
                                     <Button 
                                       size="sm"
                                       variant="outline"
