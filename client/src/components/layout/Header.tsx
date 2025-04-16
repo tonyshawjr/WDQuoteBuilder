@@ -101,11 +101,9 @@ export function Header() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="flex items-center" size="sm">
-                      <span className="text-sm text-gray-700 mr-2">{user.username}</span>
-                      {isAdmin && (
-                        <span className="bg-accent text-accent-foreground text-xs px-2 py-1 rounded-full">Admin</span>
-                      )}
-                      <User className="h-5 w-5 ml-2" />
+                      <span className="text-sm text-gray-700">
+                        {user.firstName || ''} {user.lastName || ''}
+                      </span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -133,13 +131,9 @@ export function Header() {
                   <SheetContent side="right" className="w-[75vw] sm:w-[350px]">
                     <div className="flex flex-col h-full pb-10">
                       <div className="flex items-center mb-6 mt-2">
-                        <User className="h-6 w-6 mr-2 text-primary" />
-                        <span className="font-medium">{user.username}</span>
-                        {isAdmin && (
-                          <span className="bg-accent text-accent-foreground text-xs px-2 py-1 rounded-full ml-2">
-                            Admin
-                          </span>
-                        )}
+                        <span className="font-medium">
+                          {user.firstName || ''} {user.lastName || ''}
+                        </span>
                       </div>
                       
                       <nav className="flex flex-col space-y-2 flex-grow">

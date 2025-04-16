@@ -175,9 +175,8 @@ export function ProfileEditor() {
             <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <div className="font-bold text-lg">{user.username}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {isAdmin ? "Administrator" : "Regular User"}
+                  <div className="font-bold text-lg">
+                    {user.firstName || ''} {user.lastName || ''}
                   </div>
                 </div>
                 
