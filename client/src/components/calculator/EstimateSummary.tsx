@@ -36,10 +36,11 @@ export function EstimateSummary({
   };
   
   const calculateFeaturePrice = (feature: SelectedFeature): number => {
-    if (feature.pricingType === 'fixed') {
-      return (feature.flatPrice as number) * feature.quantity;
+    // The feature may use 'flat' or 'fixed' as the type, so handle both
+    if (feature.pricingType === 'flat' || feature.pricingType === 'fixed') {
+      return (feature.flatPrice || 0) * feature.quantity;
     } else {
-      return (feature.hourlyRate as number) * (feature.estimatedHours as number) * feature.quantity;
+      return (feature.hourlyRate || 0) * (feature.estimatedHours || 0) * feature.quantity;
     }
   };
 
