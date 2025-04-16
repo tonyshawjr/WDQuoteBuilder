@@ -523,63 +523,63 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
               <div className="space-y-4">
                 {isAdmin && (
-                  <Card className="overflow-hidden border-0 shadow-sm bg-gradient-to-br from-green-50 to-blue-50">
+                  <Card className="overflow-hidden border-0 shadow-sm bg-[#282828] ring-1 ring-gray-800">
                     <CardHeader className="pb-0 py-3 px-4">
                       <div>
-                        <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">Top Revenue Generators</CardTitle>
-                        <CardDescription className="text-xs sm:text-sm text-gray-600">Salespeople with highest closed revenue</CardDescription>
+                        <CardTitle className="text-base sm:text-lg font-semibold text-white">Top Revenue Generators</CardTitle>
+                        <CardDescription className="text-xs sm:text-sm text-gray-400">Salespeople with highest closed revenue</CardDescription>
                       </div>
                     </CardHeader>
                     <CardContent className="pt-2 px-4 pb-3">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
-                          <h4 className="font-medium text-sm mb-2 text-gray-700">This Month</h4>
+                          <h4 className="font-medium text-sm mb-2 text-gray-300">This Month</h4>
                           <div className="space-y-3">
                             {getTopSalespeople(quotes, "month").length > 0 ? (
                               getTopSalespeople(quotes, "month").map((person, index) => (
-                                <div key={index} className="flex items-center justify-between bg-white p-2 rounded-md shadow-sm border border-gray-100">
+                                <div key={index} className="flex items-center justify-between bg-[#1F1F1F] p-2 rounded-md shadow-sm border border-gray-800">
                                   <div className="flex items-center">
                                     <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs text-white ${
-                                      index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : 'bg-amber-600'
+                                      index === 0 ? 'bg-[#F9B200]' : index === 1 ? 'bg-gray-500' : 'bg-amber-700'
                                     } mr-2`}>
                                       {index + 1}
                                     </span>
-                                    <span className="font-medium text-sm">{person.name}</span>
+                                    <span className="font-medium text-sm text-gray-200">{person.name}</span>
                                   </div>
                                   <div className="flex flex-col items-end">
-                                    <span className="text-sm font-semibold text-indigo-600">${person.total.toLocaleString()}</span>
-                                    <span className="text-xs text-gray-500">closed revenue</span>
+                                    <span className="text-sm font-semibold text-[#F9B200]">${person.total.toLocaleString()}</span>
+                                    <span className="text-xs text-gray-400">closed revenue</span>
                                   </div>
                                 </div>
                               ))
                             ) : (
-                              <div className="text-sm text-gray-500 p-2">No closed revenue this month</div>
+                              <div className="text-sm text-gray-400 p-2">No closed revenue this month</div>
                             )}
                           </div>
                         </div>
                         
                         <div>
-                          <h4 className="font-medium text-sm mb-2 text-gray-700">All Time</h4>
+                          <h4 className="font-medium text-sm mb-2 text-gray-300">All Time</h4>
                           <div className="space-y-3">
                             {getTopSalespeople(quotes, "all").length > 0 ? (
                               getTopSalespeople(quotes, "all").map((person, index) => (
-                                <div key={index} className="flex items-center justify-between bg-white p-2 rounded-md shadow-sm border border-gray-100">
+                                <div key={index} className="flex items-center justify-between bg-[#1F1F1F] p-2 rounded-md shadow-sm border border-gray-800">
                                   <div className="flex items-center">
                                     <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs text-white ${
-                                      index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : 'bg-amber-600'
+                                      index === 0 ? 'bg-[#F9B200]' : index === 1 ? 'bg-gray-500' : 'bg-amber-700'
                                     } mr-2`}>
                                       {index + 1}
                                     </span>
-                                    <span className="font-medium text-sm">{person.name}</span>
+                                    <span className="font-medium text-sm text-gray-200">{person.name}</span>
                                   </div>
                                   <div className="flex flex-col items-end">
-                                    <span className="text-sm font-semibold text-indigo-600">${person.total.toLocaleString()}</span>
-                                    <span className="text-xs text-gray-500">closed revenue</span>
+                                    <span className="text-sm font-semibold text-[#F9B200]">${person.total.toLocaleString()}</span>
+                                    <span className="text-xs text-gray-400">closed revenue</span>
                                   </div>
                                 </div>
                               ))
                             ) : (
-                              <div className="text-sm text-gray-500 p-2">No closed revenue yet</div>
+                              <div className="text-sm text-gray-400 p-2">No closed revenue yet</div>
                             )}
                           </div>
                         </div>
@@ -588,11 +588,11 @@ export default function Dashboard() {
                   </Card>
                 )}
                 
-                <Card className="overflow-hidden border-0 shadow-sm bg-gradient-to-br from-blue-50 to-indigo-50">
+                <Card className="overflow-hidden border-0 shadow-sm bg-[#282828] ring-1 ring-gray-800">
                   <CardHeader className="pb-0 py-3 px-4">
                     <div>
-                      <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">Quote Status</CardTitle>
-                      <CardDescription className="text-xs sm:text-sm text-gray-600">Current pipeline overview</CardDescription>
+                      <CardTitle className="text-base sm:text-lg font-semibold text-white">Quote Status</CardTitle>
+                      <CardDescription className="text-xs sm:text-sm text-gray-400">Current pipeline overview</CardDescription>
                     </div>
                   </CardHeader>
                   <CardContent className="h-52 sm:h-60 pt-2 px-4">
@@ -616,75 +616,81 @@ export default function Dashboard() {
                           </Pie>
                           <Tooltip 
                             formatter={(value) => [`${value} quotes`, "Count"]}
-                            contentStyle={{ borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                            contentStyle={{ 
+                              borderRadius: '8px', 
+                              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                              backgroundColor: '#1F1F1F',
+                              color: 'white',
+                              border: '1px solid #333' 
+                            }}
                           />
                         </PieChart>
                       </ResponsiveContainer>
                     ) : (
                       <div className="flex items-center justify-center h-full">
-                        <p className="text-gray-500 text-sm">No data available</p>
+                        <p className="text-gray-400 text-sm">No data available</p>
                       </div>
                     )}
                   </CardContent>
                 </Card>
 
-                <Card className="overflow-hidden border-0 shadow-sm">
+                <Card className="overflow-hidden border-0 shadow-sm bg-[#282828] ring-1 ring-gray-800">
                   <CardHeader className="pb-2 py-3 px-4">
-                    <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">Sales Performance</CardTitle>
-                    <CardDescription className="text-xs sm:text-sm text-gray-600">Win rate & conversion metrics</CardDescription>
+                    <CardTitle className="text-base sm:text-lg font-semibold text-white">Sales Performance</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm text-gray-400">Win rate & conversion metrics</CardDescription>
                   </CardHeader>
                   <CardContent className="px-4 pb-4">
                     <div className="space-y-4">
                       <div>
                         <div className="flex justify-between mb-1">
-                          <span className="text-xs sm:text-sm font-medium text-gray-600">Win Rate</span>
-                          <span className="text-xs sm:text-sm font-bold text-gray-900">
+                          <span className="text-xs sm:text-sm font-medium text-gray-300">Win Rate</span>
+                          <span className="text-xs sm:text-sm font-bold text-white">
                             {totalQuotes > 0 ? Math.round((wonQuotes / totalQuotes) * 100) : 0}%
                           </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="w-full bg-gray-700 rounded-full h-2">
                           <div 
-                            className="bg-green-600 h-2 rounded-full" 
+                            className="bg-green-500 h-2 rounded-full" 
                             style={{ width: `${totalQuotes > 0 ? Math.round((wonQuotes / totalQuotes) * 100) : 0}%` }}
                           ></div>
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-gray-400 mt-1">
                           {wonQuotes} won of {totalQuotes} total quotes
                         </p>
                       </div>
 
                       <div>
                         <div className="flex justify-between mb-1">
-                          <span className="text-xs sm:text-sm font-medium text-gray-600">Lost Opportunities</span>
-                          <span className="text-xs sm:text-sm font-bold text-gray-900">
+                          <span className="text-xs sm:text-sm font-medium text-gray-300">Lost Opportunities</span>
+                          <span className="text-xs sm:text-sm font-bold text-white">
                             {totalQuotes > 0 ? Math.round((lostQuotes / totalQuotes) * 100) : 0}%
                           </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="w-full bg-gray-700 rounded-full h-2">
                           <div 
                             className="bg-red-500 h-2 rounded-full" 
                             style={{ width: `${totalQuotes > 0 ? Math.round((lostQuotes / totalQuotes) * 100) : 0}%` }}
                           ></div>
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-gray-400 mt-1">
                           {lostQuotes} lost of {totalQuotes} total quotes
                         </p>
                       </div>
 
                       <div>
                         <div className="flex justify-between mb-1">
-                          <span className="text-xs sm:text-sm font-medium text-gray-600">Pending Review</span>
-                          <span className="text-xs sm:text-sm font-bold text-gray-900">
+                          <span className="text-xs sm:text-sm font-medium text-gray-300">Pending Review</span>
+                          <span className="text-xs sm:text-sm font-bold text-white">
                             {totalQuotes > 0 ? Math.round((pendingQuotes / totalQuotes) * 100) : 0}%
                           </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="w-full bg-gray-700 rounded-full h-2">
                           <div 
-                            className="bg-yellow-400 h-2 rounded-full" 
+                            className="bg-[#F9B200] h-2 rounded-full" 
                             style={{ width: `${totalQuotes > 0 ? Math.round((pendingQuotes / totalQuotes) * 100) : 0}%` }}
                           ></div>
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-gray-400 mt-1">
                           {pendingQuotes} pending of {totalQuotes} total quotes
                         </p>
                       </div>
@@ -694,38 +700,38 @@ export default function Dashboard() {
               </div>
 
               <div className="space-y-4">
-                <Card className="overflow-hidden border-0 shadow-sm bg-gradient-to-br from-indigo-50 to-purple-50">
+                <Card className="overflow-hidden border-0 shadow-sm bg-[#282828] ring-1 ring-gray-800">
                   <CardHeader className="pb-0 py-3 px-4">
                     <div>
-                      <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">Financial Summary</CardTitle>
-                      <CardDescription className="text-xs sm:text-sm text-gray-600">Open vs. closed revenue</CardDescription>
+                      <CardTitle className="text-base sm:text-lg font-semibold text-white">Financial Summary</CardTitle>
+                      <CardDescription className="text-xs sm:text-sm text-gray-400">Open vs. closed revenue</CardDescription>
                     </div>
                   </CardHeader>
                   <CardContent className="pt-3 px-4">
                     <div className="grid grid-cols-2 gap-3 mb-4">
-                      <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
-                        <h4 className="text-xs sm:text-sm font-medium text-gray-500 mb-1">Open Opportunities</h4>
-                        <p className="text-lg sm:text-xl font-bold text-indigo-600">
+                      <div className="bg-[#1F1F1F] rounded-lg p-3 shadow-sm border border-gray-800">
+                        <h4 className="text-xs sm:text-sm font-medium text-gray-300 mb-1">Open Opportunities</h4>
+                        <p className="text-lg sm:text-xl font-bold text-[#F9B200]">
                           ${pendingValue.toLocaleString()}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-gray-400 mt-1">
                           From {pendingQuotes} pending quotes
                         </p>
                       </div>
                       
-                      <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
-                        <h4 className="text-xs sm:text-sm font-medium text-gray-500 mb-1">Closed Revenue</h4>
-                        <p className="text-lg sm:text-xl font-bold text-green-600">
+                      <div className="bg-[#1F1F1F] rounded-lg p-3 shadow-sm border border-gray-800">
+                        <h4 className="text-xs sm:text-sm font-medium text-gray-300 mb-1">Closed Revenue</h4>
+                        <p className="text-lg sm:text-xl font-bold text-green-500">
                           ${wonValue.toLocaleString()}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-gray-400 mt-1">
                           From {wonQuotes} won quotes
                         </p>
                       </div>
                     </div>
                     
-                    <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
-                      <h4 className="text-xs sm:text-sm font-medium text-gray-500 mb-2">Total Pipeline Value</h4>
+                    <div className="bg-[#1F1F1F] rounded-lg p-3 shadow-sm border border-gray-800">
+                      <h4 className="text-xs sm:text-sm font-medium text-gray-300 mb-2">Total Pipeline Value</h4>
                       <div className="flex items-center">
                         <div className="flex-1 flex">
                           <div 
@@ -733,21 +739,21 @@ export default function Dashboard() {
                             style={{ width: `${activePipelineValue > 0 ? (wonValue / activePipelineValue) * 100 : 0}%` }}
                           ></div>
                           <div 
-                            className="h-2.5 bg-yellow-400" 
+                            className="h-2.5 bg-[#F9B200]" 
                             style={{ width: `${activePipelineValue > 0 ? (pendingValue / activePipelineValue) * 100 : 0}%` }}
                           ></div>
                         </div>
-                        <span className="text-base sm:text-lg font-bold ml-3 text-gray-800">
+                        <span className="text-base sm:text-lg font-bold ml-3 text-white">
                           ${activePipelineValue.toLocaleString()}
                         </span>
                       </div>
-                      <div className="flex flex-wrap text-xs text-gray-500 mt-2">
+                      <div className="flex flex-wrap text-xs text-gray-400 mt-2">
                         <span className="flex items-center mr-4 mb-1">
                           <span className="w-2 h-2 inline-block bg-green-500 rounded-full mr-1"></span>
                           Closed: {activePipelineValue > 0 ? Math.round((wonValue / activePipelineValue) * 100) : 0}%
                         </span>
                         <span className="flex items-center">
-                          <span className="w-2 h-2 inline-block bg-yellow-400 rounded-full mr-1"></span>
+                          <span className="w-2 h-2 inline-block bg-[#F9B200] rounded-full mr-1"></span>
                           Open: {activePipelineValue > 0 ? Math.round((pendingValue / activePipelineValue) * 100) : 0}%
                         </span>
                       </div>
@@ -755,28 +761,43 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
                 
-                <Card className="overflow-hidden border-0 shadow-sm">
+                <Card className="overflow-hidden border-0 shadow-sm bg-[#282828] ring-1 ring-gray-800">
                   <CardHeader className="pb-2 py-3 px-4">
-                    <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">Monthly Performance</CardTitle>
-                    <CardDescription className="text-xs sm:text-sm text-gray-600">Quote value trend over time</CardDescription>
+                    <CardTitle className="text-base sm:text-lg font-semibold text-white">Monthly Performance</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm text-gray-400">Quote value trend over time</CardDescription>
                   </CardHeader>
                   <CardContent className="h-44 sm:h-56 px-2">
                     {monthlyData.length > 0 ? (
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={monthlyData}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                          <XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
-                          <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
+                          <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                          <XAxis 
+                            dataKey="name" 
+                            tickLine={false} 
+                            axisLine={false} 
+                            tick={{ fontSize: 11, fill: "#9CA3AF" }} 
+                          />
+                          <YAxis 
+                            tickLine={false} 
+                            axisLine={false} 
+                            tick={{ fontSize: 11, fill: "#9CA3AF" }} 
+                          />
                           <Tooltip 
                             formatter={(value) => [`$${value.toLocaleString()}`, "Value"]}
-                            contentStyle={{ borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                            contentStyle={{ 
+                              borderRadius: '8px', 
+                              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                              backgroundColor: '#1F1F1F',
+                              color: 'white',
+                              border: '1px solid #333' 
+                            }}
                           />
-                          <Bar dataKey="value" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="value" fill="#F9B200" radius={[4, 4, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     ) : (
                       <div className="flex items-center justify-center h-full">
-                        <p className="text-gray-500 text-sm">No data available</p>
+                        <p className="text-gray-400 text-sm">No data available</p>
                       </div>
                     )}
                   </CardContent>
