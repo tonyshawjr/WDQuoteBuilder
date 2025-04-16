@@ -6,6 +6,10 @@
 
 @layer base {
   :root {
+    /* Default theme colors that will be replaced by custom colors */
+    --theme-light-accent: #1E40AF; /* Default blue for light mode */
+    --theme-dark-accent: #F9B200;  /* Default yellow for dark mode */
+    
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
@@ -15,6 +19,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
+    /* Primary uses the light mode accent color */
     --primary: 217 91% 60%;
     --primary-foreground: 210 40% 98%;
 
@@ -37,6 +42,12 @@
     --radius: 0.5rem;
   }
 
+  /* Apply light mode theme color */
+  :root {
+    --primary: var(--theme-light-accent);
+    --ring: var(--theme-light-accent);
+  }
+
   .dark {
     --background: 0 0% 12%; /* #1F1F1F */
     --foreground: 210 40% 98%;
@@ -47,7 +58,8 @@
     --popover: 0 0% 16%; /* #282828 */
     --popover-foreground: 210 40% 98%;
 
-    --primary: 42 100% 49%; /* #F9B200 */
+    /* Primary uses the dark mode accent color */
+    --primary: var(--theme-dark-accent);
     --primary-foreground: 0 0% 12%;
 
     --secondary: 180 70% 35%;
@@ -64,7 +76,7 @@
 
     --border: 0 0% 20%;
     --input: 0 0% 20%;
-    --ring: 42 100% 49%;
+    --ring: var(--theme-dark-accent);
   }
 
   * {
