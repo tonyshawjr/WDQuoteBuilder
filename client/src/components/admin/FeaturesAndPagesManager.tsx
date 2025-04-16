@@ -138,10 +138,12 @@ export function FeaturesAndPagesManager() {
   });
 
   const updateFeatureMutation = useMutation({
-    mutationFn: async (data: FeatureFormValues & { id: number }) => {
-      return await apiRequest(`/api/features/${data.id}`, {
+    mutationFn: async ({ id, ...data }: FeatureFormValues & { id: number }) => {
+      const cleanedData = { ...data };
+      // Remove id from the request body
+      return await apiRequest(`/api/features/${id}`, {
         method: "PUT",
-        body: JSON.stringify(data),
+        body: JSON.stringify(cleanedData),
       });
     },
     onSuccess: () => {
@@ -211,10 +213,12 @@ export function FeaturesAndPagesManager() {
   });
 
   const updatePageMutation = useMutation({
-    mutationFn: async (data: PageFormValues & { id: number }) => {
-      return await apiRequest(`/api/pages/${data.id}`, {
-        method: "PUT",
-        body: JSON.stringify(data),
+    mutationFn: async ({ id, ...data }: PageFormValues & { id: number }) => {
+      const cleanedData = { ...data };
+      // Remove id from the request body
+      return await apiRequest(`/api/pages/${id}`, {
+        method: "PUT", 
+        body: JSON.stringify(cleanedData),
       });
     },
     onSuccess: () => {

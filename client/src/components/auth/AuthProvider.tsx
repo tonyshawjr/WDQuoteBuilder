@@ -23,22 +23,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch('/api/me', {
-          credentials: "include",
-        });
-        
-        if (res.status === 401) {
-          setUser(null);
-          setLoading(false);
-          return;
-        }
-        
-        if (res.ok) {
-          const userData = await res.json();
-          setUser(userData);
-        } else {
-          setUser(null);
-        }
+        const userData = await apiRequest("/api/me");
+        setUser(userData);
+        queryClient.setQueryData(['/api/me'], userData);
       } catch (error) {
         console.error("Auth check error:", error);
         setUser(null);
@@ -48,25 +35,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
     
     checkAuth();
-  }, []);
+  }, [queryClient]);
   
   const login = async (username: string, password: string): Promise<User> => {
     try {
       console.log("Attempting login with:", username);
-      const response = await fetch("/api/login", {
+      const userData = await apiRequest("/api/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ username, password }),
-        credentials: "include"
+        body: JSON.stringify({ username, password })
       });
       
-      if (!response.ok) {
-        throw new Error("Login failed");
-      }
-      
-      const userData = await response.json();
       console.log("Login data:", userData);
       setUser(userData);
       queryClient.setQueryData(['/api/me'], userData);
@@ -79,27 +57,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   
   const refreshUser = async (): Promise<void> => {
     try {
-      const response = await apiRequest("GET", "/api/me");
-      
-      if (response.status === 401) {
-        setUser(null);
-        return;
-      }
-      
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
-        queryClient.setQueryData(['/api/me'], userData);
-      }
+      const userData = await apiRequest("/api/me");
+      setUser(userData);
+      queryClient.setQueryData(['/api/me'], userData);
     } catch (error) {
       console.error("Refresh user error:", error);
       // Just silently fail without changing user state on refresh error
+      setUser(null);
     }
   };
 
   const logout = async (): Promise<void> => {
     try {
-      await apiRequest("POST", "/api/logout");
+      await apiRequest("/api/logout", { method: "POST" });
       setUser(null);
       queryClient.setQueryData(['/api/me'], null);
       queryClient.invalidateQueries();
