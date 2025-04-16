@@ -195,6 +195,16 @@ useEffect(() => {
         });
         return;
       }
+      
+      // Check if database connection has been successfully tested
+      if (testConnectionStatus.status !== 'success') {
+        toast({
+          title: "Connection Test Required",
+          description: "Please test your database connection before proceeding.",
+          variant: "destructive"
+        });
+        return;
+      }
     } else if (currentStep === 'admin') {
       // Validate admin user settings
       const { username, password, email } = settings.adminUser;
