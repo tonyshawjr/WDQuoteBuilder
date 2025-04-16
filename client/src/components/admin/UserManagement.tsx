@@ -64,13 +64,23 @@ export function UserManagement() {
   const createUserMutation = useMutation({
     mutationFn: async (data: UserFormValues) => {
       console.log("Creating user with data:", data);
+      
+      // Format data properly to ensure all fields are sent
+      const userData = {
+        username: data.username.trim(),
+        password: data.password,
+        isAdmin: !!data.isAdmin // Force boolean
+      };
+      
+      console.log("Formatted user data:", userData);
+      
+      // Set headers explicitly to ensure proper content-type
       return await apiRequest("/api/users", {
         method: "POST",
-        body: JSON.stringify({
-          username: data.username.trim(),
-          password: data.password,
-          isAdmin: data.isAdmin
-        }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData),
       });
     },
     onSuccess: () => {
@@ -96,18 +106,25 @@ export function UserManagement() {
   const updateUserMutation = useMutation({
     mutationFn: async (data: UserFormValues & { id: number }) => {
       console.log("Updating user with data:", data);
+      
       // Only include password in the update if it's not empty
       const updateData: Record<string, any> = {
         username: data.username.trim(),
-        isAdmin: data.isAdmin
+        isAdmin: !!data.isAdmin // Force boolean
       };
       
       if (data.password) {
         updateData.password = data.password;
       }
       
+      console.log("Formatted update user data:", updateData);
+      
+      // Set headers explicitly to ensure proper content-type  
       return await apiRequest(`/api/users/${data.id}`, {
         method: "PUT",
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(updateData),
       });
     },
@@ -133,8 +150,13 @@ export function UserManagement() {
   // Delete user mutation
   const deleteUserMutation = useMutation({
     mutationFn: async (id: number) => {
+      console.log("Deleting user with ID:", id);
+      
       return await apiRequest(`/api/users/${id}`, {
         method: "DELETE",
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
     },
     onSuccess: () => {
@@ -145,6 +167,7 @@ export function UserManagement() {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
     },
     onError: (error) => {
+      console.error("User delete error:", error);
       toast({
         title: "Failed to delete user",
         description: error.message,

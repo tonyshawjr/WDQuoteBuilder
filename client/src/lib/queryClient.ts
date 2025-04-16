@@ -16,8 +16,31 @@ export async function apiRequest<T = any>(
   options?: RequestInit,
 ): Promise<T> {
   try {
+    // Ensure proper content-type header for JSON data
+    const headers = new Headers(options?.headers || {});
+    if (options?.body && !headers.has('Content-Type') && typeof options.body === 'string') {
+      try {
+        // Check if body is valid JSON
+        JSON.parse(options.body);
+        headers.set('Content-Type', 'application/json');
+      } catch (e) {
+        // Not JSON, don't set content-type
+        console.log('Request body is not valid JSON, not setting content-type header');
+      }
+    }
+    
+    console.log(`API request (${options?.method || 'GET'} ${url})`, {
+      headers: Object.fromEntries([...headers.entries()]),
+      contentType: headers.get('Content-Type'),
+      bodyType: options?.body ? typeof options.body : 'none',
+      bodyPreview: options?.body && typeof options.body === 'string' 
+        ? options.body.substring(0, 100) 
+        : 'N/A'
+    });
+    
     const res = await fetch(url, {
       ...options,
+      headers,
       credentials: "include",
     });
 

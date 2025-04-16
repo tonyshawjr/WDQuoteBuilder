@@ -107,15 +107,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create a new user (admin only)
   app.post('/api/users', isAdmin, async (req, res) => {
     try {
-      // Debug: Log the entire request body
-      console.log('POST /api/users - Request body:', req.body);
+      // Debug: Log the entire request
+      console.log('POST /api/users - Request headers:', req.headers);
+      console.log('POST /api/users - Raw request body (typeof):', typeof req.body);
+      console.log('POST /api/users - Request body:', JSON.stringify(req.body));
       
-      // This will validate the user data against our schema
-      const { username, password, isAdmin: isAdminFlag } = req.body;
+      // Direct access approach for debugging
+      let username, password, isAdminFlag;
+      
+      // Try different ways to access the data
+      if (typeof req.body === 'string') {
+        try {
+          const parsedBody = JSON.parse(req.body);
+          username = parsedBody.username;
+          password = parsedBody.password;
+          isAdminFlag = parsedBody.isAdmin;
+          console.log('Parsed string body:', parsedBody);
+        } catch (e) {
+          console.error('Failed to parse string body:', e);
+        }
+      } else {
+        // Try accessing directly from body
+        username = req.body.username;
+        password = req.body.password;
+        isAdminFlag = req.body.isAdmin;
+      }
+      
+      // Fallback for testing
+      if (!username || !password) {
+        console.log('Using fallback method to access form data', req.body);
+        if (req.body && typeof req.body === 'object') {
+          // Try to find the username and password in any key
+          Object.keys(req.body).forEach(key => {
+            console.log(`Checking key: ${key}, value:`, req.body[key]);
+            if (typeof req.body[key] === 'object' && req.body[key] !== null) {
+              if (req.body[key].username) username = req.body[key].username;
+              if (req.body[key].password) password = req.body[key].password;
+              if (req.body[key].isAdmin !== undefined) isAdminFlag = req.body[key].isAdmin;
+            }
+          });
+        }
+      }
       
       // Log the extracted values
-      console.log('Extracted values:', { 
-        username: username, 
+      console.log('Final extracted values:', { 
+        username, 
         passwordLength: password ? password.length : 0,
         isAdmin: isAdminFlag
       });
