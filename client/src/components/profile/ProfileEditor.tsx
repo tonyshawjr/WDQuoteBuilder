@@ -173,13 +173,9 @@ export function ProfileEditor() {
         <CardContent>
           <Form {...profileForm}>
             <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
-              <div className="flex items-center space-x-4 mb-6">
-                <div className="bg-primary/10 text-primary rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl">
-                  {user.username?.charAt(0)?.toUpperCase() || 'U'}
-                </div>
-                
-                <div className="flex-1">
-                  <div className="font-medium">{user.username}</div>
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <div className="font-bold text-lg">{user.username}</div>
                   <div className="text-sm text-muted-foreground">
                     {isAdmin ? "Administrator" : "Regular User"}
                   </div>

@@ -33,6 +33,9 @@ import { useAuth } from "@/components/auth/AuthProvider";
 const userFormSchema = insertUserSchema.extend({
   username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z.string().email("Invalid email address").optional().nullable(),
+  firstName: z.string().optional().nullable(),
+  lastName: z.string().optional().nullable(),
   isAdmin: z.boolean().default(false),
 });
 
@@ -51,6 +54,9 @@ export function UserManagement() {
     defaultValues: {
       username: "",
       password: "",
+      email: "",
+      firstName: "",
+      lastName: "",
       isAdmin: false,
     },
   });
@@ -69,6 +75,9 @@ export function UserManagement() {
       const userData = {
         username: data.username.trim(),
         password: data.password,
+        email: data.email || null,
+        firstName: data.firstName || null,
+        lastName: data.lastName || null,
         isAdmin: !!data.isAdmin // Force boolean
       };
       
@@ -110,6 +119,9 @@ export function UserManagement() {
       // Only include password in the update if it's not empty
       const updateData: Record<string, any> = {
         username: data.username.trim(),
+        email: data.email || null,
+        firstName: data.firstName || null,
+        lastName: data.lastName || null,
         isAdmin: !!data.isAdmin // Force boolean
       };
       
@@ -187,7 +199,14 @@ export function UserManagement() {
 
   // Open dialog for creating a new user
   const handleCreateClick = () => {
-    form.reset({ username: "", password: "", isAdmin: false });
+    form.reset({ 
+      username: "", 
+      password: "", 
+      email: "",
+      firstName: "",
+      lastName: "",
+      isAdmin: false 
+    });
     setDialogMode("create");
     setSelectedUser(null);
     setOpenDialog(true);
@@ -198,6 +217,9 @@ export function UserManagement() {
     form.reset({ 
       username: user.username, 
       password: "", // Don't show the current password for security reasons
+      email: user.email || "",
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
       isAdmin: user.isAdmin || false 
     });
     setDialogMode("edit");
@@ -348,6 +370,50 @@ export function UserManagement() {
                         Leave blank to keep the current password
                       </p>
                     )}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="firstName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>First Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="John" {...field} value={field.value || ''} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="lastName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Smith" {...field} value={field.value || ''} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="john.smith@example.com" {...field} value={field.value || ''} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
