@@ -196,11 +196,11 @@ export default function AllQuotes() {
         <div className="flex flex-col justify-between items-start mb-6">
           <div className="mb-4 flex items-center justify-between w-full">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">All Quotes</h1>
-              <p className="text-sm text-gray-600">View and manage all your quotes</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">All Quotes</h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400">View and manage all your quotes</p>
             </div>
             
-            <Button onClick={() => navigate("/calculator")} className="flex-grow-0 h-9 text-sm">
+            <Button onClick={() => navigate("/calculator")} className="flex-grow-0 h-9 text-sm bg-yellow-500 hover:bg-yellow-600">
               Create Quote
             </Button>
           </div>
@@ -398,14 +398,14 @@ export default function AllQuotes() {
           )}
         </div>
         
-        <Card className="overflow-hidden shadow-sm border-0">
+        <Card className="overflow-hidden shadow-none border-0 bg-[#1F1F1F] rounded-md">
           {noQuotesFound ? (
             <div className="flex flex-col items-center justify-center py-16 px-4">
-              <div className="bg-gray-100 rounded-full p-6 mb-4">
-                <FileText className="h-10 w-10 text-primary/70" />
+              <div className="bg-gray-800 rounded-full p-6 mb-4">
+                <FileText className="h-10 w-10 text-yellow-500" />
               </div>
-              <h4 className="text-lg font-medium text-gray-900 mb-2">No quotes found</h4>
-              <p className="text-gray-500 text-center mb-4 max-w-md">
+              <h4 className="text-lg font-medium text-white mb-2">No quotes found</h4>
+              <p className="text-gray-400 text-center mb-4 max-w-md">
                 {search ? 
                   "Try adjusting your search or filters to find what you're looking for" : 
                   "Start creating quotes for your clients to track opportunities and generate revenue"}
@@ -414,6 +414,7 @@ export default function AllQuotes() {
                 <Button 
                   onClick={() => navigate("/calculator")}
                   size="lg"
+                  className="bg-yellow-500 hover:bg-yellow-600"
                 >
                   Create your first quote
                 </Button>
@@ -421,6 +422,7 @@ export default function AllQuotes() {
                 <Button 
                   variant="outline"
                   onClick={clearFilters}
+                  className="border-gray-600 text-gray-200 hover:bg-gray-800"
                 >
                   Clear all filters
                 </Button>
@@ -467,25 +469,25 @@ export default function AllQuotes() {
                   {filteredQuotes.map((quote: QuoteType) => (
                     <div 
                       key={quote.id} 
-                      className="grid grid-cols-[repeat(16,minmax(0,1fr))] px-6 py-4 hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-100"
+                      className="grid grid-cols-[repeat(16,minmax(0,1fr))] px-6 py-4 hover:bg-[#282828] transition-colors cursor-pointer border-b border-gray-700"
                       onClick={() => navigate(`/quotes/${quote.id}`)}
                     >
                       <div className="col-span-3">
-                        <div className="font-medium text-gray-900">{quote.clientName}</div>
-                        <div className="text-sm text-gray-500 truncate">{quote.businessName || "Individual"}</div>
+                        <div className="font-medium text-white">{quote.clientName}</div>
+                        <div className="text-sm text-gray-400 truncate">{quote.businessName || "Individual"}</div>
                       </div>
                       
                       <div className="col-span-3 flex items-center">
-                        <div className="text-sm text-gray-700">
+                        <div className="text-sm text-gray-300">
                           {getProjectTypeName(quote.projectTypeId)}
                         </div>
                       </div>
                       
-                      <div className="col-span-2 flex items-center text-sm text-gray-600">
+                      <div className="col-span-2 flex items-center text-sm text-gray-400">
                         {new Date(quote.createdAt).toLocaleDateString()}
                       </div>
                       
-                      <div className="col-span-2 flex items-center text-sm text-gray-600">
+                      <div className="col-span-2 flex items-center text-sm text-gray-400">
                         {Array.isArray(users) 
                           ? users.find(u => u.username === quote.createdBy)
                               ? `${users.find(u => u.username === quote.createdBy)?.firstName || ''} ${users.find(u => u.username === quote.createdBy)?.lastName || ''}`
@@ -513,11 +515,11 @@ export default function AllQuotes() {
                         </span>
                       </div>
                       
-                      <div className="col-span-2 font-semibold text-gray-900 text-right">
+                      <div className="col-span-2 font-semibold text-yellow-500 text-right">
                         ${quote.totalPrice?.toLocaleString()}
                       </div>
                       
-                      <div className="col-span-2 text-sm text-gray-600">
+                      <div className="col-span-2 text-sm text-gray-400">
                         {new Date(quote.updatedAt || quote.createdAt).toLocaleDateString()}
                       </div>
                     </div>
@@ -530,13 +532,13 @@ export default function AllQuotes() {
                 {filteredQuotes.map((quote: QuoteType) => (
                   <div 
                     key={quote.id} 
-                    className="p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
+                    className="p-4 border-b border-gray-700 hover:bg-[#282828] transition-colors cursor-pointer"
                     onClick={() => navigate(`/quotes/${quote.id}`)}
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <h4 className="font-semibold text-gray-900">{quote.clientName}</h4>
-                        <p className="text-sm text-gray-500">{quote.businessName || "Individual"}</p>
+                        <h4 className="font-semibold text-white">{quote.clientName}</h4>
+                        <p className="text-sm text-gray-400">{quote.businessName || "Individual"}</p>
                       </div>
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
                         quote.leadStatus === "Won" 
@@ -556,19 +558,19 @@ export default function AllQuotes() {
                       </span>
                     </div>
                     
-                    <div className="flex items-center mt-2 bg-gray-50 rounded-md px-2 py-1.5">
-                      <div className="text-xs font-medium text-gray-600">
+                    <div className="flex items-center mt-2 bg-[#282828] rounded-md px-2 py-1.5">
+                      <div className="text-xs font-medium text-gray-300">
                         {getProjectTypeName(quote.projectTypeId)}
                       </div>
                     </div>
                     
-                    <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
+                    <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-700">
                       <div className="flex items-center space-x-2">
-                        <div className="flex items-center text-xs text-gray-500">
+                        <div className="flex items-center text-xs text-gray-400">
                           <Calendar className="h-3 w-3 text-gray-400 mr-1" />
                           {new Date(quote.createdAt).toLocaleDateString()}
                         </div>
-                        <div className="flex items-center text-xs text-gray-500">
+                        <div className="flex items-center text-xs text-gray-400">
                           <User className="h-3 w-3 text-gray-400 mr-1" />
                           {Array.isArray(users) 
                             ? users.find(u => u.username === quote.createdBy)
@@ -578,7 +580,7 @@ export default function AllQuotes() {
                           }
                         </div>
                       </div>
-                      <div className="font-semibold text-sm">${quote.totalPrice?.toLocaleString()}</div>
+                      <div className="font-semibold text-sm text-yellow-500">${quote.totalPrice?.toLocaleString()}</div>
                     </div>
                   </div>
                 ))}
