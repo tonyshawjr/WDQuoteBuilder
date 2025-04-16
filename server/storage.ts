@@ -2,6 +2,7 @@ import {
   users, type User, type InsertUser,
   projectTypes, type ProjectType, type InsertProjectType,
   features, type Feature, type InsertFeature,
+  featureProjectTypes, type FeatureProjectType, type InsertFeatureProjectType,
   pages, type Page, type InsertPage,
   quotes, type Quote, type InsertQuote,
   quoteFeatures, type QuoteFeature, type InsertQuoteFeature,
@@ -37,6 +38,11 @@ export interface IStorage {
   updateFeature(id: number, feature: InsertFeature): Promise<Feature | undefined>;
   deleteFeature(id: number): Promise<boolean>;
   
+  // Feature-ProjectType relationship operations
+  createFeatureProjectType(featureProjectType: InsertFeatureProjectType): Promise<FeatureProjectType>;
+  getFeatureProjectTypes(featureId: number): Promise<FeatureProjectType[]>;
+  deleteFeatureProjectTypes(featureId: number): Promise<boolean>;
+  
   // Page operations
   getPages(): Promise<Page[]>;
   getPagesByProjectType(projectTypeId: number): Promise<Page[]>;
@@ -63,6 +69,7 @@ export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private projectTypesMap: Map<number, ProjectType>;
   private featuresMap: Map<number, Feature>;
+  private featureProjectTypesMap: Map<number, FeatureProjectType>;
   private pagesMap: Map<number, Page>;
   private quotesMap: Map<number, Quote>;
   private quoteFeaturesMap: Map<number, QuoteFeature>;
@@ -77,10 +84,13 @@ export class MemStorage implements IStorage {
   quoteFeatureCurrentId: number;
   quotePageCurrentId: number;
 
+  featureProjectTypeCurrentId: number;
+
   constructor() {
     this.users = new Map();
     this.projectTypesMap = new Map();
     this.featuresMap = new Map();
+    this.featureProjectTypesMap = new Map();
     this.pagesMap = new Map();
     this.quotesMap = new Map();
     this.quoteFeaturesMap = new Map();
@@ -90,6 +100,7 @@ export class MemStorage implements IStorage {
     this.userCurrentId = 1;
     this.projectTypeCurrentId = 1;
     this.featureCurrentId = 1;
+    this.featureProjectTypeCurrentId = 1;
     this.pageCurrentId = 1;
     this.quoteCurrentId = 1;
     this.quoteFeatureCurrentId = 1;
@@ -209,7 +220,40 @@ export class MemStorage implements IStorage {
   }
   
   async deleteFeature(id: number): Promise<boolean> {
+    // Delete associated feature-project type relationships first
+    await this.deleteFeatureProjectTypes(id);
     return this.featuresMap.delete(id);
+  }
+  
+  // Feature-ProjectType relationship operations
+  async createFeatureProjectType(featureProjectType: InsertFeatureProjectType): Promise<FeatureProjectType> {
+    const id = this.featureProjectTypeCurrentId++;
+    const newFeatureProjectType: FeatureProjectType = {
+      ...featureProjectType,
+      id
+    };
+    this.featureProjectTypesMap.set(id, newFeatureProjectType);
+    return newFeatureProjectType;
+  }
+  
+  async getFeatureProjectTypes(featureId: number): Promise<FeatureProjectType[]> {
+    return Array.from(this.featureProjectTypesMap.values()).filter(
+      relationship => relationship.featureId === featureId
+    );
+  }
+  
+  async deleteFeatureProjectTypes(featureId: number): Promise<boolean> {
+    let success = false;
+    const relationships = Array.from(this.featureProjectTypesMap.entries());
+    
+    for (const [id, relationship] of relationships) {
+      if (relationship.featureId === featureId) {
+        this.featureProjectTypesMap.delete(id);
+        success = true;
+      }
+    }
+    
+    return success;
   }
   
   // Page operations

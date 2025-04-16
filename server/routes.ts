@@ -537,10 +537,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post('/api/features', isAdmin, async (req, res) => {
     try {
-      const validatedData = insertFeatureSchema.parse(req.body);
+      // Extract the selectedProjectTypes array from request body
+      const { selectedProjectTypes, ...featureData } = req.body;
+      const validatedData = insertFeatureSchema.parse(featureData);
+      
+      // Create the feature and associate it with project types
       const feature = await storage.createFeature(validatedData);
+      
+      // Handle project type associations if not "For All Project Types"
+      if (!validatedData.forAllProjectTypes && selectedProjectTypes && selectedProjectTypes.length > 0) {
+        // Save feature-project type relationships
+        for (const projectTypeId of selectedProjectTypes) {
+          await storage.createFeatureProjectType({
+            featureId: feature.id,
+            projectTypeId
+          });
+        }
+      }
+      
       res.status(201).json(feature);
     } catch (err) {
+      console.error('Error creating feature:', err);
       res.status(400).json({ message: err instanceof Error ? err.message : 'Invalid data' });
     }
   });
@@ -548,15 +565,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/features/:id', isAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const validatedData = insertFeatureSchema.parse(req.body);
+      // Extract the selectedProjectTypes array from request body
+      const { selectedProjectTypes, ...featureData } = req.body;
+      const validatedData = insertFeatureSchema.parse(featureData);
+      
+      // Update the feature
       const feature = await storage.updateFeature(id, validatedData);
       
       if (!feature) {
         return res.status(404).json({ message: 'Feature not found' });
       }
       
+      // Remove existing project type associations
+      await storage.deleteFeatureProjectTypes(id);
+      
+      // Handle project type associations if not "For All Project Types"
+      if (!validatedData.forAllProjectTypes && selectedProjectTypes && selectedProjectTypes.length > 0) {
+        // Save feature-project type relationships
+        for (const projectTypeId of selectedProjectTypes) {
+          await storage.createFeatureProjectType({
+            featureId: id,
+            projectTypeId
+          });
+        }
+      }
+      
       res.json(feature);
     } catch (err) {
+      console.error('Error updating feature:', err);
       res.status(400).json({ message: err instanceof Error ? err.message : 'Invalid data' });
     }
   });
