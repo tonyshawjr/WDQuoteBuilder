@@ -200,10 +200,13 @@ export default function QuoteMetricsReport() {
                       data={statusPieData}
                       cx="50%"
                       cy="50%"
-                      outerRadius={80}
+                      outerRadius="70%"
                       dataKey="count"
                       nameKey="status"
-                      label={({ status, count, percent }) => `${status}: ${count} (${(percent * 100).toFixed(0)}%)`}
+                      label={({ status, count, percent }) => {
+                        // Shortened label for mobile display
+                        return `${(percent * 100).toFixed(0)}%`;
+                      }}
                       labelLine={false}
                     >
                       {statusPieData.map((entry, index) => {
@@ -238,7 +241,7 @@ export default function QuoteMetricsReport() {
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={data.quoteSizesByMonth}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
@@ -284,7 +287,13 @@ export default function QuoteMetricsReport() {
                   {sizeData.map((item) => (
                     <div key={item.name} className="flex flex-col">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium">{item.name}</span>
+                        <span className="text-sm font-medium">
+                          {/* Use shortened names on mobile screens */}
+                          <span className="hidden md:inline">{item.name}</span>
+                          <span className="inline md:hidden">
+                            {item.name.replace(/\(.*?\)/g, '')}
+                          </span>
+                        </span>
                         <span className="text-sm text-gray-400">
                           {item.count} ({item.percentage}%)
                         </span>
@@ -368,7 +377,7 @@ export default function QuoteMetricsReport() {
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
                   data={data.quoteSizesByMonth}
-                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                  margin={{ top: 10, right: 20, left: 10, bottom: 0 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />

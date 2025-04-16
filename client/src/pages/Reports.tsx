@@ -47,14 +47,23 @@ export default function Reports() {
     <div className="min-h-screen bg-[#1F1F1F]">
       <Header />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         <h1 className="text-2xl font-bold mb-6">Admin Reports</h1>
         
         <Tabs defaultValue="sales-performance" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="sales-performance">Sales Team Performance</TabsTrigger>
-            <TabsTrigger value="quote-metrics">Quote Metrics</TabsTrigger>
-            <TabsTrigger value="feature-usage">Feature Usage</TabsTrigger>
+            <TabsTrigger value="sales-performance">
+              <span className="hidden md:inline">Sales Team Performance</span>
+              <span className="inline md:hidden">Sales</span>
+            </TabsTrigger>
+            <TabsTrigger value="quote-metrics">
+              <span className="hidden md:inline">Quote Metrics</span>
+              <span className="inline md:hidden">Quotes</span>
+            </TabsTrigger>
+            <TabsTrigger value="feature-usage">
+              <span className="hidden md:inline">Feature Usage</span>
+              <span className="inline md:hidden">Features</span>
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="sales-performance">
