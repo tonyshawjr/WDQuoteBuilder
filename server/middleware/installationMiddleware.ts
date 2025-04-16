@@ -6,10 +6,15 @@ import { ConfigManager } from '../config/ConfigManager';
  * If not, redirects to the installation page
  */
 export const installationMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  // Skip this middleware for the installation API routes and static files
+  // Skip this middleware for Vite resources, installation API routes, and static files
   if (req.path.startsWith('/api/install') || 
       req.path.startsWith('/install') ||
-      req.path.startsWith('/assets') || 
+      req.path.startsWith('/assets') ||
+      req.path.startsWith('/@fs/') ||
+      req.path.startsWith('/@vite/') ||
+      req.path.startsWith('/@react-refresh') ||
+      req.path.startsWith('/src/') ||
+      req.path.includes('node_modules') ||
       req.path.includes('.')) {
     return next();
   }

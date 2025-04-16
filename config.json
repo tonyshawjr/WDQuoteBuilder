@@ -1,0 +1,14 @@
+{
+  "database": {
+    "type": "postgres",
+    "host": "localhost",
+    "port": 5432,
+    "database": "web_design_calculator",
+    "user": "postgres",
+    "password": "",
+    "ssl": false
+  },
+  "appName": "Web Design Price Calculator",
+  "isInstalled": false,
+  "version": "1.0.0"
+}

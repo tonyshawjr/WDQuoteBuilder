@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Steps } from '@/components/ui/steps';
+import { Steps } from '@/components/ui';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, Database, Server, User, CheckCircle, Settings } from "lucide-react";
 
@@ -46,11 +46,11 @@ interface InstallationSettings {
 
 // Steps in the installation process
 const STEPS = [
-  { id: 'welcome', label: 'Welcome' },
-  { id: 'database', label: 'Database Setup' },
-  { id: 'admin', label: 'Admin Account' },
-  { id: 'business', label: 'Business Info' },
-  { id: 'complete', label: 'Complete' }
+  { id: 'welcome', title: 'Welcome' },
+  { id: 'database', title: 'Database Setup' },
+  { id: 'admin', title: 'Admin Account' },
+  { id: 'business', title: 'Business Info' },
+  { id: 'complete', title: 'Complete' }
 ];
 
 // Default installation settings
@@ -92,27 +92,32 @@ const InstallWizard: React.FC = () => {
   // Query to check if the app is already installed
   const { data: installStatus, isLoading: installStatusLoading } = useQuery({
     queryKey: ['/api/install/status'],
-    queryFn: getQueryFn(),
+    queryFn: getQueryFn({}),
     retry: false
   });
 
-  // Redirect to home if already installed
-  useEffect(() => {
-    if (installStatus?.isInstalled) {
-      setLocation('/');
-      toast({
-        title: "Already Installed",
-        description: "The application is already installed. Redirecting to the home page.",
-        variant: "default"
-      });
-    }
-  }, [installStatus, setLocation, toast]);
+  // Type for install status response
+interface InstallStatusResponse {
+  isInstalled: boolean;
+}
+
+// Redirect to home if already installed
+useEffect(() => {
+  const status = installStatus as InstallStatusResponse;
+  if (status?.isInstalled) {
+    setLocation('/');
+    toast({
+      title: "Already Installed",
+      description: "The application is already installed. Redirecting to the home page.",
+      variant: "default"
+    });
+  }
+}, [installStatus, setLocation, toast]);
 
   // Mutation for testing database connection
   const testConnectionMutation = useMutation({
     mutationFn: async (dbConfig: DatabaseConfig) => {
-      const res = await apiRequest('POST', '/api/install/test-connection', dbConfig);
-      return await res.json();
+      return await apiRequest('POST', '/api/install/test-connection', dbConfig);
     },
     onSuccess: (data) => {
       if (data.success) {
@@ -138,8 +143,7 @@ const InstallWizard: React.FC = () => {
   // Mutation for installing the application
   const installMutation = useMutation({
     mutationFn: async (installSettings: InstallationSettings) => {
-      const res = await apiRequest('POST', '/api/install/install', installSettings);
-      return await res.json();
+      return await apiRequest('POST', '/api/install/install', installSettings);
     },
     onSuccess: (data) => {
       if (data.success) {

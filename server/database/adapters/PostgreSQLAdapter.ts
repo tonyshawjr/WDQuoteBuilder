@@ -1,4 +1,6 @@
-import { Pool, PoolClient } from 'pg';
+import pg from 'pg';
+const { Pool } = pg;
+type PgPool = any; // Using any to resolve the typing issue
 import { IDBAdapter } from './IDBAdapter';
 import { DatabaseConfig } from './DBAdapterFactory';
 
@@ -7,7 +9,7 @@ import { DatabaseConfig } from './DBAdapterFactory';
  * Implements the IDBAdapter interface for PostgreSQL
  */
 export class PostgreSQLAdapter implements IDBAdapter {
-  private pool: Pool;
+  private pool: PgPool;
   private config: DatabaseConfig;
 
   constructor(config: DatabaseConfig) {

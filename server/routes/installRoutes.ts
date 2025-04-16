@@ -63,10 +63,11 @@ router.post('/test-connection', async (req: Request, res: Response) => {
     }
   } catch (error) {
     console.error('Test connection error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     res.status(500).json({ 
       success: false, 
       message: 'An error occurred while testing the database connection',
-      error: error.message
+      error: errorMessage
     });
   }
 });
@@ -100,10 +101,11 @@ router.post('/install', async (req: Request, res: Response) => {
     }
   } catch (error) {
     console.error('Installation error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     res.status(500).json({ 
       success: false, 
       message: 'An error occurred during installation',
-      error: error.message
+      error: errorMessage
     });
   }
 });

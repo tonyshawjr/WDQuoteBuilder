@@ -12,17 +12,24 @@ async function throwIfResNotOk(res: Response) {
 }
 
 export async function apiRequest(
+  method: string,
   url: string,
+  body?: any,
   options: RequestInit = {},
 ) {
   try {
     const defaultOptions: RequestInit = {
-      method: 'GET',
+      method: method,
       credentials: "include",
       headers: {
         'Content-Type': 'application/json',
       },
     };
+    
+    // Add body if provided
+    if (body !== undefined) {
+      defaultOptions.body = JSON.stringify(body);
+    }
     
     // Merge options
     const mergedOptions = {
@@ -67,11 +74,12 @@ export async function apiRequest(
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
-export const getQueryFn: <T>(options: {
-  on401: UnauthorizedBehavior;
+export const getQueryFn: <T>(options?: {
+  on401?: UnauthorizedBehavior;
 }) => QueryFunction<T> =
-  ({ on401: unauthorizedBehavior }) =>
+  (options = {}) =>
   async ({ queryKey }) => {
+    const unauthorizedBehavior = options.on401 || "returnNull";
     try {
       const res = await fetch(queryKey[0] as string, {
         credentials: "include",
