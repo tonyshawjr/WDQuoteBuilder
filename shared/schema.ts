@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, doublePrecision, numeric, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, doublePrecision, numeric, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -48,7 +48,7 @@ export const insertProjectTypeSchema = createInsertSchema(projectTypes).pick({
 // Features table
 export const features = pgTable("features", {
   id: serial("id").primaryKey(),
-  projectTypeId: integer("project_type_id").notNull(),
+  projectTypeId: integer("project_type_id"), // Now optional for backward compatibility
   name: text("name").notNull(),
   description: text("description"),
   category: text("category").notNull(),
@@ -57,7 +57,17 @@ export const features = pgTable("features", {
   hourlyRate: doublePrecision("hourly_rate"),
   estimatedHours: doublePrecision("estimated_hours"),
   supportsQuantity: boolean("supports_quantity").default(false),
+  forAllProjectTypes: boolean("for_all_project_types").default(false),
 });
+
+// Feature to project type relations table
+export const featureProjectTypes = pgTable("feature_project_types", {
+  id: serial("id").primaryKey(),
+  featureId: integer("feature_id").notNull().references(() => features.id, { onDelete: "cascade" }),
+  projectTypeId: integer("project_type_id").notNull().references(() => projectTypes.id, { onDelete: "cascade" }),
+}, (t) => ({
+  featureProjectTypeIdx: uniqueIndex("feature_project_type_idx").on(t.featureId, t.projectTypeId),
+}));
 
 export const insertFeatureSchema = createInsertSchema(features).pick({
   projectTypeId: true,
@@ -69,6 +79,12 @@ export const insertFeatureSchema = createInsertSchema(features).pick({
   hourlyRate: true,
   estimatedHours: true,
   supportsQuantity: true,
+  forAllProjectTypes: true,
+});
+
+export const insertFeatureProjectTypeSchema = createInsertSchema(featureProjectTypes).pick({
+  featureId: true,
+  projectTypeId: true,
 });
 
 // Pages table
@@ -174,3 +190,6 @@ export type InsertQuoteFeature = z.infer<typeof insertQuoteFeatureSchema>;
 
 export type QuotePage = typeof quotePages.$inferSelect;
 export type InsertQuotePage = z.infer<typeof insertQuotePageSchema>;
+
+export type FeatureProjectType = typeof featureProjectTypes.$inferSelect;
+export type InsertFeatureProjectType = z.infer<typeof insertFeatureProjectTypeSchema>;
