@@ -34,10 +34,18 @@ export default function BusinessSettings() {
   // Update business name mutation
   const updateMutation = useMutation({
     mutationFn: async (newBusinessName: string) => {
-      const res = await apiRequest("POST", "/api/business-name", {
-        businessName: newBusinessName
-      });
-      return await res.json();
+      try {
+        const res = await apiRequest("POST", "/api/business-name", { 
+          businessName: newBusinessName 
+        });
+        if (res.ok) {
+          return await res.json();
+        }
+        throw new Error("Failed to update business name");
+      } catch (error) {
+        console.error("Error updating business name:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       // Invalidate the query to refresh the data

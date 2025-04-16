@@ -11,43 +11,65 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-export async function apiRequest<T = any>(
+export async function apiRequest(
+  method: string,
   url: string,
-  options?: RequestInit,
-): Promise<T> {
+  data?: any,
+  customOptions?: RequestInit,
+) {
   try {
-    // Ensure proper content-type header for JSON data
-    const headers = new Headers(options?.headers || {});
-    if (options?.body && !headers.has('Content-Type') && typeof options.body === 'string') {
-      try {
-        // Check if body is valid JSON
-        JSON.parse(options.body);
-        headers.set('Content-Type', 'application/json');
-      } catch (e) {
-        // Not JSON, don't set content-type
-        console.log('Request body is not valid JSON, not setting content-type header');
+    const options: RequestInit = {
+      method,
+      ...customOptions,
+      credentials: "include",
+    };
+    
+    // Set up headers
+    const headers = new Headers(customOptions?.headers || {});
+    
+    // Handle JSON data
+    if (data !== undefined) {
+      // If data is already a string, assume it's pre-formatted
+      if (typeof data === 'string') {
+        options.body = data;
+        if (!headers.has('Content-Type')) {
+          try {
+            JSON.parse(data);
+            headers.set('Content-Type', 'application/json');
+          } catch (e) {
+            // Not valid JSON, don't set content type
+          }
+        }
+      } else {
+        // Convert objects to JSON string
+        options.body = JSON.stringify(data);
+        if (!headers.has('Content-Type')) {
+          headers.set('Content-Type', 'application/json');
+        }
       }
     }
     
-    console.log(`API request (${options?.method || 'GET'} ${url})`, {
+    options.headers = headers;
+    
+    console.log(`API request (${method} ${url})`, {
       headers: Object.fromEntries([...headers.entries()]),
       contentType: headers.get('Content-Type'),
-      bodyType: options?.body ? typeof options.body : 'none',
-      bodyPreview: options?.body && typeof options.body === 'string' 
+      bodyType: options.body ? typeof options.body : 'none',
+      bodyPreview: options.body && typeof options.body === 'string' 
         ? options.body.substring(0, 100) 
         : 'N/A'
     });
     
-    const res = await fetch(url, {
-      ...options,
-      headers,
-      credentials: "include",
-    });
-
+    const res = await fetch(url, options);
     await throwIfResNotOk(res);
-    return await res.json();
+    
+    // Add json method to response for backward compatibility
+    const response = res as Response & { json: () => Promise<any> };
+    response.json = () => res.json();
+    
+    return response;
   } catch (error) {
-    console.error(`API request error (${options?.method || 'GET'} ${url}):`, error);
+    console.error(`API request error (${method} ${url}):`, error);
     throw error;
   }
 }
