@@ -82,7 +82,10 @@ export class DatabaseStorage implements IStorage {
       const userData = {
         username: String(user.username),
         password: String(user.password),
-        isAdmin: user.isAdmin === true // Ensure this is a boolean
+        isAdmin: user.isAdmin === true, // Ensure this is a boolean
+        email: user.email, // Include email field
+        firstName: user.firstName, // Include firstName field
+        lastName: user.lastName // Include lastName field
       };
       
       console.log('DB storage - Processed user data:', JSON.stringify(userData));
@@ -113,6 +116,19 @@ export class DatabaseStorage implements IStorage {
       
       if (userData.isAdmin !== undefined) {
         processedData.isAdmin = userData.isAdmin === true;
+      }
+      
+      // Handle profile fields
+      if (userData.email !== undefined) {
+        processedData.email = userData.email;
+      }
+      
+      if (userData.firstName !== undefined) {
+        processedData.firstName = userData.firstName;
+      }
+      
+      if (userData.lastName !== undefined) {
+        processedData.lastName = userData.lastName;
       }
       
       console.log('DB storage - Processed update data:', JSON.stringify(processedData));
