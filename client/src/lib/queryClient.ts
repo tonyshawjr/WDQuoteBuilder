@@ -12,64 +12,56 @@ async function throwIfResNotOk(res: Response) {
 }
 
 export async function apiRequest(
-  method: string,
   url: string,
-  data?: any,
-  customOptions?: RequestInit,
+  options: RequestInit = {},
 ) {
   try {
-    const options: RequestInit = {
-      method,
-      ...customOptions,
+    const defaultOptions: RequestInit = {
+      method: 'GET',
       credentials: "include",
+      headers: {
+        'Content-Type': 'application/json',
+      },
     };
     
-    // Set up headers
-    const headers = new Headers(customOptions?.headers || {});
+    // Merge options
+    const mergedOptions = {
+      ...defaultOptions,
+      ...options,
+      headers: {
+        ...defaultOptions.headers,
+        ...(options.headers || {}),
+      },
+    };
     
-    // Handle JSON data
-    if (data !== undefined) {
-      // If data is already a string, assume it's pre-formatted
-      if (typeof data === 'string') {
-        options.body = data;
-        if (!headers.has('Content-Type')) {
-          try {
-            JSON.parse(data);
-            headers.set('Content-Type', 'application/json');
-          } catch (e) {
-            // Not valid JSON, don't set content type
-          }
-        }
-      } else {
-        // Convert objects to JSON string
-        options.body = JSON.stringify(data);
-        if (!headers.has('Content-Type')) {
-          headers.set('Content-Type', 'application/json');
-        }
-      }
-    }
-    
-    options.headers = headers;
-    
-    console.log(`API request (${method} ${url})`, {
-      headers: Object.fromEntries([...headers.entries()]),
-      contentType: headers.get('Content-Type'),
-      bodyType: options.body ? typeof options.body : 'none',
-      bodyPreview: options.body && typeof options.body === 'string' 
-        ? options.body.substring(0, 100) 
+    console.log(`API request (${url})`, {
+      headers: mergedOptions.headers,
+      contentType: (mergedOptions.headers as any)['Content-Type'],
+      bodyType: mergedOptions.body ? typeof mergedOptions.body : 'none',
+      bodyPreview: mergedOptions.body && typeof mergedOptions.body === 'string' 
+        ? mergedOptions.body.substring(0, 100) 
         : 'N/A'
     });
     
-    const res = await fetch(url, options);
+    const res = await fetch(url, mergedOptions);
     await throwIfResNotOk(res);
     
-    // Add json method to response for backward compatibility
-    const response = res as Response & { json: () => Promise<any> };
-    response.json = () => res.json();
+    // For empty responses
+    if (res.status === 204) {
+      return res;
+    }
     
-    return response;
+    // Try to parse as JSON first
+    try {
+      const clonedRes = res.clone();
+      const data = await clonedRes.json();
+      return data;
+    } catch (e) {
+      // If not JSON, return the response itself
+      return res;
+    }
   } catch (error) {
-    console.error(`API request error (${method} ${url}):`, error);
+    console.error(`API request error (${url}):`, error);
     throw error;
   }
 }
