@@ -557,34 +557,77 @@ export function FeaturesAndPagesManager() {
 
               <FormField
                 control={featureForm.control}
-                name="projectTypeId"
+                name="forAllProjectTypes"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Project Type</FormLabel>
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 mb-4">
                     <FormControl>
-                      <Select
-                        onValueChange={(value) => field.onChange(parseInt(value))}
-                        value={field.value.toString()}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select project type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {projectTypes.map((projectType: ProjectType) => (
-                            <SelectItem
-                              key={projectType.id}
-                              value={projectType.id.toString()}
-                            >
-                              {projectType.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked);
+                          setForAllProjectTypes(!!checked);
+                        }}
+                      />
                     </FormControl>
-                    <FormMessage />
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Available for all project types
+                      </FormLabel>
+                      <p className="text-sm text-muted-foreground">
+                        This feature will be available for all project types
+                      </p>
+                    </div>
                   </FormItem>
                 )}
               />
+
+              {!forAllProjectTypes && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <FormLabel>Project Types</FormLabel>
+                    {selectedProjectTypes.length > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedProjectTypes([])}
+                        type="button"
+                      >
+                        Clear selection
+                      </Button>
+                    )}
+                  </div>
+                  <div className="border rounded-md p-4 space-y-2">
+                    {projectTypes.map((projectType: ProjectType) => (
+                      <div key={projectType.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`project-type-${projectType.id}`}
+                          checked={selectedProjectTypes.includes(projectType.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedProjectTypes([...selectedProjectTypes, projectType.id]);
+                            } else {
+                              setSelectedProjectTypes(
+                                selectedProjectTypes.filter(id => id !== projectType.id)
+                              );
+                            }
+                          }}
+                        />
+                        <label 
+                          htmlFor={`project-type-${projectType.id}`}
+                          className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {projectType.name}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                  {selectedProjectTypes.length === 0 && !forAllProjectTypes && (
+                    <p className="text-sm text-destructive">
+                      Please select at least one project type or choose "Available for all project types"
+                    </p>
+                  )}
+                </div>
+              )}
 
               <FormField
                 control={featureForm.control}
