@@ -845,7 +845,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { quote, selectedFeatures, selectedPages } = req.body;
       
       // Validate quote data
-      const validatedQuote = insertQuoteSchema.parse(quote);
+      const validatedQuote = insertQuoteSchema.parse({
+        ...quote,
+        // Set the createdBy field to the current user's username
+        createdBy: req.user?.username || ''
+      });
       
       // Create the quote and its related items
       const createdQuote = await storage.createQuote(

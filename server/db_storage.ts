@@ -221,7 +221,12 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getQuotesByUser(userId: number): Promise<Quote[]> {
-    return db.select().from(quotes).where(eq(quotes.createdBy, userId.toString()));
+    // First get the user to get their username
+    const user = await this.getUser(userId);
+    if (!user) return [];
+    
+    // Now query by username in the createdBy field
+    return db.select().from(quotes).where(eq(quotes.createdBy, user.username));
   }
 
   async getQuote(id: number): Promise<Quote | undefined> {
