@@ -211,34 +211,34 @@ export function EstimateSummary({
       <CardContent className="px-4 sm:px-6">
         <div className="mb-4 sm:mb-6">
           {!hasSelections ? (
-            <div className="text-center text-gray-500 py-4 sm:py-8">
+            <div className="text-center text-gray-500 dark:text-gray-400 py-4 sm:py-8">
               No items selected yet
             </div>
           ) : (
             <div>
-              <div className="border-b border-gray-200 pb-3 mb-3 sm:pb-4 sm:mb-4">
-                <h3 className="font-medium text-gray-700 mb-1 sm:mb-2">{selectedProjectType.name}</h3>
+              <div className="border-b border-gray-200 dark:border-gray-700 pb-3 mb-3 sm:pb-4 sm:mb-4">
+                <h3 className="font-medium text-gray-700 dark:text-gray-200 mb-1 sm:mb-2">{selectedProjectType.name}</h3>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Base Price</span>
-                  <span className="text-sm font-medium">{formatCurrency(basePrice)}</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Base Price</span>
+                  <span className="text-sm font-medium dark:text-white">{formatCurrency(basePrice)}</span>
                 </div>
               </div>
               
               {selectedPages.length > 0 && (
                 <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4">
-                  <h4 className="text-sm font-medium text-gray-600">Pages</h4>
+                  <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400">Pages</h4>
                   <div className="max-h-[150px] overflow-y-auto pr-1 space-y-2">
                     {selectedPages.map(page => (
                       <div key={page.id} className="flex justify-between items-start">
                         <div className="flex-1 min-w-0 mr-2">
-                          <p className="text-sm font-medium text-gray-700 truncate">
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-200 truncate">
                             {page.name}{page.quantity > 1 ? ` (x${page.quantity})` : ''}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
                             ${page.pricePerPage?.toFixed(2) || '0.00'} per page
                           </p>
                         </div>
-                        <span className="text-sm font-medium whitespace-nowrap">{formatCurrency(calculatePagePrice(page))}</span>
+                        <span className="text-sm font-medium whitespace-nowrap dark:text-white">{formatCurrency(calculatePagePrice(page))}</span>
                       </div>
                     ))}
                   </div>
@@ -247,30 +247,30 @@ export function EstimateSummary({
               
               {selectedFeatures.length > 0 && (
                 <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4">
-                  <h4 className="text-sm font-medium text-gray-600">Features</h4>
+                  <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400">Features</h4>
                   <div className="max-h-[150px] overflow-y-auto pr-1 space-y-2">
                     {selectedFeatures.map(feature => (
                       <div key={feature.id} className="flex justify-between items-start">
                         <div className="flex-1 min-w-0 mr-2">
-                          <p className="text-sm font-medium text-gray-700 truncate">
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-200 truncate">
                             {feature.name}{feature.quantity > 1 ? ` (x${feature.quantity})` : ''}
                           </p>
                           {feature.pricingType === 'hourly' && (
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
                               {(feature.estimatedHours as number) * feature.quantity} hrs @ {formatCurrency(feature.hourlyRate as number)}/hr
                             </p>
                           )}
                         </div>
-                        <span className="text-sm font-medium whitespace-nowrap">{formatCurrency(calculateFeaturePrice(feature))}</span>
+                        <span className="text-sm font-medium whitespace-nowrap dark:text-white">{formatCurrency(calculateFeaturePrice(feature))}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
               
-              <div className="border-t border-gray-200 pt-3 sm:pt-4">
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-3 sm:pt-4">
                 <div className="flex justify-between items-center font-medium">
-                  <span>Total Estimate</span>
+                  <span className="text-gray-900 dark:text-gray-200">Total Estimate</span>
                   <span className="text-lg text-primary font-bold">{formatCurrency(totalPrice)}</span>
                 </div>
               </div>
