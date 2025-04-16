@@ -176,20 +176,20 @@ export default function Dashboard() {
   return (
     <>
       <Header />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600">Overview of your quotes and performance</p>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className="flex flex-col justify-between items-start mb-6">
+          <div className="mb-4">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Dashboard</h1>
+            <p className="text-sm text-gray-600">Overview of your quotes and performance</p>
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-3 mt-4 sm:mt-0">
+          <div className="flex flex-wrap gap-2 w-full">
             {isAdmin && (
               <Select 
                 value={selectedUser === "all" ? "all" : selectedUser.toString()}
                 onValueChange={(value) => setSelectedUser(value === "all" ? "all" : parseInt(value))}
               >
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="flex-grow sm:flex-grow-0 h-9 text-sm sm:w-[160px]">
                   <SelectValue placeholder="Select user" />
                 </SelectTrigger>
                 <SelectContent>
@@ -207,7 +207,7 @@ export default function Dashboard() {
               value={timeFilter}
               onValueChange={(value: "all" | "month" | "week") => setTimeFilter(value)}
             >
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="flex-grow sm:flex-grow-0 h-9 text-sm sm:w-[160px]">
                 <SelectValue placeholder="Time period" />
               </SelectTrigger>
               <SelectContent>
@@ -217,64 +217,64 @@ export default function Dashboard() {
               </SelectContent>
             </Select>
             
-            <Button onClick={() => navigate("/calculator")}>
+            <Button onClick={() => navigate("/calculator")} className="flex-grow sm:flex-grow-0 h-9 text-sm">
               <PlusCircle className="h-4 w-4 mr-2" />
               New Quote
             </Button>
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+          <Card className="shadow-sm">
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-xs sm:text-sm font-medium text-gray-500">
                 Total Quotes
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalQuotes}</div>
+            <CardContent className="pt-0 pb-3 px-4">
+              <div className="text-xl sm:text-2xl font-bold">{totalQuotes}</div>
               <p className="text-xs text-gray-500 mt-1">
                 {timeFilter === "all" ? "All time" : timeFilter === "month" ? "Last 30 days" : "Last 7 days"}
               </p>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
+          <Card className="shadow-sm">
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-xs sm:text-sm font-medium text-gray-500">
                 Total Value
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">${totalValue.toLocaleString()}</div>
+            <CardContent className="pt-0 pb-3 px-4">
+              <div className="text-xl sm:text-2xl font-bold">${totalValue.toLocaleString()}</div>
               <p className="text-xs text-gray-500 mt-1">
                 From all quotes
               </p>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
+          <Card className="shadow-sm">
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-xs sm:text-sm font-medium text-gray-500">
                 Closed Value
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">${wonValue.toLocaleString()}</div>
+            <CardContent className="pt-0 pb-3 px-4">
+              <div className="text-xl sm:text-2xl font-bold">${wonValue.toLocaleString()}</div>
               <p className="text-xs text-gray-500 mt-1">
                 From won quotes
               </p>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
+          <Card className="shadow-sm">
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-xs sm:text-sm font-medium text-gray-500">
                 Win Rate
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
+            <CardContent className="pt-0 pb-3 px-4">
+              <div className="text-xl sm:text-2xl font-bold">
                 {totalQuotes > 0 ? Math.round((wonQuotes / totalQuotes) * 100) : 0}%
               </div>
               <p className="text-xs text-gray-500 mt-1">
@@ -284,20 +284,20 @@ export default function Dashboard() {
           </Card>
         </div>
         
-        <Tabs defaultValue="quotes" className="mb-8">
-          <TabsList>
+        <Tabs defaultValue="quotes" className="mb-6">
+          <TabsList className="w-full grid grid-cols-2 mb-4">
             <TabsTrigger value="quotes">Quotes</TabsTrigger>
             <TabsTrigger value="analytics">Reports</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="quotes" className="pt-6">
+          <TabsContent value="quotes" className="pt-4">
             <div className="bg-white shadow rounded-lg overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">Recent Quotes</h3>
+              <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+                <h3 className="text-base sm:text-lg font-medium text-gray-900">Recent Quotes</h3>
               </div>
               
               {timeFilteredQuotes.length === 0 ? (
-                <div className="px-6 py-12 text-center">
+                <div className="px-4 sm:px-6 py-8 sm:py-12 text-center">
                   <p className="text-gray-500">No quotes found</p>
                   <Button 
                     variant="outline" 
@@ -310,29 +310,29 @@ export default function Dashboard() {
               ) : (
                 <div className="divide-y divide-gray-200">
                   {timeFilteredQuotes.slice(0, 5).map((quote: Quote) => (
-                    <div key={quote.id} className="px-6 py-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                    <div key={quote.id} className="px-4 sm:px-6 py-3 sm:py-4 hover:bg-gray-50 transition-colors cursor-pointer"
                       onClick={() => navigate(`/quotes/${quote.id}`)}
                     >
                       <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="font-medium text-gray-900">{quote.clientName}</h4>
-                          <p className="text-sm text-gray-500">{quote.businessName || "No business name"}</p>
-                          <div className="flex items-center mt-1">
+                        <div className="overflow-hidden">
+                          <h4 className="font-medium text-gray-900 text-sm sm:text-base truncate">{quote.clientName}</h4>
+                          <p className="text-xs sm:text-sm text-gray-500 truncate">{quote.businessName || "No business name"}</p>
+                          <div className="flex items-center mt-1 flex-wrap">
                             <Calendar className="h-3 w-3 text-gray-400 mr-1" />
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-gray-500 mr-3">
                               {new Date(quote.createdAt).toLocaleDateString()}
                             </span>
                             
-                            <User className="h-3 w-3 text-gray-400 ml-3 mr-1" />
+                            <User className="h-3 w-3 text-gray-400 mr-1" />
                             <span className="text-xs text-gray-500">
                               {quote.createdBy}
                             </span>
                           </div>
                         </div>
                         
-                        <div className="flex flex-col items-end">
-                          <span className="font-medium">${quote.totalPrice?.toLocaleString()}</span>
-                          <span className={`text-xs px-2 py-0.5 rounded-full mt-1 ${
+                        <div className="flex flex-col items-end ml-3">
+                          <span className="font-medium text-sm sm:text-base whitespace-nowrap">${quote.totalPrice?.toLocaleString()}</span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full mt-1 whitespace-nowrap ${
                             quote.leadStatus === "Won" 
                               ? "bg-green-100 text-green-800" 
                               : quote.leadStatus === "Lost"
@@ -347,10 +347,10 @@ export default function Dashboard() {
                   ))}
                   
                   {timeFilteredQuotes.length > 5 && (
-                    <div className="px-6 py-3 text-center">
+                    <div className="px-4 sm:px-6 py-3 text-center">
                       <Button 
                         variant="ghost"
-                        className="text-sm"
+                        className="text-xs sm:text-sm h-8"
                         onClick={() => {/* TODO: Implement view all quotes */}}
                       >
                         View all quotes
@@ -363,19 +363,17 @@ export default function Dashboard() {
             </div>
           </TabsContent>
           
-          <TabsContent value="analytics" className="pt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-              <div className="space-y-6">
-                <Card className="overflow-hidden border-0 shadow-md bg-gradient-to-br from-blue-50 to-indigo-50">
-                  <CardHeader className="pb-0">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <CardTitle className="text-lg font-semibold text-gray-800">Quote Status</CardTitle>
-                        <CardDescription className="text-gray-600">Current pipeline overview</CardDescription>
-                      </div>
+          <TabsContent value="analytics" className="pt-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+              <div className="space-y-4">
+                <Card className="overflow-hidden border-0 shadow-sm bg-gradient-to-br from-blue-50 to-indigo-50">
+                  <CardHeader className="pb-0 py-3 px-4">
+                    <div>
+                      <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">Quote Status</CardTitle>
+                      <CardDescription className="text-xs sm:text-sm text-gray-600">Current pipeline overview</CardDescription>
                     </div>
                   </CardHeader>
-                  <CardContent className="h-72 pt-4">
+                  <CardContent className="h-52 sm:h-60 pt-2 px-4">
                     {statusData.length > 0 ? (
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
@@ -383,11 +381,12 @@ export default function Dashboard() {
                             data={statusData}
                             cx="50%"
                             cy="50%"
-                            innerRadius={70}
-                            outerRadius={100}
+                            innerRadius={50}
+                            outerRadius={70}
                             paddingAngle={2}
                             dataKey="value"
                             label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                            labelLine={false}
                           >
                             {statusData.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={entry.color} />
@@ -401,29 +400,29 @@ export default function Dashboard() {
                       </ResponsiveContainer>
                     ) : (
                       <div className="flex items-center justify-center h-full">
-                        <p className="text-gray-500">No data available</p>
+                        <p className="text-gray-500 text-sm">No data available</p>
                       </div>
                     )}
                   </CardContent>
                 </Card>
 
-                <Card className="overflow-hidden border-0 shadow-md">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg font-semibold text-gray-800">Sales Performance</CardTitle>
-                    <CardDescription className="text-gray-600">Win rate & conversion metrics</CardDescription>
+                <Card className="overflow-hidden border-0 shadow-sm">
+                  <CardHeader className="pb-2 py-3 px-4">
+                    <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">Sales Performance</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm text-gray-600">Win rate & conversion metrics</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-6">
+                  <CardContent className="px-4 pb-4">
+                    <div className="space-y-4">
                       <div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-sm font-medium text-gray-600">Win Rate</span>
-                          <span className="text-sm font-bold text-gray-900">
+                        <div className="flex justify-between mb-1">
+                          <span className="text-xs sm:text-sm font-medium text-gray-600">Win Rate</span>
+                          <span className="text-xs sm:text-sm font-bold text-gray-900">
                             {totalQuotes > 0 ? Math.round((wonQuotes / totalQuotes) * 100) : 0}%
                           </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
                           <div 
-                            className="bg-green-600 h-2.5 rounded-full" 
+                            className="bg-green-600 h-2 rounded-full" 
                             style={{ width: `${totalQuotes > 0 ? Math.round((wonQuotes / totalQuotes) * 100) : 0}%` }}
                           ></div>
                         </div>
@@ -433,15 +432,15 @@ export default function Dashboard() {
                       </div>
 
                       <div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-sm font-medium text-gray-600">Lost Opportunities</span>
-                          <span className="text-sm font-bold text-gray-900">
+                        <div className="flex justify-between mb-1">
+                          <span className="text-xs sm:text-sm font-medium text-gray-600">Lost Opportunities</span>
+                          <span className="text-xs sm:text-sm font-bold text-gray-900">
                             {totalQuotes > 0 ? Math.round((lostQuotes / totalQuotes) * 100) : 0}%
                           </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
                           <div 
-                            className="bg-red-500 h-2.5 rounded-full" 
+                            className="bg-red-500 h-2 rounded-full" 
                             style={{ width: `${totalQuotes > 0 ? Math.round((lostQuotes / totalQuotes) * 100) : 0}%` }}
                           ></div>
                         </div>
@@ -451,15 +450,15 @@ export default function Dashboard() {
                       </div>
 
                       <div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-sm font-medium text-gray-600">Pending Review</span>
-                          <span className="text-sm font-bold text-gray-900">
+                        <div className="flex justify-between mb-1">
+                          <span className="text-xs sm:text-sm font-medium text-gray-600">Pending Review</span>
+                          <span className="text-xs sm:text-sm font-bold text-gray-900">
                             {totalQuotes > 0 ? Math.round((pendingQuotes / totalQuotes) * 100) : 0}%
                           </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
                           <div 
-                            className="bg-yellow-400 h-2.5 rounded-full" 
+                            className="bg-yellow-400 h-2 rounded-full" 
                             style={{ width: `${totalQuotes > 0 ? Math.round((pendingQuotes / totalQuotes) * 100) : 0}%` }}
                           ></div>
                         </div>
@@ -472,21 +471,19 @@ export default function Dashboard() {
                 </Card>
               </div>
 
-              <div className="space-y-6">
-                <Card className="overflow-hidden border-0 shadow-md bg-gradient-to-br from-indigo-50 to-purple-50">
-                  <CardHeader className="pb-0">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <CardTitle className="text-lg font-semibold text-gray-800">Financial Summary</CardTitle>
-                        <CardDescription className="text-gray-600">Open vs. closed revenue</CardDescription>
-                      </div>
+              <div className="space-y-4">
+                <Card className="overflow-hidden border-0 shadow-sm bg-gradient-to-br from-indigo-50 to-purple-50">
+                  <CardHeader className="pb-0 py-3 px-4">
+                    <div>
+                      <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">Financial Summary</CardTitle>
+                      <CardDescription className="text-xs sm:text-sm text-gray-600">Open vs. closed revenue</CardDescription>
                     </div>
                   </CardHeader>
-                  <CardContent className="pt-4">
-                    <div className="grid grid-cols-2 gap-4 mb-6">
-                      <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                        <h4 className="text-sm font-medium text-gray-500 mb-1">Open Opportunities</h4>
-                        <p className="text-2xl font-bold text-indigo-600">
+                  <CardContent className="pt-3 px-4">
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
+                        <h4 className="text-xs sm:text-sm font-medium text-gray-500 mb-1">Open Opportunities</h4>
+                        <p className="text-lg sm:text-xl font-bold text-indigo-600">
                           ${pendingValue.toLocaleString()}
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
@@ -494,9 +491,9 @@ export default function Dashboard() {
                         </p>
                       </div>
                       
-                      <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                        <h4 className="text-sm font-medium text-gray-500 mb-1">Closed Revenue</h4>
-                        <p className="text-2xl font-bold text-green-600">
+                      <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
+                        <h4 className="text-xs sm:text-sm font-medium text-gray-500 mb-1">Closed Revenue</h4>
+                        <p className="text-lg sm:text-xl font-bold text-green-600">
                           ${wonValue.toLocaleString()}
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
@@ -505,29 +502,29 @@ export default function Dashboard() {
                       </div>
                     </div>
                     
-                    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                      <h4 className="text-sm font-medium text-gray-500 mb-3">Total Pipeline Value</h4>
+                    <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
+                      <h4 className="text-xs sm:text-sm font-medium text-gray-500 mb-2">Total Pipeline Value</h4>
                       <div className="flex items-center">
                         <div className="flex-1 flex">
                           <div 
-                            className="h-3 bg-green-500 rounded-l-full" 
+                            className="h-2.5 bg-green-500 rounded-l-full" 
                             style={{ width: `${activePipelineValue > 0 ? (wonValue / activePipelineValue) * 100 : 0}%` }}
                           ></div>
                           <div 
-                            className="h-3 bg-yellow-400" 
+                            className="h-2.5 bg-yellow-400" 
                             style={{ width: `${activePipelineValue > 0 ? (pendingValue / activePipelineValue) * 100 : 0}%` }}
                           ></div>
                         </div>
-                        <span className="text-lg font-bold ml-4 text-gray-800">
+                        <span className="text-base sm:text-lg font-bold ml-3 text-gray-800">
                           ${activePipelineValue.toLocaleString()}
                         </span>
                       </div>
-                      <div className="flex text-xs text-gray-500 mt-2">
-                        <span className="flex items-center">
+                      <div className="flex flex-wrap text-xs text-gray-500 mt-2">
+                        <span className="flex items-center mr-4 mb-1">
                           <span className="w-2 h-2 inline-block bg-green-500 rounded-full mr-1"></span>
                           Closed: {activePipelineValue > 0 ? Math.round((wonValue / activePipelineValue) * 100) : 0}%
                         </span>
-                        <span className="flex items-center ml-4">
+                        <span className="flex items-center">
                           <span className="w-2 h-2 inline-block bg-yellow-400 rounded-full mr-1"></span>
                           Open: {activePipelineValue > 0 ? Math.round((pendingValue / activePipelineValue) * 100) : 0}%
                         </span>
@@ -536,18 +533,18 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
                 
-                <Card className="overflow-hidden border-0 shadow-md">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg font-semibold text-gray-800">Monthly Performance</CardTitle>
-                    <CardDescription className="text-gray-600">Quote value trend over time</CardDescription>
+                <Card className="overflow-hidden border-0 shadow-sm">
+                  <CardHeader className="pb-2 py-3 px-4">
+                    <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">Monthly Performance</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm text-gray-600">Quote value trend over time</CardDescription>
                   </CardHeader>
-                  <CardContent className="h-60">
+                  <CardContent className="h-44 sm:h-56 px-2">
                     {monthlyData.length > 0 ? (
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={monthlyData}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                          <XAxis dataKey="name" tickLine={false} axisLine={false} />
-                          <YAxis tickLine={false} axisLine={false} />
+                          <XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
+                          <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
                           <Tooltip 
                             formatter={(value) => [`$${value.toLocaleString()}`, "Value"]}
                             contentStyle={{ borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
@@ -557,7 +554,7 @@ export default function Dashboard() {
                       </ResponsiveContainer>
                     ) : (
                       <div className="flex items-center justify-center h-full">
-                        <p className="text-gray-500">No data available</p>
+                        <p className="text-gray-500 text-sm">No data available</p>
                       </div>
                     )}
                   </CardContent>
