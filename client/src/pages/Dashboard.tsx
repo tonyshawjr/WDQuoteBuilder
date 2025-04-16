@@ -31,7 +31,7 @@ import {
   CartesianGrid, 
   Tooltip 
 } from "recharts";
-import { PlusCircle, ArrowUpRight, Filter, User, Calendar } from "lucide-react";
+import { PlusCircle, ArrowUpRight, Filter, User, Calendar, FileText } from "lucide-react";
 import { Quote, User as UserType } from "@shared/schema";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
@@ -332,48 +332,96 @@ export default function Dashboard() {
           </TabsList>
           
           <TabsContent value="quotes" className="pt-4">
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-              <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
-                <h3 className="text-base sm:text-lg font-medium text-gray-900">Recent Quotes</h3>
+            <div className="bg-white shadow-lg rounded-xl overflow-hidden">
+              <div className="bg-gradient-to-r from-primary/90 to-primary px-6 py-5 flex justify-between items-center">
+                <h3 className="text-xl font-semibold text-white">Recent Quotes</h3>
+                <Button 
+                  variant="secondary" 
+                  className="bg-white text-primary hover:bg-white/90"
+                  onClick={() => navigate("/calculator")}
+                >
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  New Quote
+                </Button>
               </div>
               
               {timeFilteredQuotes.length === 0 ? (
-                <div className="px-4 sm:px-6 py-8 sm:py-12 text-center">
-                  <p className="text-gray-500">No quotes found</p>
+                <div className="flex flex-col items-center justify-center py-16 px-4">
+                  <div className="bg-gray-100 rounded-full p-6 mb-4">
+                    <FileText className="h-10 w-10 text-primary/70" />
+                  </div>
+                  <h4 className="text-lg font-medium text-gray-900 mb-2">No quotes yet</h4>
+                  <p className="text-gray-500 text-center mb-4 max-w-md">Start creating quotes for your clients to track opportunities and generate revenue</p>
                   <Button 
-                    variant="outline" 
-                    className="mt-4"
                     onClick={() => navigate("/calculator")}
+                    size="lg"
                   >
                     Create your first quote
                   </Button>
                 </div>
               ) : (
-                <div className="divide-y divide-gray-200">
-                  {timeFilteredQuotes.slice(0, 5).map((quote: Quote) => (
-                    <div key={quote.id} className="px-4 sm:px-6 py-3 sm:py-4 hover:bg-gray-50 transition-colors cursor-pointer"
-                      onClick={() => navigate(`/quotes/${quote.id}`)}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="overflow-hidden">
-                          <h4 className="font-medium text-gray-900 text-sm sm:text-base truncate">{quote.clientName}</h4>
-                          <p className="text-xs sm:text-sm text-gray-500 truncate">{quote.businessName || "No business name"}</p>
-                          <div className="flex items-center mt-1 flex-wrap">
-                            <Calendar className="h-3 w-3 text-gray-400 mr-1" />
-                            <span className="text-xs text-gray-500 mr-3">
-                              {new Date(quote.createdAt).toLocaleDateString()}
-                            </span>
-                            
-                            <User className="h-3 w-3 text-gray-400 mr-1" />
-                            <span className="text-xs text-gray-500">
-                              {quote.createdBy}
+                <div>
+                  {/* Desktop view */}
+                  <div className="hidden md:block">
+                    <div className="grid grid-cols-12 bg-gray-50 px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <div className="col-span-4">Client</div>
+                      <div className="col-span-3">Created</div>
+                      <div className="col-span-2">By</div>
+                      <div className="col-span-2 text-right">Amount</div>
+                      <div className="col-span-1 text-right">Status</div>
+                    </div>
+                    <div>
+                      {timeFilteredQuotes.slice(0, 5).map((quote: Quote) => (
+                        <div 
+                          key={quote.id} 
+                          className="grid grid-cols-12 px-6 py-4 hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-100"
+                          onClick={() => navigate(`/quotes/${quote.id}`)}
+                        >
+                          <div className="col-span-4">
+                            <div className="font-medium text-gray-900">{quote.clientName}</div>
+                            <div className="text-sm text-gray-500 truncate">{quote.businessName || "Individual"}</div>
+                          </div>
+                          <div className="col-span-3 flex items-center text-sm text-gray-600">
+                            <Calendar className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
+                            {new Date(quote.createdAt).toLocaleDateString()}
+                          </div>
+                          <div className="col-span-2 flex items-center text-sm text-gray-600">
+                            <User className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
+                            {quote.createdBy}
+                          </div>
+                          <div className="col-span-2 text-right font-semibold">
+                            ${quote.totalPrice?.toLocaleString()}
+                          </div>
+                          <div className="col-span-1 text-right">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              quote.leadStatus === "Won" 
+                                ? "bg-green-100 text-green-800" 
+                                : quote.leadStatus === "Lost"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-yellow-100 text-yellow-800"
+                            }`}>
+                              {quote.leadStatus}
                             </span>
                           </div>
                         </div>
-                        
-                        <div className="flex flex-col items-end ml-3">
-                          <span className="font-medium text-sm sm:text-base whitespace-nowrap">${quote.totalPrice?.toLocaleString()}</span>
-                          <span className={`text-xs px-2 py-0.5 rounded-full mt-1 whitespace-nowrap ${
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Mobile view - card style */}
+                  <div className="md:hidden">
+                    {timeFilteredQuotes.slice(0, 5).map((quote: Quote) => (
+                      <div 
+                        key={quote.id} 
+                        className="p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
+                        onClick={() => navigate(`/quotes/${quote.id}`)}
+                      >
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h4 className="font-semibold text-gray-900">{quote.clientName}</h4>
+                            <p className="text-sm text-gray-500">{quote.businessName || "Individual"}</p>
+                          </div>
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
                             quote.leadStatus === "Won" 
                               ? "bg-green-100 text-green-800" 
                               : quote.leadStatus === "Lost"
@@ -383,19 +431,27 @@ export default function Dashboard() {
                             {quote.leadStatus}
                           </span>
                         </div>
+                        
+                        <div className="flex justify-between items-center mt-3 pt-2 border-t border-gray-100">
+                          <div className="flex items-center text-sm text-gray-500">
+                            <Calendar className="h-3.5 w-3.5 text-gray-400 mr-1.5" />
+                            {new Date(quote.createdAt).toLocaleDateString()}
+                          </div>
+                          <div className="font-semibold">${quote.totalPrice?.toLocaleString()}</div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                   
                   {timeFilteredQuotes.length > 5 && (
-                    <div className="px-4 sm:px-6 py-3 text-center">
+                    <div className="bg-gray-50 px-6 py-4 text-center">
                       <Button 
                         variant="ghost"
-                        className="text-xs sm:text-sm h-8"
                         onClick={() => {/* TODO: Implement view all quotes */}}
+                        className="text-primary hover:text-primary/90 hover:bg-gray-100"
                       >
                         View all quotes
-                        <ArrowUpRight className="h-3 w-3 ml-1" />
+                        <ArrowUpRight className="h-4 w-4 ml-2" />
                       </Button>
                     </div>
                   )}
