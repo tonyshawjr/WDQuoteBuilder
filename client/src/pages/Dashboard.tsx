@@ -358,12 +358,12 @@ export default function Dashboard() {
           </TabsList>
           
           <TabsContent value="quotes" className="pt-4">
-            <div className="bg-white shadow-lg rounded-xl overflow-hidden">
-              <div className="bg-gradient-to-r from-primary/90 to-primary px-6 py-5 flex justify-between items-center">
-                <h3 className="text-xl font-semibold text-white">Recent Quotes</h3>
+            <div className="bg-card shadow-lg rounded-xl overflow-hidden">
+              <div className="bg-gradient-to-r from-secondary/90 to-secondary px-6 py-5 flex justify-between items-center">
+                <h3 className="text-xl font-semibold text-secondary-foreground">Recent Quotes</h3>
                 <Button 
                   variant="secondary" 
-                  className="bg-white text-primary hover:bg-white/90"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
                   onClick={() => navigate("/calculator")}
                 >
                   <PlusCircle className="h-4 w-4 mr-2" />
@@ -388,70 +388,74 @@ export default function Dashboard() {
               ) : (
                 <div>
                   {/* Desktop view */}
-                  <div className="hidden md:block">
-                    <div className="grid grid-cols-[repeat(16,minmax(0,1fr))] bg-gray-800 px-6 py-3 text-xs font-medium text-gray-200 uppercase tracking-wider">
-                      <div className="col-span-3">Client</div>
-                      <div className="col-span-3">Project Type</div>
-                      <div className="col-span-2">Created</div>
-                      <div className="col-span-2">Rep</div>
-                      <div className="col-span-2">Status</div>
-                      <div className="col-span-2">Value</div>
-                      <div className="col-span-2">Last Updated</div>
-                    </div>
-                    <div>
-                      {timeFilteredQuotes.slice(0, 5).map((quote: Quote) => (
-                        <div 
-                          key={quote.id} 
-                          className="grid grid-cols-[repeat(16,minmax(0,1fr))] px-6 py-4 hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-100"
-                          onClick={() => navigate(`/quotes/${quote.id}`)}
-                        >
-                          <div className="col-span-3">
-                            <div className="font-medium text-gray-900">{quote.clientName}</div>
-                            <div className="text-sm text-gray-500 truncate">{quote.businessName || "Individual"}</div>
-                          </div>
-                          
-                          <div className="col-span-3 flex items-center">
-                            <div className="text-sm text-gray-700">
-                              {getProjectTypeName(quote.projectTypeId)}
-                            </div>
-                          </div>
-                          
-                          <div className="col-span-2 flex items-center text-sm text-gray-600">
-                            {new Date(quote.createdAt).toLocaleDateString()}
-                          </div>
-                          
-                          <div className="col-span-2 flex items-center text-sm text-gray-600">
-                            {Array.isArray(users) 
-                              ? users.find(u => u.username === quote.createdBy)
-                                  ? `${users.find(u => u.username === quote.createdBy)?.firstName || ''} ${users.find(u => u.username === quote.createdBy)?.lastName || ''}`
-                                  : quote.createdBy
-                              : quote.createdBy
-                            }
-                          </div>
-                          
-                          <div className="col-span-2">
-                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                              quote.leadStatus === "Won" 
-                                ? "bg-green-500 text-white" 
-                                : quote.leadStatus === "Lost"
-                                  ? "bg-red-500 text-white"
-                                  : "bg-yellow-400 text-gray-900"
-                            }`}>
-                              <span className="h-2 w-2 rounded-full mr-1.5 bg-current opacity-70"></span>
-                              {quote.leadStatus || "In Progress"}
-                            </span>
-                          </div>
-                          
-                          <div className="col-span-2 font-semibold text-gray-900">
-                            ${quote.totalPrice?.toLocaleString()}
-                          </div>
-                          
-                          <div className="col-span-2 text-sm text-gray-600">
-                            {new Date(quote.updatedAt || quote.createdAt).toLocaleDateString()}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                  <div className="hidden md:block table-container">
+                    <table className="table w-full">
+                      <thead>
+                        <tr>
+                          <th className="w-[20%]">Client</th>
+                          <th className="w-[20%]">Project Type</th>
+                          <th className="w-[12%]">Created</th>
+                          <th className="w-[12%]">Rep</th>
+                          <th className="w-[12%]">Status</th>
+                          <th className="w-[12%]">Value</th>
+                          <th className="w-[12%]">Last Updated</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {timeFilteredQuotes.slice(0, 5).map((quote: Quote) => (
+                          <tr 
+                            key={quote.id} 
+                            className="cursor-pointer"
+                            onClick={() => navigate(`/quotes/${quote.id}`)}
+                          >
+                            <td>
+                              <div className="font-medium">{quote.clientName}</div>
+                              <div className="text-sm text-muted-foreground truncate">{quote.businessName || "Individual"}</div>
+                            </td>
+                            
+                            <td>
+                              <div className="text-sm">
+                                {getProjectTypeName(quote.projectTypeId)}
+                              </div>
+                            </td>
+                            
+                            <td className="text-sm text-muted-foreground">
+                              {new Date(quote.createdAt).toLocaleDateString()}
+                            </td>
+                            
+                            <td className="text-sm text-muted-foreground">
+                              {Array.isArray(users) 
+                                ? users.find(u => u.username === quote.createdBy)
+                                    ? `${users.find(u => u.username === quote.createdBy)?.firstName || ''} ${users.find(u => u.username === quote.createdBy)?.lastName || ''}`
+                                    : quote.createdBy
+                                : quote.createdBy
+                              }
+                            </td>
+                            
+                            <td>
+                              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                                quote.leadStatus === "Won" 
+                                  ? "bg-green-500 text-white" 
+                                  : quote.leadStatus === "Lost"
+                                    ? "bg-red-500 text-white"
+                                    : "bg-yellow-400 text-primary-foreground"
+                              }`}>
+                                <span className="h-2 w-2 rounded-full mr-1.5 bg-current opacity-70"></span>
+                                {quote.leadStatus || "In Progress"}
+                              </span>
+                            </td>
+                            
+                            <td className="font-semibold">
+                              ${quote.totalPrice?.toLocaleString()}
+                            </td>
+                            
+                            <td className="text-sm text-muted-foreground">
+                              {new Date(quote.updatedAt || quote.createdAt).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                   
                   {/* Mobile view - card style */}
@@ -459,40 +463,40 @@ export default function Dashboard() {
                     {timeFilteredQuotes.slice(0, 5).map((quote: Quote) => (
                       <div 
                         key={quote.id} 
-                        className="p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
+                        className="p-4 border-b border-border hover:bg-muted/30 transition-colors cursor-pointer"
                         onClick={() => navigate(`/quotes/${quote.id}`)}
                       >
                         <div className="flex justify-between items-start mb-2">
                           <div>
-                            <h4 className="font-semibold text-gray-900">{quote.clientName}</h4>
-                            <p className="text-sm text-gray-500">{quote.businessName || "Individual"}</p>
+                            <h4 className="font-semibold">{quote.clientName}</h4>
+                            <p className="text-sm text-muted-foreground">{quote.businessName || "Individual"}</p>
                           </div>
                           <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
                             quote.leadStatus === "Won" 
                               ? "bg-green-500 text-white" 
                               : quote.leadStatus === "Lost"
                                 ? "bg-red-500 text-white"
-                                : "bg-yellow-400 text-gray-900"
+                                : "bg-yellow-400 text-primary-foreground"
                           }`}>
                             <span className="h-2 w-2 rounded-full mr-1 bg-current opacity-70"></span>
                             {quote.leadStatus || "In Progress"}
                           </span>
                         </div>
                         
-                        <div className="flex items-center mt-2 bg-gray-50 rounded-md px-2 py-1.5">
-                          <div className="text-xs font-medium text-gray-600">
+                        <div className="flex items-center mt-2 bg-muted rounded-md px-2 py-1.5">
+                          <div className="text-xs font-medium text-muted-foreground">
                             {getProjectTypeName(quote.projectTypeId)}
                           </div>
                         </div>
                         
-                        <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
+                        <div className="flex justify-between items-center mt-2 pt-2 border-t border-border">
                           <div className="flex items-center space-x-2">
-                            <div className="flex items-center text-xs text-gray-500">
-                              <Calendar className="h-3 w-3 text-gray-400 mr-1" />
+                            <div className="flex items-center text-xs text-muted-foreground">
+                              <Calendar className="h-3 w-3 text-muted-foreground mr-1" />
                               {new Date(quote.createdAt).toLocaleDateString()}
                             </div>
-                            <div className="flex items-center text-xs text-gray-500">
-                              <User className="h-3 w-3 text-gray-400 mr-1" />
+                            <div className="flex items-center text-xs text-muted-foreground">
+                              <User className="h-3 w-3 text-muted-foreground mr-1" />
                               {Array.isArray(users) 
                                 ? users.find(u => u.username === quote.createdBy)
                                     ? `${users.find(u => u.username === quote.createdBy)?.firstName || ''} ${users.find(u => u.username === quote.createdBy)?.lastName || ''}`
@@ -508,11 +512,11 @@ export default function Dashboard() {
                   </div>
                   
                   {timeFilteredQuotes.length > 5 && (
-                    <div className="bg-gray-50 px-6 py-4 text-center">
+                    <div className="bg-muted/30 px-6 py-4 text-center">
                       <Button 
                         variant="ghost"
                         onClick={() => navigate("/quotes")}
-                        className="text-primary hover:text-primary/90 hover:bg-gray-100"
+                        className="text-primary hover:text-primary/90 hover:bg-muted"
                       >
                         View all quotes
                         <ArrowUpRight className="h-4 w-4 ml-2" />
