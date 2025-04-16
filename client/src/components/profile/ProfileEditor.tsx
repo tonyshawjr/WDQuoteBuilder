@@ -166,7 +166,7 @@ export function ProfileEditor() {
   return (
     <div className="space-y-10">
       {/* Profile Card */}
-      <div className="bg-white rounded-xl overflow-hidden shadow-sm ring-1 ring-gray-100">
+      <div className="bg-[#282828] rounded-xl overflow-hidden shadow-sm ring-1 ring-gray-700">
         {/* Personal Info Section */}
         <div className="px-6 py-6 md:px-10 md:py-8">
           <Form {...profileForm}>
@@ -174,8 +174,8 @@ export function ProfileEditor() {
               {isEditingProfile ? (
                 <>
                   <div className="mb-8">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-1">Edit Your Profile</h2>
-                    <p className="text-gray-500">Update your personal information</p>
+                    <h2 className="text-2xl font-bold text-white mb-1">Edit Your Profile</h2>
+                    <p className="text-gray-400">Update your personal information</p>
                   </div>
                   
                   <div className="space-y-8">
@@ -185,7 +185,7 @@ export function ProfileEditor() {
                         name="username"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-gray-700 font-medium">Username</FormLabel>
+                            <FormLabel className="text-gray-300 font-medium">Username</FormLabel>
                             <FormControl>
                               <Input 
                                 {...field} 
@@ -202,7 +202,7 @@ export function ProfileEditor() {
                         name="email"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-gray-700 font-medium">Email</FormLabel>
+                            <FormLabel className="text-gray-300 font-medium">Email</FormLabel>
                             <FormControl>
                               <Input 
                                 type="email" 
@@ -223,7 +223,7 @@ export function ProfileEditor() {
                         name="firstName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-gray-700 font-medium">First Name</FormLabel>
+                            <FormLabel className="text-gray-300 font-medium">First Name</FormLabel>
                             <FormControl>
                               <Input 
                                 {...field} 
@@ -241,7 +241,7 @@ export function ProfileEditor() {
                         name="lastName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-gray-700 font-medium">Last Name</FormLabel>
+                            <FormLabel className="text-gray-300 font-medium">Last Name</FormLabel>
                             <FormControl>
                               <Input 
                                 {...field} 
@@ -261,7 +261,7 @@ export function ProfileEditor() {
                       type="button"
                       variant="outline"
                       onClick={toggleEditProfile}
-                      className="rounded-lg px-5 py-2.5 border-gray-300"
+                      className="rounded-lg px-5 py-2.5 bg-[#282828] text-gray-300 border-gray-600 hover:bg-gray-700"
                     >
                       Cancel
                     </Button>
@@ -269,7 +269,7 @@ export function ProfileEditor() {
                       type="submit"
                       variant="default"
                       disabled={updateProfileMutation.isPending}
-                      className="rounded-lg px-5 py-2.5"
+                      className="rounded-lg px-5 py-2.5 bg-[#F9B200] text-[#1F1F1F] hover:bg-[#e5a400]"
                     >
                       {updateProfileMutation.isPending ? (
                         <>
@@ -289,8 +289,8 @@ export function ProfileEditor() {
                 <>
                   <div className="flex justify-between items-center mb-8">
                     <div>
-                      <h2 className="text-2xl font-bold text-gray-900">Personal Information</h2>
-                      <p className="text-gray-500 mt-1">
+                      <h2 className="text-2xl font-bold text-white">Personal Information</h2>
+                      <p className="text-gray-400 mt-1">
                         Manage your personal details and account settings
                       </p>
                     </div>
@@ -298,7 +298,7 @@ export function ProfileEditor() {
                       type="button"
                       variant="outline"
                       onClick={toggleEditProfile}
-                      className="rounded-lg bg-white h-10 px-4 py-2"
+                      className="rounded-lg bg-[#282828] text-[#F9B200] border-[#F9B200]/30 hover:bg-[#F9B200]/10 h-10 px-4 py-2"
                     >
                       Edit Profile
                     </Button>
