@@ -8,6 +8,7 @@ type AuthContextType = {
   loading: boolean;
   login: (username: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
   isAdmin: boolean;
 };
 
@@ -68,6 +69,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
   
+  const refreshUser = async (): Promise<void> => {
+    try {
+      const res = await fetch('/api/me', {
+        credentials: "include",
+      });
+      
+      if (res.status === 401) {
+        setUser(null);
+        return;
+      }
+      
+      if (res.ok) {
+        const userData = await res.json();
+        setUser(userData);
+        queryClient.setQueryData(['/api/me'], userData);
+      }
+    } catch (error) {
+      console.error("Refresh user error:", error);
+    }
+  };
+
   const logout = async (): Promise<void> => {
     try {
       await apiRequest('/api/logout', {
@@ -90,6 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     login,
     logout,
+    refreshUser,
     isAdmin
   };
   

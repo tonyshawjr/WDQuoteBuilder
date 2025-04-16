@@ -34,7 +34,7 @@ type PasswordChangeFormValues = z.infer<typeof passwordChangeSchema>;
 
 export function ProfileEditor() {
   const { toast } = useToast();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, refreshUser } = useAuth();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   
   // Profile form setup
@@ -76,12 +76,16 @@ export function ProfileEditor() {
         }),
       });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      // First refresh the user data
+      await refreshUser();
+      
       toast({
         title: "Profile updated",
         description: "Your profile has been updated successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/me"] });
+      
+      // Update the UI
       setIsEditingProfile(false);
     },
     onError: (error) => {
@@ -111,13 +115,17 @@ export function ProfileEditor() {
         }),
       });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      // First refresh the user data
+      await refreshUser();
+      
       toast({
         title: "Password changed",
         description: "Your password has been changed successfully",
       });
+      
+      // Reset the form
       passwordForm.reset();
-      queryClient.invalidateQueries({ queryKey: ["/api/me"] });
     },
     onError: (error) => {
       toast({
