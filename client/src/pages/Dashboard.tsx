@@ -60,6 +60,46 @@ export default function Dashboard() {
     }
   }, [user, isAdmin]);
   
+  // Helper function to calculate top salespeople based on quotes
+  const getTopSalespeople = (quotes: Quote[], timeRange: "all" | "month") => {
+    if (!Array.isArray(quotes) || !Array.isArray(users)) return [];
+    
+    // Filter quotes by time range if needed
+    let filteredQuotes = [...quotes];
+    
+    if (timeRange === "month") {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      filteredQuotes = filteredQuotes.filter(quote => 
+        new Date(quote.createdAt) >= thirtyDaysAgo
+      );
+    }
+    
+    // Only include quotes that have been won
+    filteredQuotes = filteredQuotes.filter(quote => quote.leadStatus === "Won");
+    
+    // Group by sales person
+    const salesByPerson: Record<string, number> = {};
+    
+    filteredQuotes.forEach(quote => {
+      if (!quote.createdBy) return;
+      
+      if (!salesByPerson[quote.createdBy]) {
+        salesByPerson[quote.createdBy] = 0;
+      }
+      
+      salesByPerson[quote.createdBy] += quote.totalPrice || 0;
+    });
+    
+    // Convert to array and sort
+    const sortedSales = Object.entries(salesByPerson)
+      .map(([name, total]) => ({ name, total }))
+      .sort((a, b) => b.total - a.total);
+    
+    // Return top 3 performers
+    return sortedSales.slice(0, 3);
+  };
+  
   if (isLoadingQuotes || isLoadingUsers) {
     return (
       <>
@@ -366,6 +406,66 @@ export default function Dashboard() {
           <TabsContent value="analytics" className="pt-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
               <div className="space-y-4">
+                {isAdmin && (
+                  <Card className="overflow-hidden border-0 shadow-sm bg-gradient-to-br from-green-50 to-blue-50">
+                    <CardHeader className="pb-0 py-3 px-4">
+                      <div>
+                        <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">Top Salespeople</CardTitle>
+                        <CardDescription className="text-xs sm:text-sm text-gray-600">Best performing team members</CardDescription>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-2 px-4 pb-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <h4 className="font-medium text-sm mb-2 text-gray-700">This Month</h4>
+                          <div className="space-y-3">
+                            {getTopSalespeople(quotes, "month").length > 0 ? (
+                              getTopSalespeople(quotes, "month").map((person, index) => (
+                                <div key={index} className="flex items-center justify-between bg-white p-2 rounded-md shadow-sm border border-gray-100">
+                                  <div className="flex items-center">
+                                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs text-white ${
+                                      index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : 'bg-amber-600'
+                                    } mr-2`}>
+                                      {index + 1}
+                                    </span>
+                                    <span className="font-medium text-sm">{person.name}</span>
+                                  </div>
+                                  <span className="text-sm font-semibold text-indigo-600">${person.total.toLocaleString()}</span>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="text-sm text-gray-500 p-2">No closed deals this month</div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="font-medium text-sm mb-2 text-gray-700">All Time</h4>
+                          <div className="space-y-3">
+                            {getTopSalespeople(quotes, "all").length > 0 ? (
+                              getTopSalespeople(quotes, "all").map((person, index) => (
+                                <div key={index} className="flex items-center justify-between bg-white p-2 rounded-md shadow-sm border border-gray-100">
+                                  <div className="flex items-center">
+                                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs text-white ${
+                                      index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : 'bg-amber-600'
+                                    } mr-2`}>
+                                      {index + 1}
+                                    </span>
+                                    <span className="font-medium text-sm">{person.name}</span>
+                                  </div>
+                                  <span className="text-sm font-semibold text-indigo-600">${person.total.toLocaleString()}</span>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="text-sm text-gray-500 p-2">No closed deals yet</div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+                
                 <Card className="overflow-hidden border-0 shadow-sm bg-gradient-to-br from-blue-50 to-indigo-50">
                   <CardHeader className="pb-0 py-3 px-4">
                     <div>
