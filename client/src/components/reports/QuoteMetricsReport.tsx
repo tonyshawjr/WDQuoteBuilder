@@ -88,12 +88,48 @@ export default function QuoteMetricsReport() {
     "Proposal Sent": "#a855f7"
   };
 
-  const sizePieData = data ? [
-    { name: "Small ($0-$5.5k)", value: data.quoteSizeDistribution.small, color: "#f59e0b" },
-    { name: "Medium ($5.5k-$10.5k)", value: data.quoteSizeDistribution.medium, color: "#f97316" },
-    { name: "Large ($10.5k-$25.5k)", value: data.quoteSizeDistribution.large, color: "#ea580c" },
-    { name: "Enterprise (>$25.5k)", value: data.quoteSizeDistribution.enterprise, color: "#c2410c" }
-  ] : [];
+  // Calculate percentages for the size distribution
+  const calculateSizeData = () => {
+    if (!data) return [];
+    
+    const { small, medium, large, enterprise } = data.quoteSizeDistribution;
+    const total = small + medium + large + enterprise;
+    
+    if (total === 0) return [];
+    
+    return [
+      { 
+        name: "Small ($0-$5.5k)", 
+        value: small,
+        count: small,
+        percentage: Math.round((small / total) * 100), 
+        color: "#f59e0b" 
+      },
+      { 
+        name: "Medium ($5.5k-$10.5k)", 
+        value: medium,
+        count: medium,
+        percentage: Math.round((medium / total) * 100), 
+        color: "#f97316" 
+      },
+      { 
+        name: "Large ($10.5k-$25.5k)", 
+        value: large,
+        count: large,
+        percentage: Math.round((large / total) * 100), 
+        color: "#ea580c" 
+      },
+      { 
+        name: "Enterprise (>$25.5k)", 
+        value: enterprise,
+        count: enterprise,
+        percentage: Math.round((enterprise / total) * 100), 
+        color: "#c2410c" 
+      }
+    ];
+  };
+  
+  const sizeData = calculateSizeData();
 
   const statusPieData = data?.quoteStatusDistribution || [];
 
@@ -243,31 +279,32 @@ export default function QuoteMetricsReport() {
           </CardHeader>
           <CardContent>
             <div className="h-[250px]">
-              {data && sizePieData.some(item => item.value > 0) ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={sizePieData}
-                    layout="vertical"
-                    margin={{ top: 20, right: 30, left: 150, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" />
-                    <YAxis 
-                      type="category" 
-                      dataKey="name" 
-                      tick={{ fontSize: 12 }}
-                      width={150}
-                    />
-                    <Tooltip
-                      formatter={(value) => [value, "Quote Count"]}
-                    />
-                    <Bar dataKey="value" name="Number of Quotes">
-                      {sizePieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+              {data && sizeData.length > 0 ? (
+                <div className="flex flex-col h-full space-y-3">
+                  {sizeData.map((item) => (
+                    <div key={item.name} className="flex flex-col">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium">{item.name}</span>
+                        <span className="text-sm text-gray-400">
+                          {item.count} ({item.percentage}%)
+                        </span>
+                      </div>
+                      <div className="w-full bg-[#1F1F1F] rounded-full h-4">
+                        <div 
+                          className="h-full rounded-full" 
+                          style={{ 
+                            width: `${item.percentage}%`,
+                            backgroundColor: item.color,
+                            minWidth: '12px' // Ensures small percentages are still visible
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="pt-2 text-xs text-gray-400 italic text-center">
+                    Based on total of {sizeData.reduce((sum, item) => sum + item.count, 0)} quotes
+                  </div>
+                </div>
               ) : (
                 <div className="flex items-center justify-center h-full">
                   <p className="text-gray-500">No size distribution data available</p>
