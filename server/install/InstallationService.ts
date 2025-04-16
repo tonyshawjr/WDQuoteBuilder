@@ -56,6 +56,23 @@ export class InstallationService {
       return false;
     }
   }
+  
+  /**
+   * Test a minimal database connection with default values
+   * Used for checking if a database server is available
+   */
+  public async testMinimalDatabaseConnection(dbConfig: DatabaseConfig): Promise<boolean> {
+    // Create a new database service with the provided configuration
+    const tempDbService = DatabaseService.initWithConfig(dbConfig);
+    
+    try {
+      // Just attempt to connect, don't do any queries
+      return await tempDbService.testConnection();
+    } catch (error) {
+      // Silent failure is ok here since we're just checking availability
+      return false;
+    }
+  }
 
   /**
    * Install the application

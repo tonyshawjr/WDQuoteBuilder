@@ -111,4 +111,85 @@ router.post('/install', async (req: Request, res: Response) => {
   }
 });
 
+// Check if a particular database type is available on the server
+router.post('/check-database', async (req: Request, res: Response) => {
+  try {
+    const { type } = req.body;
+    
+    if (!type || (type !== 'mysql' && type !== 'postgres')) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid database type. Must be "mysql" or "postgres"' 
+      });
+    }
+    
+    // Check database availability using commands
+    let available = false;
+    
+    if (type === 'mysql') {
+      // Try connecting to MySQL with a minimal connection attempt
+      try {
+        const testConnection = await installationService.testMinimalDatabaseConnection({
+          type: 'mysql',
+          host: 'localhost',
+          port: 3306,
+          database: 'information_schema', // This exists in all MySQL installations
+          user: 'root',
+          password: ''
+        });
+        available = testConnection;
+      } catch (error) {
+        // Failed to connect, MySQL might not be available
+        available = false;
+      }
+    } else if (type === 'postgres') {
+      // Try connecting to PostgreSQL with a minimal connection attempt
+      try {
+        const testConnection = await installationService.testMinimalDatabaseConnection({
+          type: 'postgres',
+          host: 'localhost',
+          port: 5432,
+          database: 'postgres', // This exists in all PostgreSQL installations
+          user: 'postgres',
+          password: ''
+        });
+        available = testConnection;
+      } catch (error) {
+        // Failed to connect, PostgreSQL might not be available
+        available = false;
+      }
+    }
+    
+    // Try checking if the database is installed using system commands as fallback
+    if (!available) {
+      available = await checkDatabaseInstalled(type);
+    }
+    
+    res.json({ available });
+  } catch (error) {
+    console.error('Database availability check error:', error);
+    res.status(500).json({ 
+      available: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Helper to check if a database is installed using system commands
+function checkDatabaseInstalled(type: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (type === 'mysql') {
+      exec('which mysql', (error) => {
+        resolve(!error);
+      });
+    } else if (type === 'postgres') {
+      exec('which psql', (error) => {
+        resolve(!error);
+      });
+    } else {
+      resolve(false);
+    }
+  });
+}
+
 export default router;
