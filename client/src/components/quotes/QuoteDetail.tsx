@@ -211,11 +211,12 @@ export function QuoteDetail({ quoteId, open, onClose }: QuoteDetailProps) {
   // Get status badge color
   const getStatusColor = (status: string | null) => {
     switch (status) {
-      case "Won": return "bg-green-100 text-green-800";
-      case "Lost": return "bg-red-100 text-red-800";
-      case "Proposal Sent": return "bg-blue-100 text-blue-800";
-      case "On Hold": return "bg-yellow-100 text-yellow-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "Won": return "bg-green-500 text-white";
+      case "Lost": return "bg-red-500 text-white";
+      case "In Progress": return "bg-blue-500 text-white";
+      case "On Hold": return "bg-gray-500 text-white";
+      case "Proposal Sent": return "bg-purple-500 text-white";
+      default: return "bg-yellow-400 text-gray-900";
     }
   };
   
