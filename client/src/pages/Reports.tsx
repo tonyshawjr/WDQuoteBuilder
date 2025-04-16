@@ -4,6 +4,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/layout/Header";
+import FeatureUsageReport from "@/components/reports/FeatureUsageReport";
+import QuoteMetricsReport from "@/components/reports/QuoteMetricsReport";
 
 export default function Reports() {
   const [, setLocation] = useLocation();
@@ -55,19 +57,13 @@ export default function Reports() {
           
           <TabsContent value="feature-usage">
             <div className="space-y-6">
-              <div className="p-8 bg-[#282828] rounded-lg">
-                <h2 className="text-xl font-semibold mb-4">Feature Usage Analysis - Coming Soon</h2>
-                <p className="text-gray-400">This report will show the most frequently selected features across all quotes, helping you identify which features are most valuable to your clients.</p>
-              </div>
+              <FeatureUsageReport />
             </div>
           </TabsContent>
           
           <TabsContent value="quote-metrics">
             <div className="space-y-6">
-              <div className="p-8 bg-[#282828] rounded-lg">
-                <h2 className="text-xl font-semibold mb-4">Quote Metrics - Coming Soon</h2>
-                <p className="text-gray-400">This report will display metrics about your quotes, including average quote size, quote status distribution, and revenue performance.</p>
-              </div>
+              <QuoteMetricsReport />
             </div>
           </TabsContent>
         </Tabs>

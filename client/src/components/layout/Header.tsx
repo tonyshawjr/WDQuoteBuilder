@@ -8,7 +8,8 @@ import {
   LayoutDashboard, 
   Menu, 
   ChevronRight,
-  FileText
+  FileText,
+  BarChart
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
@@ -115,6 +116,17 @@ export function Header() {
                     All Quotes
                   </Button>
                   
+                  {isAdmin && (
+                    <Button 
+                      variant={location === "/reports" ? "default" : "ghost"} 
+                      onClick={() => navigateTo("/reports")}
+                      size="sm"
+                    >
+                      <BarChart className="h-4 w-4 mr-2" />
+                      Reports
+                    </Button>
+                  )}
+                  
                   <Button 
                     variant={location === "/settings" ? "default" : "ghost"} 
                     onClick={() => navigateTo("/settings")}
@@ -186,6 +198,18 @@ export function Header() {
                           All Quotes
                           <ChevronRight className="h-4 w-4 ml-auto" />
                         </Button>
+                        
+                        {isAdmin && (
+                          <Button 
+                            variant={location === "/reports" ? "default" : "ghost"} 
+                            onClick={() => navigateTo("/reports")}
+                            className="justify-start"
+                          >
+                            <BarChart className="h-5 w-5 mr-2" />
+                            Reports
+                            <ChevronRight className="h-4 w-4 ml-auto" />
+                          </Button>
+                        )}
                         
                         <Button 
                           variant={location === "/settings" ? "default" : "ghost"} 
