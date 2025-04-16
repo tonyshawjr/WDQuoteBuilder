@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Header } from "@/components/layout/Header";
 import { CalculatorPanel } from "@/components/calculator/CalculatorPanel";
-import { EstimateSummary } from "@/components/calculator/EstimateSummary";
+import { QuoteSummary } from "@/components/calculator/QuoteSummary";
 import { ClientInfoForm, ClientInfoValues } from "@/components/calculator/ClientInfoForm";
 import { useQuotes } from "@/hooks/use-quotes";
 import { useToast } from "@/hooks/use-toast";
@@ -136,7 +136,7 @@ export default function Calculator() {
             {/* On mobile, the summary will appear on top for better UX */}
             <div className="block lg:hidden mb-6">
               <div className="bg-card rounded-lg shadow-sm p-4 border border-border">
-                <EstimateSummary
+                <QuoteSummary
                   selectedFeatures={selectedFeatures}
                   selectedProjectType={selectedProjectType}
                   selectedPages={selectedPages}
