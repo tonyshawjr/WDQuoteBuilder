@@ -478,6 +478,7 @@ export function FeaturesAndPagesManager() {
                     <TableHead>Name</TableHead>
                     <TableHead>Price Per Page</TableHead>
                     <TableHead>Default Quantity</TableHead>
+                    <TableHead>Supports Quantity</TableHead>
                     <TableHead>Project Type</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="w-[100px]">Actions</TableHead>
@@ -492,6 +493,13 @@ export function FeaturesAndPagesManager() {
                         <TableCell>{page.name}</TableCell>
                         <TableCell>${page.pricePerPage}</TableCell>
                         <TableCell>{page.defaultQuantity || 1}</TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            page.supportsQuantity ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                          }`}>
+                            {page.supportsQuantity ? "Yes" : "No"}
+                          </span>
+                        </TableCell>
                         <TableCell>{projectType ? projectType.name : "All"}</TableCell>
                         <TableCell>
                           <span className={`px-2 py-1 rounded-full text-xs ${
@@ -866,6 +874,29 @@ export function FeaturesAndPagesManager() {
                       <Input placeholder="Description (optional)" {...field} />
                     </FormControl>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={pageForm.control}
+                name="supportsQuantity"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Supports Quantity
+                      </FormLabel>
+                      <p className="text-sm text-muted-foreground">
+                        Can this page have multiple quantities? Set to false for pages like "Home" that should be limited to quantity of 1.
+                      </p>
+                    </div>
                   </FormItem>
                 )}
               />
