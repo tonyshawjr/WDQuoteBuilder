@@ -359,8 +359,8 @@ export default function Dashboard() {
           
           <TabsContent value="quotes" className="pt-4">
             <div className="bg-card shadow-lg rounded-xl overflow-hidden">
-              <div className="bg-gradient-to-r from-secondary/90 to-secondary px-6 py-5 flex justify-between items-center">
-                <h3 className="text-xl font-semibold text-secondary-foreground">Recent Quotes</h3>
+              <div className="px-6 py-5 flex justify-between items-center border-b border-border">
+                <h3 className="text-xl font-semibold">Recent Quotes</h3>
                 <Button 
                   variant="secondary" 
                   className="bg-primary text-primary-foreground hover:bg-primary/90"
@@ -388,19 +388,8 @@ export default function Dashboard() {
               ) : (
                 <div>
                   {/* Desktop view */}
-                  <div className="hidden md:block table-container">
-                    <table className="table w-full">
-                      <thead>
-                        <tr>
-                          <th className="w-[20%]">Client</th>
-                          <th className="w-[20%]">Project Type</th>
-                          <th className="w-[12%]">Created</th>
-                          <th className="w-[12%]">Rep</th>
-                          <th className="w-[12%]">Status</th>
-                          <th className="w-[12%]">Value</th>
-                          <th className="w-[12%]">Last Updated</th>
-                        </tr>
-                      </thead>
+                  <div className="hidden md:block">
+                    <table className="w-full border-collapse">
                       <tbody>
                         {timeFilteredQuotes.slice(0, 5).map((quote: Quote) => (
                           <tr 
