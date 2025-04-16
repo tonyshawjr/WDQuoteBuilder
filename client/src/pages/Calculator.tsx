@@ -94,9 +94,8 @@ export default function Calculator() {
         description: "Your quote has been successfully saved."
       });
       
-      // Just go back to calculator without resetting the form
-      // The selections will be preserved
-      setActiveTab("calculator");
+      // Redirect to dashboard
+      setLocation("/dashboard");
       
     } catch (error) {
       toast({

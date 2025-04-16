@@ -8,6 +8,7 @@ import {
   Check
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { jsPDF } from "jspdf";
 
 interface EstimateSummaryProps {
   selectedFeatures: SelectedFeature[];
@@ -98,10 +99,106 @@ export function EstimateSummary({
   };
   
   const handleExportPDF = () => {
-    toast({
-      title: "Feature not available",
-      description: "PDF export is not implemented in this demo",
-    });
+    if (!selectedProjectType) return;
+    
+    try {
+      // Create new PDF document
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margin = 20;
+      let y = 20;
+      
+      // Add title
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "bold");
+      doc.text("Web Design Estimate", pageWidth / 2, y, { align: "center" });
+      y += 10;
+      
+      // Add date
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      const today = new Date().toLocaleDateString();
+      doc.text(`Generated on: ${today}`, pageWidth / 2, y, { align: "center" });
+      y += 15;
+      
+      // Project type and base price
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text(`Project: ${selectedProjectType.name}`, margin, y);
+      y += 10;
+      
+      doc.setFont("helvetica", "normal");
+      doc.text(`Base Price: ${formatCurrency(basePrice)}`, margin, y);
+      y += 15;
+      
+      // Pages
+      if (selectedPages.length > 0) {
+        doc.setFont("helvetica", "bold");
+        doc.text("Pages:", margin, y);
+        y += 7;
+        
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        
+        selectedPages.forEach(page => {
+          const price = calculatePagePrice(page);
+          doc.text(`• ${page.name}${page.quantity > 1 ? ` (x${page.quantity})` : ''}: ${formatCurrency(price)}`, margin + 5, y);
+          y += 6;
+        });
+        
+        y += 5;
+      }
+      
+      // Features
+      if (selectedFeatures.length > 0) {
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Features:", margin, y);
+        y += 7;
+        
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        
+        selectedFeatures.forEach(feature => {
+          const price = calculateFeaturePrice(feature);
+          doc.text(`• ${feature.name}${feature.quantity > 1 ? ` (x${feature.quantity})` : ''}: ${formatCurrency(price)}`, margin + 5, y);
+          y += 6;
+          
+          if (feature.pricingType === 'hourly') {
+            doc.text(`  ${(feature.estimatedHours as number) * feature.quantity} hours @ ${formatCurrency(feature.hourlyRate as number)}/hr`, margin + 8, y);
+            y += 6;
+          }
+        });
+        
+        y += 10;
+      }
+      
+      // Total
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text(`Total Estimate: ${formatCurrency(totalPrice)}`, margin, y);
+      
+      // Add footer
+      const footerY = doc.internal.pageSize.getHeight() - 10;
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "italic");
+      doc.text("This is an estimate only. Final pricing may vary based on project requirements.", pageWidth / 2, footerY, { align: "center" });
+      
+      // Save the PDF
+      doc.save(`web-design-estimate-${today.replace(/\//g, '-')}.pdf`);
+      
+      toast({
+        title: "PDF Exported",
+        description: "Your estimate has been exported as a PDF",
+      });
+    } catch (error) {
+      console.error('PDF export error:', error);
+      toast({
+        title: "Export failed",
+        description: "Could not export PDF. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
   
   const hasSelections = selectedProjectType && (selectedFeatures.length > 0 || selectedPages.length > 0);
