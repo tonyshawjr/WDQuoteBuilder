@@ -10,6 +10,10 @@ import {
 } from "@shared/schema";
 
 export interface IStorage {
+  // System Settings operations
+  getBusinessName(): Promise<string | null>;
+  updateBusinessName(businessName: string): Promise<boolean>;
+  
   // User operations
   getUsers(): Promise<User[]>;
   getUser(id: number): Promise<User | undefined>;
@@ -63,6 +67,7 @@ export class MemStorage implements IStorage {
   private quotesMap: Map<number, Quote>;
   private quoteFeaturesMap: Map<number, QuoteFeature>;
   private quotePagesMap: Map<number, QuotePage>;
+  private businessName: string | null;
   
   userCurrentId: number;
   projectTypeCurrentId: number;
@@ -80,6 +85,7 @@ export class MemStorage implements IStorage {
     this.quotesMap = new Map();
     this.quoteFeaturesMap = new Map();
     this.quotePagesMap = new Map();
+    this.businessName = "Web Design Agency";
     
     this.userCurrentId = 1;
     this.projectTypeCurrentId = 1;
@@ -232,6 +238,16 @@ export class MemStorage implements IStorage {
     const newPage: Page = { ...page, id };
     this.pagesMap.set(id, newPage);
     return newPage;
+  }
+  
+  // System Settings operations
+  async getBusinessName(): Promise<string | null> {
+    return this.businessName;
+  }
+  
+  async updateBusinessName(businessName: string): Promise<boolean> {
+    this.businessName = businessName;
+    return true;
   }
   
   async updatePage(id: number, page: InsertPage): Promise<Page | undefined> {

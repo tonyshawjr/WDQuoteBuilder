@@ -2,6 +2,17 @@ import { pgTable, text, serial, integer, boolean, doublePrecision, numeric, time
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// System settings table
+export const systemSettings = pgTable("system_settings", {
+  id: serial("id").primaryKey(),
+  businessName: text("business_name"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertSystemSettingsSchema = createInsertSchema(systemSettings).pick({
+  businessName: true,
+});
+
 // User table
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -81,6 +92,9 @@ export const insertPageSchema = createInsertSchema(pages).pick({
 });
 
 // Types
+export type SystemSetting = typeof systemSettings.$inferSelect;
+export type InsertSystemSetting = z.infer<typeof insertSystemSettingsSchema>;
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 
