@@ -1443,6 +1443,210 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: 'Failed to generate quote metrics report' });
     }
   });
+  
+  // Report: Sales Team Performance - Shows metrics about sales team performance
+  app.get('/api/reports/sales-performance', isAuthenticated, async (req, res) => {
+    try {
+      // Only admin users can access this report
+      const user = req.user as User;
+      if (!user.isAdmin) {
+        return res.status(403).json({ error: 'Unauthorized access' });
+      }
+      
+      const timeRange = req.query.timeRange as string || 'all';
+      
+      // Get all users and quotes
+      const users = await storage.getUsers();
+      const quotes = await storage.getQuotes();
+      
+      // Filter quotes by time range if needed
+      let filteredQuotes = quotes;
+      if (timeRange !== 'all') {
+        const now = new Date();
+        let cutoffDate = new Date();
+        
+        if (timeRange === 'past30days') {
+          cutoffDate.setDate(now.getDate() - 30);
+        } else if (timeRange === 'past90days') {
+          cutoffDate.setDate(now.getDate() - 90);
+        } else if (timeRange === 'pastyear') {
+          cutoffDate.setFullYear(now.getFullYear() - 1);
+        }
+        
+        filteredQuotes = quotes.filter(quote => {
+          const quoteDate = new Date(quote.createdAt);
+          return quoteDate >= cutoffDate;
+        });
+      }
+      
+      // Group quotes by sales person (quote.createdBy)
+      const salesPerformance: Record<string, {
+        name: string,
+        totalQuotes: number,
+        totalRevenue: number,
+        wonQuotes: number,
+        wonRevenue: number,
+        lostQuotes: number,
+        pendingQuotes: number,
+        averageQuoteSize: number,
+        conversionRate: number
+      }> = {};
+      
+      // Initialize with all users who have created quotes
+      const quoteCreators = new Set<string>();
+      filteredQuotes.forEach(quote => {
+        if (quote.createdBy) {
+          quoteCreators.add(quote.createdBy);
+        }
+      });
+      
+      // Add all users from the users table as well
+      users.forEach(user => {
+        if (user.username) {
+          quoteCreators.add(user.username);
+        }
+      });
+      
+      // Initialize sales performance object
+      quoteCreators.forEach(username => {
+        // Find the user's full name if available
+        const userRecord = users.find(u => u.username === username);
+        const displayName = userRecord && userRecord.firstName && userRecord.lastName
+          ? `${userRecord.firstName} ${userRecord.lastName}`
+          : username;
+        
+        salesPerformance[username] = {
+          name: displayName,
+          totalQuotes: 0,
+          totalRevenue: 0,
+          wonQuotes: 0,
+          wonRevenue: 0,
+          lostQuotes: 0,
+          pendingQuotes: 0,
+          averageQuoteSize: 0,
+          conversionRate: 0
+        };
+      });
+      
+      // Populate sales performance data
+      filteredQuotes.forEach(quote => {
+        const createdBy = quote.createdBy || 'unknown';
+        
+        if (!salesPerformance[createdBy]) {
+          salesPerformance[createdBy] = {
+            name: createdBy,
+            totalQuotes: 0,
+            totalRevenue: 0,
+            wonQuotes: 0,
+            wonRevenue: 0,
+            lostQuotes: 0,
+            pendingQuotes: 0,
+            averageQuoteSize: 0,
+            conversionRate: 0
+          };
+        }
+        
+        const salesPerson = salesPerformance[createdBy];
+        salesPerson.totalQuotes += 1;
+        salesPerson.totalRevenue += quote.totalPrice;
+        
+        if (quote.leadStatus === 'Won') {
+          salesPerson.wonQuotes += 1;
+          salesPerson.wonRevenue += quote.totalPrice;
+        } else if (quote.leadStatus === 'Lost') {
+          salesPerson.lostQuotes += 1;
+        } else {
+          salesPerson.pendingQuotes += 1;
+        }
+      });
+      
+      // Calculate derived metrics
+      Object.values(salesPerformance).forEach(salesPerson => {
+        if (salesPerson.totalQuotes > 0) {
+          salesPerson.averageQuoteSize = salesPerson.totalRevenue / salesPerson.totalQuotes;
+          salesPerson.conversionRate = salesPerson.totalQuotes > 0
+            ? salesPerson.wonQuotes / salesPerson.totalQuotes
+            : 0;
+        }
+      });
+      
+      // Convert to array and sort by total revenue (descending)
+      const salesPerformanceArray = Object.entries(salesPerformance).map(([username, data]) => ({
+        username,
+        ...data
+      })).sort((a, b) => b.totalRevenue - a.totalRevenue);
+      
+      // Calculate team totals
+      const teamTotals = {
+        totalQuotes: filteredQuotes.length,
+        totalRevenue: filteredQuotes.reduce((sum, quote) => sum + quote.totalPrice, 0),
+        wonQuotes: filteredQuotes.filter(quote => quote.leadStatus === 'Won').length,
+        wonRevenue: filteredQuotes
+          .filter(quote => quote.leadStatus === 'Won')
+          .reduce((sum, quote) => sum + quote.totalPrice, 0),
+        lostQuotes: filteredQuotes.filter(quote => quote.leadStatus === 'Lost').length,
+        pendingQuotes: filteredQuotes.filter(quote => 
+          quote.leadStatus !== 'Won' && quote.leadStatus !== 'Lost'
+        ).length,
+        averageQuoteSize: filteredQuotes.length > 0
+          ? filteredQuotes.reduce((sum, quote) => sum + quote.totalPrice, 0) / filteredQuotes.length
+          : 0,
+        conversionRate: filteredQuotes.length > 0
+          ? filteredQuotes.filter(quote => quote.leadStatus === 'Won').length / filteredQuotes.length
+          : 0
+      };
+      
+      // Calculate monthly performance by user
+      const monthlyPerformance: Record<string, Record<string, {
+        totalQuotes: number,
+        totalRevenue: number
+      }>> = {};
+      
+      filteredQuotes.forEach(quote => {
+        const date = new Date(quote.createdAt);
+        const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+        const createdBy = quote.createdBy || 'unknown';
+        
+        if (!monthlyPerformance[monthKey]) {
+          monthlyPerformance[monthKey] = {};
+        }
+        
+        if (!monthlyPerformance[monthKey][createdBy]) {
+          monthlyPerformance[monthKey][createdBy] = {
+            totalQuotes: 0,
+            totalRevenue: 0
+          };
+        }
+        
+        monthlyPerformance[monthKey][createdBy].totalQuotes += 1;
+        monthlyPerformance[monthKey][createdBy].totalRevenue += quote.totalPrice;
+      });
+      
+      // Format monthly performance for charting
+      const monthlyPerformanceChart = Object.entries(monthlyPerformance)
+        .map(([month, userData]) => {
+          const monthData: Record<string, any> = { month };
+          
+          Object.entries(userData).forEach(([user, data]) => {
+            monthData[`${user}_quotes`] = data.totalQuotes;
+            monthData[`${user}_revenue`] = data.totalRevenue;
+          });
+          
+          return monthData;
+        })
+        .sort((a, b) => a.month.localeCompare(b.month));
+      
+      res.json({
+        salesPerformance: salesPerformanceArray,
+        teamTotals,
+        monthlyPerformanceChart,
+        timeRange
+      });
+    } catch (error) {
+      console.error('Error generating sales performance report:', error);
+      res.status(500).json({ error: 'Failed to generate sales performance report' });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;

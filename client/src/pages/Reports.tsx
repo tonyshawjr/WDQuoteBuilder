@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/layout/Header";
 import FeatureUsageReport from "@/components/reports/FeatureUsageReport";
 import QuoteMetricsReport from "@/components/reports/QuoteMetricsReport";
+import SalesPerformanceReport from "@/components/reports/SalesPerformanceReport";
 
 export default function Reports() {
   const [, setLocation] = useLocation();
@@ -49,21 +50,28 @@ export default function Reports() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-2xl font-bold mb-6">Admin Reports</h1>
         
-        <Tabs defaultValue="feature-usage" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="feature-usage">Feature Usage Analysis</TabsTrigger>
+        <Tabs defaultValue="sales-performance" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsTrigger value="sales-performance">Sales Team Performance</TabsTrigger>
             <TabsTrigger value="quote-metrics">Quote Metrics</TabsTrigger>
+            <TabsTrigger value="feature-usage">Feature Usage</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="feature-usage">
+          <TabsContent value="sales-performance">
             <div className="space-y-6">
-              <FeatureUsageReport />
+              <SalesPerformanceReport />
             </div>
           </TabsContent>
           
           <TabsContent value="quote-metrics">
             <div className="space-y-6">
               <QuoteMetricsReport />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="feature-usage">
+            <div className="space-y-6">
+              <FeatureUsageReport />
             </div>
           </TabsContent>
         </Tabs>
