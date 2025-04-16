@@ -114,10 +114,17 @@ export default function Calculator() {
     (selectedFeatures.length > 0 || selectedPages.length > 0);
   
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="mb-6">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+            Web Design Estimate
+          </h1>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Create a customized estimate for your client's web design project</p>
+        </div>
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="calculator">Build Estimate</TabsTrigger>
@@ -125,11 +132,10 @@ export default function Calculator() {
           </TabsList>
           
           <TabsContent value="calculator" className="space-y-4">
-            <h2 className="text-2xl font-bold mb-6">Create Web Design Estimate</h2>
             
             {/* On mobile, the summary will appear on top for better UX */}
             <div className="block lg:hidden mb-6">
-              <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+              <div className="bg-card rounded-lg shadow-sm p-4 border border-border">
                 <EstimateSummary
                   selectedFeatures={selectedFeatures}
                   selectedProjectType={selectedProjectType}
@@ -164,7 +170,7 @@ export default function Calculator() {
               
               {/* Desktop summary is hidden on mobile */}
               <div className="hidden lg:block lg:w-1/3">
-                <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100 sticky top-24">
+                <div className="bg-card rounded-lg shadow-sm p-4 border border-border sticky top-24">
                   <EstimateSummary
                     selectedFeatures={selectedFeatures}
                     selectedProjectType={selectedProjectType}
@@ -198,7 +204,7 @@ export default function Calculator() {
           
           <TabsContent value="save-quote" className="space-y-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-              <h2 className="text-2xl font-bold">Save Quote</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Save Quote</h2>
               <Button 
                 variant="outline" 
                 onClick={() => setActiveTab("calculator")}
@@ -217,8 +223,8 @@ export default function Calculator() {
               </div>
               
               <div className="lg:w-1/2 mt-6 lg:mt-0">
-                <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
-                  <h2 className="text-xl font-bold mb-4">Quote Summary</h2>
+                <div className="bg-card rounded-lg shadow-sm p-4 border border-border">
+                  <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Quote Summary</h2>
                   <EstimateSummary
                     selectedFeatures={selectedFeatures}
                     selectedProjectType={selectedProjectType}
