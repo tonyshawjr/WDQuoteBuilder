@@ -1,21 +1,19 @@
 import { Pool, PoolClient } from 'pg';
 import { IDBAdapter } from './IDBAdapter';
+import { DatabaseConfig } from './DBAdapterFactory';
 
-export interface PostgreSQLConfig {
-  host: string;
-  port: number;
-  database: string;
-  user: string;
-  password: string;
-  ssl?: boolean;
-}
-
+/**
+ * PostgreSQL database adapter
+ * Implements the IDBAdapter interface for PostgreSQL
+ */
 export class PostgreSQLAdapter implements IDBAdapter {
   private pool: Pool;
-  private config: PostgreSQLConfig;
+  private config: DatabaseConfig;
 
-  constructor(config: PostgreSQLConfig) {
+  constructor(config: DatabaseConfig) {
     this.config = config;
+    
+    // Create a PostgreSQL connection pool
     this.pool = new Pool({
       host: config.host,
       port: config.port,
@@ -26,46 +24,69 @@ export class PostgreSQLAdapter implements IDBAdapter {
     });
   }
 
+  /**
+   * Connect to the database
+   */
   async connect(): Promise<void> {
-    // The pool automatically manages connections
-    // Just try a test connection to ensure it's working
+    // Test the connection
     try {
       const client = await this.pool.connect();
       client.release();
     } catch (error) {
       console.error('PostgreSQL connection error:', error);
-      throw new Error(`Failed to connect to PostgreSQL: ${error.message}`);
+      throw new Error(`Failed to connect to PostgreSQL: ${(error as Error).message}`);
     }
   }
 
+  /**
+   * Disconnect from the database
+   */
   async disconnect(): Promise<void> {
     await this.pool.end();
   }
 
+  /**
+   * Execute a query on the database
+   * @param query The SQL query to execute
+   * @param params Optional parameters for the query
+   * @returns The result of the query
+   */
   async query<T = any>(query: string, params?: any[]): Promise<T[]> {
-    const client = await this.pool.connect();
     try {
-      const result = await client.query(query, params);
+      const result = await this.pool.query(query, params);
       return result.rows as T[];
-    } finally {
-      client.release();
+    } catch (error) {
+      console.error('PostgreSQL query error:', error);
+      throw new Error(`Query failed: ${(error as Error).message}`);
     }
   }
 
+  /**
+   * Execute a query that returns a single result
+   * @param query The SQL query to execute
+   * @param params Optional parameters for the query
+   * @returns The first result of the query, or null if no results
+   */
   async queryOne<T = any>(query: string, params?: any[]): Promise<T | null> {
     const results = await this.query<T>(query, params);
     return results.length > 0 ? results[0] : null;
   }
 
-  getClient(): Pool {
-    return this.pool;
-  }
-
+  /**
+   * Test the connection to the database
+   * @returns True if the connection is successful, false otherwise
+   */
   async testConnection(): Promise<boolean> {
     try {
+      // Try to connect to the database
       const client = await this.pool.connect();
+      
+      // Run a simple query to make sure the connection works
       await client.query('SELECT 1');
+      
+      // Release the connection
       client.release();
+      
       return true;
     } catch (error) {
       console.error('PostgreSQL connection test failed:', error);

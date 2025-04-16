@@ -14,6 +14,7 @@ import Login from "@/pages/Login";
 import Settings from "@/pages/Settings";
 import AllQuotes from "@/pages/AllQuotes";
 import Reports from "@/pages/Reports";
+import InstallWizard from "@/pages/InstallWizard";
 
 function Router() {
   return (
@@ -37,6 +38,7 @@ function Router() {
       <Route path="/quotes/:id" component={QuoteDetailsPage} />
       <Route path="/settings" component={Settings} />
       <Route path="/reports" component={Reports} />
+      <Route path="/install" component={InstallWizard} />
       <Route component={NotFound} />
     </Switch>
   );

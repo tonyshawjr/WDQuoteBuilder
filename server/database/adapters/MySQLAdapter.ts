@@ -1,21 +1,19 @@
 import mysql from 'mysql2/promise';
 import { IDBAdapter } from './IDBAdapter';
+import { DatabaseConfig } from './DBAdapterFactory';
 
-export interface MySQLConfig {
-  host: string;
-  port: number;
-  database: string;
-  user: string;
-  password: string;
-  ssl?: boolean;
-}
-
+/**
+ * MySQL database adapter
+ * Implements the IDBAdapter interface for MySQL
+ */
 export class MySQLAdapter implements IDBAdapter {
   private pool: mysql.Pool;
-  private config: MySQLConfig;
+  private config: DatabaseConfig;
 
-  constructor(config: MySQLConfig) {
+  constructor(config: DatabaseConfig) {
     this.config = config;
+    
+    // Create a MySQL connection pool
     this.pool = mysql.createPool({
       host: config.host,
       port: config.port,
@@ -23,92 +21,79 @@ export class MySQLAdapter implements IDBAdapter {
       user: config.user,
       password: config.password,
       ssl: config.ssl ? { rejectUnauthorized: false } : undefined,
-      // Convert MySQL boolean to JS boolean
-      typeCast: function (field, next) {
-        if (field.type === 'TINY' && field.length === 1) {
-          return (field.string() === '1'); // 1 = true, 0 = false
-        }
-        return next();
-      }
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0
     });
   }
 
+  /**
+   * Connect to the database
+   */
   async connect(): Promise<void> {
-    // The pool automatically manages connections
-    // Just try a test connection to ensure it's working
+    // Test the connection
     try {
       const connection = await this.pool.getConnection();
       connection.release();
     } catch (error) {
       console.error('MySQL connection error:', error);
-      throw new Error(`Failed to connect to MySQL: ${error.message}`);
+      throw new Error(`Failed to connect to MySQL: ${(error as Error).message}`);
     }
   }
 
+  /**
+   * Disconnect from the database
+   */
   async disconnect(): Promise<void> {
     await this.pool.end();
   }
 
+  /**
+   * Execute a query on the database
+   * @param query The SQL query to execute
+   * @param params Optional parameters for the query
+   * @returns The result of the query
+   */
   async query<T = any>(query: string, params?: any[]): Promise<T[]> {
-    // MySQL queries use ? for parameters instead of $1, $2, etc.
-    // Convert PostgreSQL style parameters to MySQL style if needed
-    const convertedQuery = this.convertQuery(query);
-    
     try {
-      const [rows] = await this.pool.execute(convertedQuery, params);
+      const [rows] = await this.pool.query(query, params || []);
       return rows as T[];
     } catch (error) {
       console.error('MySQL query error:', error);
-      throw new Error(`MySQL query failed: ${error.message}`);
+      throw new Error(`Query failed: ${(error as Error).message}`);
     }
   }
 
+  /**
+   * Execute a query that returns a single result
+   * @param query The SQL query to execute
+   * @param params Optional parameters for the query
+   * @returns The first result of the query, or null if no results
+   */
   async queryOne<T = any>(query: string, params?: any[]): Promise<T | null> {
     const results = await this.query<T>(query, params);
     return results.length > 0 ? results[0] : null;
   }
 
-  getClient(): mysql.Pool {
-    return this.pool;
-  }
-
+  /**
+   * Test the connection to the database
+   * @returns True if the connection is successful, false otherwise
+   */
   async testConnection(): Promise<boolean> {
     try {
+      // Try to connect to the database
       const connection = await this.pool.getConnection();
-      await connection.execute('SELECT 1');
+      
+      // Run a simple query to make sure the connection works
+      await connection.query('SELECT 1');
+      
+      // Release the connection
       connection.release();
+      
       return true;
     } catch (error) {
       console.error('MySQL connection test failed:', error);
       return false;
     }
-  }
-
-  /**
-   * Convert PostgreSQL style parameters ($1, $2) to MySQL style (?)
-   */
-  private convertQuery(query: string): string {
-    // If query uses PostgreSQL style parameters ($1, $2, etc), convert to MySQL style (?)
-    if (query.includes('$')) {
-      // Match all $n parameters
-      const parameterRegex = /\$(\d+)/g;
-      const parameters: number[] = [];
-      
-      // Extract all parameter numbers and find the highest
-      let match;
-      while ((match = parameterRegex.exec(query)) !== null) {
-        parameters.push(parseInt(match[1]));
-      }
-      
-      // Replace each $n parameter with ?
-      let convertedQuery = query;
-      for (let i = 1; i <= Math.max(...parameters); i++) {
-        convertedQuery = convertedQuery.replace(new RegExp(`\\$${i}`, 'g'), '?');
-      }
-      
-      return convertedQuery;
-    }
-    
-    return query;
   }
 }

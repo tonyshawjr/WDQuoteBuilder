@@ -1,5 +1,6 @@
 import { IDBAdapter } from './adapters/IDBAdapter';
 import { DBAdapterFactory, DatabaseConfig } from './adapters/DBAdapterFactory';
+import { ConfigManager } from '../config/ConfigManager';
 
 /**
  * Database service that uses the appropriate adapter based on configuration
@@ -9,6 +10,9 @@ export class DatabaseService {
   private adapter: IDBAdapter;
   private isConnected: boolean = false;
 
+  /**
+   * Private constructor to enforce singleton pattern
+   */
   private constructor(adapter: IDBAdapter) {
     this.adapter = adapter;
   }
@@ -18,9 +22,17 @@ export class DatabaseService {
    */
   public static getInstance(): DatabaseService {
     if (!DatabaseService.instance) {
-      const adapter = DBAdapterFactory.createAdapterFromEnv();
+      // Get configuration from config manager
+      const configManager = ConfigManager.getInstance();
+      const dbConfig = configManager.getDatabaseConfig();
+      
+      // Create the appropriate adapter
+      const adapter = DBAdapterFactory.createAdapter(dbConfig);
+      
+      // Create a new instance with the adapter
       DatabaseService.instance = new DatabaseService(adapter);
     }
+    
     return DatabaseService.instance;
   }
 
@@ -48,7 +60,6 @@ export class DatabaseService {
     if (!this.isConnected) {
       await this.adapter.connect();
       this.isConnected = true;
-      console.log('Database connection established');
     }
   }
 
@@ -59,7 +70,6 @@ export class DatabaseService {
     if (this.isConnected) {
       await this.adapter.disconnect();
       this.isConnected = false;
-      console.log('Database connection closed');
     }
   }
 
@@ -70,6 +80,7 @@ export class DatabaseService {
     if (!this.isConnected) {
       await this.connect();
     }
+    
     return this.adapter.query<T>(query, params);
   }
 
@@ -80,6 +91,7 @@ export class DatabaseService {
     if (!this.isConnected) {
       await this.connect();
     }
+    
     return this.adapter.queryOne<T>(query, params);
   }
 
@@ -87,12 +99,7 @@ export class DatabaseService {
    * Test the database connection
    */
   public async testConnection(): Promise<boolean> {
-    try {
-      return await this.adapter.testConnection();
-    } catch (error) {
-      console.error('Database connection test failed:', error);
-      return false;
-    }
+    return this.adapter.testConnection();
   }
 
   /**

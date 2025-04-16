@@ -16,6 +16,8 @@ import session from "express-session";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import MemoryStore from "memorystore";
+import { installationMiddleware } from "./middleware/installationMiddleware";
+import installRoutes from "./routes/installRoutes";
 
 // Add to InsertQuote to match our SQL schema
 declare module "@shared/schema" {
@@ -1649,6 +1651,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: 'Failed to generate sales performance report' });
     }
   });
+
+  // Apply installation middleware - This will check if the app is installed
+  // and redirect to the installation page if needed
+  app.use(installationMiddleware);
+
+  // Install routes - Handle installation API endpoints
+  app.use('/api/install', installRoutes);
 
   const httpServer = createServer(app);
   return httpServer;

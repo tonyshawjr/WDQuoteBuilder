@@ -1,54 +1,69 @@
 import { IDBAdapter } from './IDBAdapter';
-import { PostgreSQLAdapter, PostgreSQLConfig } from './PostgreSQLAdapter';
-import { MySQLAdapter, MySQLConfig } from './MySQLAdapter';
+import { PostgreSQLAdapter } from './PostgreSQLAdapter';
+import { MySQLAdapter } from './MySQLAdapter';
 
+/**
+ * Database types supported by the application
+ */
 export type DatabaseType = 'postgres' | 'mysql';
 
+/**
+ * Interface for database configuration
+ */
 export interface DatabaseConfig {
+  /**
+   * Type of database (postgres or mysql)
+   */
   type: DatabaseType;
+  
+  /**
+   * Database host
+   */
   host: string;
+  
+  /**
+   * Database port
+   */
   port: number;
+  
+  /**
+   * Database name
+   */
   database: string;
+  
+  /**
+   * Database username
+   */
   user: string;
+  
+  /**
+   * Database password
+   */
   password: string;
+  
+  /**
+   * Whether to use SSL connection
+   */
   ssl?: boolean;
 }
 
+/**
+ * Factory for creating database adapters
+ */
 export class DBAdapterFactory {
   /**
    * Create a database adapter based on the database type
+   * @param config Database configuration
+   * @returns A database adapter instance
    */
-  static createAdapter(config: DatabaseConfig): IDBAdapter {
+  public static createAdapter(config: DatabaseConfig): IDBAdapter {
     switch (config.type) {
       case 'postgres':
-        return new PostgreSQLAdapter(config as PostgreSQLConfig);
+        return new PostgreSQLAdapter(config);
       case 'mysql':
-        return new MySQLAdapter(config as MySQLConfig);
+        return new MySQLAdapter(config);
       default:
         throw new Error(`Unsupported database type: ${config.type}`);
     }
-  }
-
-  /**
-   * Create a database adapter from environment variables
-   */
-  static createAdapterFromEnv(): IDBAdapter {
-    const type = process.env.DB_TYPE as DatabaseType || 'postgres';
-    const host = process.env.DB_HOST || 'localhost';
-    const port = parseInt(process.env.DB_PORT || '5432');
-    const database = process.env.DB_NAME || '';
-    const user = process.env.DB_USER || '';
-    const password = process.env.DB_PASSWORD || '';
-    const ssl = process.env.DB_SSL === 'true';
-
-    return this.createAdapter({
-      type,
-      host,
-      port,
-      database,
-      user,
-      password,
-      ssl
-    });
   }
 }

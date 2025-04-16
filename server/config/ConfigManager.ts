@@ -2,6 +2,9 @@ import fs from 'fs';
 import path from 'path';
 import { DatabaseConfig } from '../database/adapters/DBAdapterFactory';
 
+/**
+ * Interface for the application configuration
+ */
 interface AppConfig {
   database: DatabaseConfig;
   appName: string;
@@ -15,7 +18,7 @@ interface AppConfig {
  */
 export class ConfigManager {
   private static instance: ConfigManager;
-  private config: AppConfig;
+  private config!: AppConfig; // Initialize in constructor
   private configPath: string;
 
   private defaultConfig: AppConfig = {
@@ -23,16 +26,19 @@ export class ConfigManager {
       type: 'postgres',
       host: 'localhost',
       port: 5432,
-      database: 'webdesignquotebuilder',
+      database: 'web_design_calculator',
       user: 'postgres',
-      password: 'postgres',
+      password: '',
       ssl: false
     },
-    appName: 'Web Design Quote Builder',
+    appName: 'Web Design Price Calculator',
     isInstalled: false,
     version: '1.0.0'
   };
 
+  /**
+   * Private constructor to enforce singleton pattern
+   */
   private constructor(configPath: string) {
     this.configPath = configPath;
     this.loadConfig();
@@ -43,7 +49,7 @@ export class ConfigManager {
    */
   public static getInstance(configPath?: string): ConfigManager {
     if (!ConfigManager.instance) {
-      const configFilePath = configPath || path.join(process.cwd(), 'app-config.json');
+      const configFilePath = configPath || path.join(process.cwd(), 'config.json');
       ConfigManager.instance = new ConfigManager(configFilePath);
     }
     return ConfigManager.instance;
@@ -109,17 +115,20 @@ export class ConfigManager {
    */
   private loadConfig(): void {
     try {
+      // Check if the config file exists
       if (fs.existsSync(this.configPath)) {
-        const configData = fs.readFileSync(this.configPath, 'utf-8');
+        // Read and parse the config file
+        const configData = fs.readFileSync(this.configPath, 'utf8');
         this.config = JSON.parse(configData);
       } else {
+        // Use default configuration and save it
         this.config = { ...this.defaultConfig };
         this.saveConfig();
       }
     } catch (error) {
       console.error('Error loading configuration:', error);
+      // Use default configuration in case of error
       this.config = { ...this.defaultConfig };
-      this.saveConfig();
     }
   }
 
@@ -128,7 +137,14 @@ export class ConfigManager {
    */
   private saveConfig(): void {
     try {
-      fs.writeFileSync(this.configPath, JSON.stringify(this.config, null, 2), 'utf-8');
+      // Create the directory if it doesn't exist
+      const configDir = path.dirname(this.configPath);
+      if (!fs.existsSync(configDir)) {
+        fs.mkdirSync(configDir, { recursive: true });
+      }
+      
+      // Write the config to the file
+      fs.writeFileSync(this.configPath, JSON.stringify(this.config, null, 2), 'utf8');
     } catch (error) {
       console.error('Error saving configuration:', error);
     }

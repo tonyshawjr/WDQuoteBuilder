@@ -1,6 +1,6 @@
 /**
  * Interface for database adapters
- * This provides a common interface for different database implementations
+ * This ensures consistent implementation regardless of the database type
  */
 export interface IDBAdapter {
   /**
@@ -15,25 +15,23 @@ export interface IDBAdapter {
   
   /**
    * Execute a query on the database
-   * @param query SQL query to execute
-   * @param params Parameters for the query
+   * @param query The SQL query to execute
+   * @param params Optional parameters for the query
+   * @returns The result of the query
    */
   query<T = any>(query: string, params?: any[]): Promise<T[]>;
   
   /**
-   * Execute a single query that returns one result
-   * @param query SQL query to execute
-   * @param params Parameters for the query
+   * Execute a query that returns a single result
+   * @param query The SQL query to execute
+   * @param params Optional parameters for the query
+   * @returns The first result of the query, or null if no results
    */
   queryOne<T = any>(query: string, params?: any[]): Promise<T | null>;
   
   /**
-   * Get the database client/connection
-   */
-  getClient(): any;
-  
-  /**
-   * Test the database connection
+   * Test the connection to the database
+   * @returns True if the connection is successful, false otherwise
    */
   testConnection(): Promise<boolean>;
 }
