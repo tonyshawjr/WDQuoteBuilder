@@ -623,6 +623,13 @@ export default function Dashboard() {
                               color: 'white',
                               border: '1px solid #333' 
                             }}
+                            itemStyle={{
+                              color: 'white'
+                            }}
+                            labelStyle={{
+                              color: 'white'
+                            }}
+                            cursor={{ fill: 'transparent' }}
                           />
                         </PieChart>
                       </ResponsiveContainer>
@@ -791,6 +798,13 @@ export default function Dashboard() {
                               color: 'white',
                               border: '1px solid #333' 
                             }}
+                            itemStyle={{
+                              color: 'white'
+                            }}
+                            labelStyle={{
+                              color: 'white'
+                            }}
+                            cursor={{ fill: '#F9B200', fillOpacity: 0.2 }}
                           />
                           <Bar dataKey="value" fill="#F9B200" radius={[4, 4, 0, 0]} />
                         </BarChart>
