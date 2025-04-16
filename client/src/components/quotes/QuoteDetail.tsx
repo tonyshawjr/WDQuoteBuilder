@@ -260,11 +260,11 @@ export function QuoteDetail({ quoteId, open, onClose }: QuoteDetailProps) {
                         <SelectValue placeholder="Update Status" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="In Progress">In Progress</SelectItem>
                         <SelectItem value="Proposal Sent">Proposal Sent</SelectItem>
+                        <SelectItem value="In Progress">In Progress</SelectItem>
+                        <SelectItem value="On Hold">On Hold</SelectItem>
                         <SelectItem value="Won">Won</SelectItem>
                         <SelectItem value="Lost">Lost</SelectItem>
-                        <SelectItem value="On Hold">On Hold</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
