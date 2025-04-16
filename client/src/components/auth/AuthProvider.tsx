@@ -53,12 +53,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (username: string, password: string): Promise<User> => {
     try {
       console.log("Attempting login with:", username);
-      const response = await apiRequest("POST", "/api/login", { 
-        username, 
-        password 
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ username, password }),
+        credentials: "include"
       });
       
+      if (!response.ok) {
+        throw new Error("Login failed");
+      }
+      
       const userData = await response.json();
+      console.log("Login data:", userData);
       setUser(userData);
       queryClient.setQueryData(['/api/me'], userData);
       return userData;
@@ -70,22 +79,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   
   const refreshUser = async (): Promise<void> => {
     try {
-      const res = await fetch('/api/me', {
-        credentials: "include",
-      });
+      const response = await apiRequest("GET", "/api/me");
       
-      if (res.status === 401) {
+      if (response.status === 401) {
         setUser(null);
         return;
       }
       
-      if (res.ok) {
-        const userData = await res.json();
+      if (response.ok) {
+        const userData = await response.json();
         setUser(userData);
         queryClient.setQueryData(['/api/me'], userData);
       }
     } catch (error) {
       console.error("Refresh user error:", error);
+      // Just silently fail without changing user state on refresh error
     }
   };
 
