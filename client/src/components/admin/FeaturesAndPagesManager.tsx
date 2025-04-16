@@ -78,13 +78,14 @@ export function FeaturesAndPagesManager() {
     resolver: zodResolver(featureFormSchema),
     defaultValues: {
       name: "",
-      category: "",
+      category: "", // Kept for backward compatibility but not shown in UI
       pricingType: "flat",
       description: "",
       flatPrice: 0,
       hourlyRate: null,
       estimatedHours: null,
       supportsQuantity: false,
+      forAllProjectTypes: false,
     },
   });
 
@@ -293,7 +294,7 @@ export function FeaturesAndPagesManager() {
     featureForm.reset({
       name: "",
       projectTypeId: null,
-      category: "",
+      category: "", // Empty category as per user request
       pricingType: "flat",
       description: "",
       flatPrice: 0,
@@ -403,7 +404,6 @@ export function FeaturesAndPagesManager() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead>Category</TableHead>
                     <TableHead>Project Type</TableHead>
                     <TableHead>Price</TableHead>
                     <TableHead className="w-[100px]">Actions</TableHead>
@@ -419,7 +419,6 @@ export function FeaturesAndPagesManager() {
                     return (
                       <TableRow key={feature.id}>
                         <TableCell>{feature.name}</TableCell>
-                        <TableCell>{feature.category}</TableCell>
                         <TableCell>{projectType ? projectType.name : "N/A"}</TableCell>
                         <TableCell>{priceDisplay}</TableCell>
                         <TableCell>
@@ -629,19 +628,8 @@ export function FeaturesAndPagesManager() {
                 </div>
               )}
 
-              <FormField
-                control={featureForm.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Marketing" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Category field removed as per user request */}
+              <input type="hidden" {...featureForm.register("category")} value="" />
 
               <FormField
                 control={featureForm.control}
