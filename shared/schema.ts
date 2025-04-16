@@ -51,7 +51,7 @@ export const features = pgTable("features", {
   projectTypeId: integer("project_type_id"), // Now optional for backward compatibility
   name: text("name").notNull(),
   description: text("description"),
-  category: text("category").notNull(),
+  category: text("category").default(""),
   pricingType: text("pricing_type").notNull(), // 'fixed' or 'hourly'
   flatPrice: doublePrecision("flat_price"),
   hourlyRate: doublePrecision("hourly_rate"),

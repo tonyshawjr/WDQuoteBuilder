@@ -40,7 +40,7 @@ import {
 const featureFormSchema = insertFeatureSchema.extend({
   name: z.string().min(2, "Name must be at least 2 characters"),
   projectTypeId: z.coerce.number().optional().nullable(), // Make projectTypeId optional
-  category: z.string().min(2, "Category must be at least 2 characters"),
+  category: z.string().optional().default(""),
   pricingType: z.string().min(2, "Pricing type is required"),
   description: z.string().optional(),
   flatPrice: z.coerce.number().optional().nullable(),
