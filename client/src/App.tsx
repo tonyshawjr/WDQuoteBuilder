@@ -13,6 +13,7 @@ import NotFound from "@/pages/not-found";
 import Login from "@/pages/Login";
 import Settings from "@/pages/Settings";
 import AllQuotes from "@/pages/AllQuotes";
+import Reports from "@/pages/Reports";
 
 function Router() {
   return (
@@ -35,6 +36,7 @@ function Router() {
       <Route path="/quotes" component={AllQuotes} />
       <Route path="/quotes/:id" component={QuoteDetailsPage} />
       <Route path="/settings" component={Settings} />
+      <Route path="/reports" component={Reports} />
       <Route component={NotFound} />
     </Switch>
   );
