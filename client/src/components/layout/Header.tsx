@@ -1,21 +1,12 @@
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { 
   LogOut, 
-  User, 
   Calculator, 
   Settings, 
   LayoutDashboard, 
   Menu, 
-  X, 
   ChevronRight 
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -98,26 +89,19 @@ export function Header() {
                   </Button>
                 </nav>
                 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex items-center" size="sm">
-                      <span className="text-sm text-gray-700">
-                        {user.firstName || ''} {user.lastName || ''}
-                      </span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => navigateTo("/settings")}>
-                      <Settings className="h-4 w-4 mr-2" />
-                      Settings
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-red-500 cursor-pointer" onClick={handleLogout}>
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Logout
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="flex items-center space-x-4">
+                  <span className="text-sm text-gray-700">
+                    {user.firstName || ''} {user.lastName || ''}
+                  </span>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={handleLogout}
+                    className="text-red-500 hover:text-red-600"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
               
               {/* Mobile navigation */}
