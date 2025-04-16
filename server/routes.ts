@@ -385,16 +385,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // System Settings routes
-  app.get('/api/system-settings', async (req, res) => {
-    try {
-      const settings = await storage.getSystemSettings();
-      res.json(settings);
-    } catch (error) {
-      console.error('Error getting system settings:', error);
-      res.status(500).json({ message: 'Error getting system settings' });
-    }
-  });
-  
   app.get('/api/business-name', async (req, res) => {
     try {
       const businessName = await storage.getBusinessName();
@@ -428,43 +418,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error updating business name:', error);
       res.status(500).json({ message: 'Error updating business name' });
-    }
-  });
-  
-  app.post('/api/brand-colors', async (req, res) => {
-    try {
-      // Check if the user is an admin
-      if (!req.user || !req.user.isAdmin) {
-        return res.status(403).json({ message: 'Only admins can update brand colors' });
-      }
-      
-      const { lightModeColor, darkModeColor } = req.body;
-      
-      // Validate colors are proper hex codes
-      const hexColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
-      
-      if (!lightModeColor || !darkModeColor || 
-          typeof lightModeColor !== 'string' || 
-          typeof darkModeColor !== 'string' ||
-          !hexColorRegex.test(lightModeColor) ||
-          !hexColorRegex.test(darkModeColor)) {
-        return res.status(400).json({ message: 'Invalid color values. Must be valid hex colors.' });
-      }
-      
-      const success = await storage.updateBrandColors(lightModeColor, darkModeColor);
-      
-      if (success) {
-        res.json({ 
-          message: 'Brand colors updated successfully', 
-          lightModeColor, 
-          darkModeColor 
-        });
-      } else {
-        res.status(500).json({ message: 'Failed to update brand colors' });
-      }
-    } catch (error) {
-      console.error('Error updating brand colors:', error);
-      res.status(500).json({ message: 'Error updating brand colors' });
     }
   });
   
