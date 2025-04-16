@@ -32,7 +32,7 @@ import {
   Tooltip 
 } from "recharts";
 import { PlusCircle, ArrowUpRight, Filter, User, Calendar, FileText } from "lucide-react";
-import { Quote, User as UserType } from "@shared/schema";
+import { Quote, User as UserType, ProjectType } from "@shared/schema";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
 
@@ -51,6 +51,11 @@ export default function Dashboard() {
   const { data: users = [], isLoading: isLoadingUsers } = useQuery({
     queryKey: ["/api/users"],
     enabled: isAdmin,
+  });
+  
+  // Fetch project types for quote display
+  const { data: projectTypes = [], isLoading: isLoadingProjectTypes } = useQuery({
+    queryKey: ["/api/project-types"],
   });
   
   useEffect(() => {
@@ -80,12 +85,21 @@ export default function Dashboard() {
     
     // Group by sales person
     const revenueByPerson: Record<string, number> = {};
+    const usernameToDisplayName: Record<string, string> = {};
     
     filteredQuotes.forEach(quote => {
       if (!quote.createdBy) return;
       
       if (!revenueByPerson[quote.createdBy]) {
         revenueByPerson[quote.createdBy] = 0;
+        
+        // Store the display name for this username
+        const user = users.find(u => u.username === quote.createdBy);
+        if (user && user.firstName && user.lastName) {
+          usernameToDisplayName[quote.createdBy] = `${user.firstName} ${user.lastName}`;
+        } else {
+          usernameToDisplayName[quote.createdBy] = quote.createdBy;
+        }
       }
       
       // Add the total price of the won quote to the salesperson's revenue
@@ -94,14 +108,26 @@ export default function Dashboard() {
     
     // Convert to array and sort by revenue (highest first)
     const sortedSales = Object.entries(revenueByPerson)
-      .map(([name, total]) => ({ name, total }))
+      .map(([username, total]) => ({ 
+        name: usernameToDisplayName[username] || username, 
+        total 
+      }))
       .sort((a, b) => b.total - a.total);
     
     // Return top 3 revenue generators
     return sortedSales.slice(0, 3);
   };
   
-  if (isLoadingQuotes || isLoadingUsers) {
+  // Helper function to get project type name by ID
+  const getProjectTypeName = (projectTypeId: number | null) => {
+    if (!projectTypeId) return "Not specified";
+    const projectType = Array.isArray(projectTypes) 
+      ? projectTypes.find((pt: ProjectType) => pt.id === projectTypeId)
+      : null;
+    return projectType ? projectType.name : "Unknown Project";
+  };
+  
+  if (isLoadingQuotes || isLoadingUsers || isLoadingProjectTypes) {
     return (
       <>
         <Header />
@@ -237,7 +263,7 @@ export default function Dashboard() {
                   <SelectItem value="all">All Users</SelectItem>
                   {Array.isArray(users) && users.map((u: UserType) => (
                     <SelectItem key={u.id} value={u.id.toString()}>
-                      {u.username}
+                      {`${u.firstName || ''} ${u.lastName || ''}`}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -386,9 +412,7 @@ export default function Dashboard() {
                           
                           <div className="col-span-3 flex items-center">
                             <div className="text-sm text-gray-700">
-                              {quote.projectTypeId 
-                                ? "WordPress Website" 
-                                : "Shopify Store"}
+                              {getProjectTypeName(quote.projectTypeId)}
                             </div>
                           </div>
                           
@@ -397,7 +421,12 @@ export default function Dashboard() {
                           </div>
                           
                           <div className="col-span-2 flex items-center text-sm text-gray-600">
-                            {quote.createdBy}
+                            {Array.isArray(users) 
+                              ? users.find(u => u.username === quote.createdBy)
+                                  ? `${users.find(u => u.username === quote.createdBy)?.firstName || ''} ${users.find(u => u.username === quote.createdBy)?.lastName || ''}`
+                                  : quote.createdBy
+                              : quote.createdBy
+                            }
                           </div>
                           
                           <div className="col-span-2">
@@ -452,7 +481,7 @@ export default function Dashboard() {
                         
                         <div className="flex items-center mt-2 bg-gray-50 rounded-md px-2 py-1.5">
                           <div className="text-xs font-medium text-gray-600">
-                            {quote.projectTypeId ? "WordPress Website" : "Shopify Store"}
+                            {getProjectTypeName(quote.projectTypeId)}
                           </div>
                         </div>
                         
@@ -464,7 +493,12 @@ export default function Dashboard() {
                             </div>
                             <div className="flex items-center text-xs text-gray-500">
                               <User className="h-3 w-3 text-gray-400 mr-1" />
-                              {quote.createdBy}
+                              {Array.isArray(users) 
+                                ? users.find(u => u.username === quote.createdBy)
+                                    ? `${users.find(u => u.username === quote.createdBy)?.firstName || ''} ${users.find(u => u.username === quote.createdBy)?.lastName || ''}`
+                                    : quote.createdBy
+                                : quote.createdBy
+                              }
                             </div>
                           </div>
                           <div className="font-semibold text-sm">${quote.totalPrice?.toLocaleString()}</div>
