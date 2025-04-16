@@ -32,7 +32,11 @@ import { useAuth } from "@/components/auth/AuthProvider";
 // Form validation schema
 const userFormSchema = insertUserSchema.extend({
   username: z.string().min(3, "Username must be at least 3 characters"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string()
+    .refine(
+      (val) => val === '' || val.length >= 6,
+      { message: "Password must be at least 6 characters" }
+    ),
   email: z.string().email("Invalid email address").optional().nullable(),
   firstName: z.string().optional().nullable(),
   lastName: z.string().optional().nullable(),
@@ -191,6 +195,11 @@ export function UserManagement() {
   // Handle form submission
   const onSubmit = (values: UserFormValues) => {
     if (dialogMode === "create") {
+      // For new users, password is required
+      if (!values.password) {
+        form.setError("password", { message: "Password is required for new users" });
+        return;
+      }
       createUserMutation.mutate(values);
     } else if (dialogMode === "edit" && selectedUser) {
       updateUserMutation.mutate({ ...values, id: selectedUser.id });
