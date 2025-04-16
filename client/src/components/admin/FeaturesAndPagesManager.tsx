@@ -814,14 +814,14 @@ export function FeaturesAndPagesManager() {
                     <FormLabel>Project Type (Optional)</FormLabel>
                     <FormControl>
                       <Select
-                        onValueChange={(value) => field.onChange(value ? parseInt(value) : null)}
-                        value={field.value ? field.value.toString() : ""}
+                        onValueChange={(value) => field.onChange(value === "null" ? null : parseInt(value))}
+                        value={field.value ? field.value.toString() : "null"}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select project type" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Project Types</SelectItem>
+                          <SelectItem value="null">All Project Types</SelectItem>
                           {projectTypes.map((projectType: ProjectType) => (
                             <SelectItem
                               key={projectType.id}
