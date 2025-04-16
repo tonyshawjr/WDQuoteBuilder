@@ -36,10 +36,22 @@ export default function BusinessSettings() {
     mutationFn: async (newBusinessName: string) => {
       try {
         console.log("Sending businessName update:", newBusinessName);
-        const res = await apiRequest("POST", "/api/business-name", { 
-          businessName: newBusinessName 
+        // Use direct fetch instead of apiRequest to ensure proper handling
+        const response = await fetch("/api/business-name", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ businessName: newBusinessName }),
+          credentials: "include"
         });
-        const data = await res.json();
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to update business name");
+        }
+        
+        const data = await response.json();
         console.log("Response from business name update:", data);
         return data;
       } catch (error) {
@@ -47,9 +59,9 @@ export default function BusinessSettings() {
         throw error;
       }
     },
-    onSuccess: () => {
-      // Invalidate the query to refresh the data
-      queryClient.invalidateQueries({ queryKey: ["/api/business-name"] });
+    onSuccess: (data) => {
+      // Directly update the query data instead of invalidating
+      queryClient.setQueryData(["/api/business-name"], { businessName: businessName });
       toast({
         title: "Business name updated",
         description: "Your business name has been updated successfully.",
