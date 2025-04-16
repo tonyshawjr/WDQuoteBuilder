@@ -246,8 +246,10 @@ export default function Dashboard() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         <div className="flex flex-col justify-between items-start mb-6">
           <div className="mb-4">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-sm text-gray-600">Overview of your quotes and performance</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+              Hello, {user?.firstName || 'there'}! 👋
+            </h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Welcome to your dashboard. Here's an overview of your quotes and performance.</p>
           </div>
           
           <div className="flex flex-wrap gap-2 w-full">
