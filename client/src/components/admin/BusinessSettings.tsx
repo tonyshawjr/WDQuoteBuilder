@@ -35,13 +35,13 @@ export default function BusinessSettings() {
   const updateMutation = useMutation({
     mutationFn: async (newBusinessName: string) => {
       try {
+        console.log("Sending businessName update:", newBusinessName);
         const res = await apiRequest("POST", "/api/business-name", { 
           businessName: newBusinessName 
         });
-        if (res.ok) {
-          return await res.json();
-        }
-        throw new Error("Failed to update business name");
+        const data = await res.json();
+        console.log("Response from business name update:", data);
+        return data;
       } catch (error) {
         console.error("Error updating business name:", error);
         throw error;
