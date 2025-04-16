@@ -89,6 +89,13 @@ const InstallWizard: React.FC = () => {
     status: 'idle'
   });
   
+  // System requirement check states
+  const [systemRequirements, setSystemRequirements] = useState({
+    mysql: { available: false, checking: true },
+    postgres: { available: false, checking: true },
+    nodeVersion: { version: import.meta.env.VITE_NODE_VERSION || 'Unknown', sufficient: true }
+  });
+  
   // Query to check if the app is already installed
   const { data: installStatus, isLoading: installStatusLoading } = useQuery({
     queryKey: ['/api/install/status'],
@@ -113,6 +120,46 @@ useEffect(() => {
     });
   }
 }, [installStatus, setLocation, toast]);
+
+// Check system requirements when on welcome step
+useEffect(() => {
+  if (currentStep === 'welcome') {
+    // Check MySQL availability
+    const checkMySql = async () => {
+      try {
+        const result = await apiRequest('POST', '/api/install/check-database', { type: 'mysql' });
+        setSystemRequirements(prev => ({
+          ...prev,
+          mysql: { available: result.available, checking: false }
+        }));
+      } catch (error) {
+        setSystemRequirements(prev => ({
+          ...prev,
+          mysql: { available: false, checking: false }
+        }));
+      }
+    };
+
+    // Check PostgreSQL availability
+    const checkPostgres = async () => {
+      try {
+        const result = await apiRequest('POST', '/api/install/check-database', { type: 'postgres' });
+        setSystemRequirements(prev => ({
+          ...prev,
+          postgres: { available: result.available, checking: false }
+        }));
+      } catch (error) {
+        setSystemRequirements(prev => ({
+          ...prev,
+          postgres: { available: false, checking: false }
+        }));
+      }
+    };
+
+    checkMySql();
+    checkPostgres();
+  }
+}, [currentStep]);
 
   // Mutation for testing database connection
   const testConnectionMutation = useMutation({
@@ -318,13 +365,67 @@ useEffect(() => {
                   </ul>
                 </div>
                 <div className="rounded-lg border p-4">
-                  <h3 className="text-lg font-semibold mb-2">System Requirements</h3>
-                  <p className="mb-2">Your hosting environment should support:</p>
-                  <ul className="list-disc pl-5 space-y-1">
-                    <li>Node.js (v14+)</li>
-                    <li>MySQL or PostgreSQL database</li>
-                    <li>The ability to create and configure database tables</li>
-                  </ul>
+                  <h3 className="text-lg font-semibold mb-2">System Requirements Check</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span>Node.js (v14+)</span>
+                      <span className={`flex items-center ${systemRequirements.nodeVersion.sufficient ? 'text-green-600' : 'text-amber-600'}`}>
+                        {systemRequirements.nodeVersion.sufficient ? (
+                          <CheckCircle className="h-4 w-4 mr-1 text-green-600" />
+                        ) : (
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin text-amber-600" />
+                        )}
+                        {systemRequirements.nodeVersion.version || 'Checking...'}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span>MySQL Database</span>
+                      <span className="flex items-center">
+                        {systemRequirements.mysql.checking ? (
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin text-blue-600" />
+                        ) : systemRequirements.mysql.available ? (
+                          <CheckCircle className="h-4 w-4 mr-1 text-green-600" />
+                        ) : (
+                          <span className="text-amber-600">Not available</span>
+                        )}
+                        {systemRequirements.mysql.checking ? 'Checking...' : 
+                          systemRequirements.mysql.available ? 'Available' : ''}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span>PostgreSQL Database</span>
+                      <span className="flex items-center">
+                        {systemRequirements.postgres.checking ? (
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin text-blue-600" />
+                        ) : systemRequirements.postgres.available ? (
+                          <CheckCircle className="h-4 w-4 mr-1 text-green-600" />
+                        ) : (
+                          <span className="text-amber-600">Not available</span>
+                        )}
+                        {systemRequirements.postgres.checking ? 'Checking...' : 
+                          systemRequirements.postgres.available ? 'Available' : ''}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {!systemRequirements.mysql.available && !systemRequirements.postgres.available && !systemRequirements.mysql.checking && !systemRequirements.postgres.checking && (
+                    <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-800">
+                      <p className="text-sm font-medium">No database connection available</p>
+                      <p className="text-xs mt-1">This application requires either MySQL or PostgreSQL. Please ensure at least one database type is available on your hosting environment.</p>
+                    </div>
+                  )}
+                  
+                  <div className="mt-4">
+                    <h4 className="font-medium text-sm mb-2">cPanel Hosting Instructions:</h4>
+                    <ol className="list-decimal pl-5 space-y-1 text-sm text-muted-foreground">
+                      <li>Create a MySQL database from cPanel</li>
+                      <li>Create a database user and assign it to your database</li>
+                      <li>Note your database name, username and password</li>
+                      <li>Most cPanel servers use 'localhost' as the host</li>
+                    </ol>
+                  </div>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end">

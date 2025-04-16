@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { InstallationService, InstallationSettings, AdminUser } from '../install/InstallationService';
 import { DatabaseConfig, DatabaseType } from '../database/adapters/DBAdapterFactory';
 import { z } from 'zod';
+import { exec } from 'child_process';
 
 // Create a router
 const router = Router();
