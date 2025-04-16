@@ -164,36 +164,22 @@ export function ProfileEditor() {
   }
 
   return (
-    <div className="space-y-8">
-      <Card className="border-0 shadow-sm overflow-hidden">
-        <CardHeader className="bg-gray-50 border-b px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle className="text-xl">Profile Details</CardTitle>
-              <CardDescription className="text-gray-600 mt-1">
-                Update your personal information
-              </CardDescription>
-            </div>
-            {!isEditingProfile && (
-              <Button 
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={toggleEditProfile}
-                className="shadow-sm"
-              >
-                Edit Profile
-              </Button>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent className="px-6 py-5">
+    <div className="space-y-10">
+      {/* Profile Card */}
+      <div className="bg-white rounded-xl overflow-hidden shadow-sm ring-1 ring-gray-100">
+        {/* Personal Info Section */}
+        <div className="px-6 py-6 md:px-10 md:py-8">
           <Form {...profileForm}>
-            <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
+            <form onSubmit={profileForm.handleSubmit(onProfileSubmit)}>
               {isEditingProfile ? (
                 <>
-                  <div className="grid gap-5">
-                    <div className="grid gap-5 sm:grid-cols-2">
+                  <div className="mb-8">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-1">Edit Your Profile</h2>
+                    <p className="text-gray-500">Update your personal information</p>
+                  </div>
+                  
+                  <div className="space-y-8">
+                    <div className="grid gap-6 sm:grid-cols-2">
                       <FormField
                         control={profileForm.control}
                         name="username"
@@ -201,7 +187,10 @@ export function ProfileEditor() {
                           <FormItem>
                             <FormLabel className="text-gray-700 font-medium">Username</FormLabel>
                             <FormControl>
-                              <Input {...field} className="shadow-sm" />
+                              <Input 
+                                {...field} 
+                                className="h-12 bg-gray-50 border-gray-100 focus:bg-white focus:ring-1 focus:ring-primary/30 transition-all shadow-none" 
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -215,7 +204,12 @@ export function ProfileEditor() {
                           <FormItem>
                             <FormLabel className="text-gray-700 font-medium">Email</FormLabel>
                             <FormControl>
-                              <Input type="email" {...field} value={field.value || ''} className="shadow-sm" />
+                              <Input 
+                                type="email" 
+                                {...field} 
+                                value={field.value || ''} 
+                                className="h-12 bg-gray-50 border-gray-100 focus:bg-white focus:ring-1 focus:ring-primary/30 transition-all shadow-none" 
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -223,7 +217,7 @@ export function ProfileEditor() {
                       />
                     </div>
                     
-                    <div className="grid gap-5 sm:grid-cols-2">
+                    <div className="grid gap-6 sm:grid-cols-2">
                       <FormField
                         control={profileForm.control}
                         name="firstName"
@@ -231,7 +225,11 @@ export function ProfileEditor() {
                           <FormItem>
                             <FormLabel className="text-gray-700 font-medium">First Name</FormLabel>
                             <FormControl>
-                              <Input {...field} value={field.value || ''} className="shadow-sm" />
+                              <Input 
+                                {...field} 
+                                value={field.value || ''} 
+                                className="h-12 bg-gray-50 border-gray-100 focus:bg-white focus:ring-1 focus:ring-primary/30 transition-all shadow-none" 
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -245,7 +243,11 @@ export function ProfileEditor() {
                           <FormItem>
                             <FormLabel className="text-gray-700 font-medium">Last Name</FormLabel>
                             <FormControl>
-                              <Input {...field} value={field.value || ''} className="shadow-sm" />
+                              <Input 
+                                {...field} 
+                                value={field.value || ''} 
+                                className="h-12 bg-gray-50 border-gray-100 focus:bg-white focus:ring-1 focus:ring-primary/30 transition-all shadow-none" 
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -254,93 +256,133 @@ export function ProfileEditor() {
                     </div>
                   </div>
                   
-                  <div className="flex justify-end space-x-2 pt-2">
+                  <div className="flex justify-end space-x-3 mt-8">
                     <Button
                       type="button"
                       variant="outline"
                       onClick={toggleEditProfile}
-                      className="shadow-sm"
+                      className="rounded-lg px-5 py-2.5 border-gray-300"
                     >
                       Cancel
                     </Button>
                     <Button
                       type="submit"
+                      variant="default"
                       disabled={updateProfileMutation.isPending}
-                      className="shadow-sm"
+                      className="rounded-lg px-5 py-2.5"
                     >
-                      {updateProfileMutation.isPending && (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {updateProfileMutation.isPending ? (
+                        <>
+                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Saving...
+                        </>
+                      ) : (
+                        "Save Changes"
                       )}
-                      Save Changes
                     </Button>
                   </div>
                 </>
               ) : (
-                <div className="space-y-6">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center">
-                    <div className="flex items-center justify-center bg-primary/10 rounded-full w-16 h-16 mb-4 sm:mb-0 sm:mr-6">
-                      <span className="text-primary font-semibold text-xl">
-                        {user.firstName ? user.firstName.charAt(0).toUpperCase() : ''}
-                        {user.lastName ? user.lastName.charAt(0).toUpperCase() : ''}
-                      </span>
-                    </div>
-                    
+                <>
+                  <div className="flex justify-between items-center mb-8">
                     <div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-1">
-                        {user.firstName || ''} {user.lastName || ''}
-                      </h3>
-                      <p className="text-gray-500">{user.email || "No email provided"}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8 border-t border-gray-100 pt-6">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-500 mb-1">Username</h4>
-                      <p className="text-gray-900">{user.username}</p>
-                    </div>
-                    
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-500 mb-1">Email</h4>
-                      <p className="text-gray-900">{user.email || "Not provided"}</p>
-                    </div>
-                    
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-500 mb-1">First Name</h4>
-                      <p className="text-gray-900">{user.firstName || "Not provided"}</p>
-                    </div>
-                    
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-500 mb-1">Last Name</h4>
-                      <p className="text-gray-900">{user.lastName || "Not provided"}</p>
-                    </div>
-                    
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-500 mb-1">Role</h4>
-                      <p className="text-gray-900">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isAdmin ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}`}>
-                          {isAdmin ? 'Administrator' : 'Sales User'}
-                        </span>
+                      <h2 className="text-2xl font-bold text-gray-900">Personal Information</h2>
+                      <p className="text-gray-500 mt-1">
+                        Manage your personal details and account settings
                       </p>
                     </div>
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      onClick={toggleEditProfile}
+                      className="rounded-lg bg-white h-10 px-4 py-2"
+                    >
+                      Edit Profile
+                    </Button>
                   </div>
-                </div>
+                  
+                  <div className="flex flex-col md:flex-row md:items-center pb-10">
+                    <div className="flex-shrink-0 mb-6 md:mb-0 md:mr-8">
+                      <div className="relative group">
+                        <div className="flex items-center justify-center bg-gradient-to-br from-primary/80 to-primary rounded-full w-28 h-28 text-white shadow-lg overflow-hidden">
+                          <span className="text-3xl font-semibold">
+                            {user.firstName ? user.firstName.charAt(0).toUpperCase() : ''}
+                            {user.lastName ? user.lastName.charAt(0).toUpperCase() : ''}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex-1">
+                      <div>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-1">
+                          {user.firstName || user.username} {user.lastName || ''}
+                        </h3>
+                        
+                        <div className="flex flex-wrap items-center gap-3 mb-4">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                            isAdmin 
+                              ? 'bg-purple-50 text-purple-700 ring-1 ring-purple-700/10' 
+                              : 'bg-blue-50 text-blue-700 ring-1 ring-blue-700/10'
+                          }`}>
+                            {isAdmin ? 'Administrator' : 'Sales User'}
+                          </span>
+                          
+                          {user.email && (
+                            <span className="text-gray-500 flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                              </svg>
+                              {user.email}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6 mt-6">
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-500">Username</h4>
+                          <p className="text-gray-900 mt-1">{user.username}</p>
+                        </div>
+                        
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-500">Email</h4>
+                          <p className="text-gray-900 mt-1">{user.email || "Not provided"}</p>
+                        </div>
+                        
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-500">First Name</h4>
+                          <p className="text-gray-900 mt-1">{user.firstName || "Not provided"}</p>
+                        </div>
+                        
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-500">Last Name</h4>
+                          <p className="text-gray-900 mt-1">{user.lastName || "Not provided"}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
               )}
             </form>
           </Form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
       
-      <Card className="border-0 shadow-sm overflow-hidden">
-        <CardHeader className="bg-gray-50 border-b px-6 py-4">
-          <CardTitle className="text-xl">Change Password</CardTitle>
-          <CardDescription className="text-gray-600 mt-1">
-            Update your password to secure your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-6 py-5">
+      {/* Password Card */}
+      <div className="bg-white rounded-xl overflow-hidden shadow-sm ring-1 ring-gray-100">
+        <div className="px-6 py-6 md:px-10 md:py-8">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900">Password & Security</h2>
+            <p className="text-gray-500 mt-1">Update your password to secure your account</p>
+          </div>
+          
           <Form {...passwordForm}>
-            <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-5">
-              <div className="space-y-5">
+            <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-8">
+              <div className="space-y-8">
                 <FormField
                   control={passwordForm.control}
                   name="currentPassword"
@@ -352,7 +394,7 @@ export function ProfileEditor() {
                           type="password" 
                           placeholder="Enter your current password" 
                           {...field} 
-                          className="shadow-sm"
+                          className="h-12 bg-gray-50 border-gray-100 focus:bg-white focus:ring-1 focus:ring-primary/30 transition-all shadow-none"
                         />
                       </FormControl>
                       <FormMessage />
@@ -360,7 +402,7 @@ export function ProfileEditor() {
                   )}
                 />
                 
-                <div className="grid gap-5 sm:grid-cols-2">
+                <div className="grid gap-6 sm:grid-cols-2">
                   <FormField
                     control={passwordForm.control}
                     name="newPassword"
@@ -372,7 +414,7 @@ export function ProfileEditor() {
                             type="password" 
                             placeholder="Enter your new password" 
                             {...field} 
-                            className="shadow-sm"
+                            className="h-12 bg-gray-50 border-gray-100 focus:bg-white focus:ring-1 focus:ring-primary/30 transition-all shadow-none"
                           />
                         </FormControl>
                         <FormMessage />
@@ -391,7 +433,7 @@ export function ProfileEditor() {
                             type="password" 
                             placeholder="Confirm your new password" 
                             {...field} 
-                            className="shadow-sm"
+                            className="h-12 bg-gray-50 border-gray-100 focus:bg-white focus:ring-1 focus:ring-primary/30 transition-all shadow-none"
                           />
                         </FormControl>
                         <FormMessage />
@@ -401,22 +443,32 @@ export function ProfileEditor() {
                 </div>
               </div>
               
-              <div className="pt-2">
+              <div className="flex items-center justify-between pt-2">
+                <div className="text-sm text-gray-500">
+                  Password must be at least 6 characters long
+                </div>
                 <Button 
                   type="submit"
                   disabled={changePasswordMutation.isPending}
-                  className="shadow-sm"
+                  className="rounded-lg px-5 py-2.5"
                 >
-                  {changePasswordMutation.isPending && (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  {changePasswordMutation.isPending ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Updating...
+                    </>
+                  ) : (
+                    "Update Password"
                   )}
-                  Change Password
                 </Button>
               </div>
             </form>
           </Form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
