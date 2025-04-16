@@ -34,9 +34,9 @@ export default function BusinessSettings() {
   // Update business name mutation
   const updateMutation = useMutation({
     mutationFn: async (newBusinessName: string) => {
-      const res = await apiRequest("POST", "/api/business-name", JSON.stringify({
+      const res = await apiRequest("POST", "/api/business-name", {
         businessName: newBusinessName
-      }));
+      });
       return await res.json();
     },
     onSuccess: () => {

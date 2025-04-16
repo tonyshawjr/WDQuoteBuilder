@@ -71,13 +71,12 @@ export class DatabaseStorage implements IStorage {
       if (settings) {
         // Update existing record
         await db.update(systemSettings)
-          .set({ businessName, updatedAt: new Date() })
+          .set({ businessName })
           .where(eq(systemSettings.id, settings.id));
       } else {
         // Create new record if none exists
         await db.insert(systemSettings).values({
-          businessName,
-          updatedAt: new Date()
+          businessName
         });
       }
       
