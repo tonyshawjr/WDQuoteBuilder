@@ -60,7 +60,7 @@ export default function Dashboard() {
     }
   }, [user, isAdmin]);
   
-  // Helper function to calculate top salespeople based on quotes
+  // Helper function to calculate top salespeople based on revenue from won deals
   const getTopSalespeople = (quotes: Quote[], timeRange: "all" | "month") => {
     if (!Array.isArray(quotes) || !Array.isArray(users)) return [];
     
@@ -75,28 +75,29 @@ export default function Dashboard() {
       );
     }
     
-    // Only include quotes that have been won
+    // Only include quotes that have been won - these represent actual revenue
     filteredQuotes = filteredQuotes.filter(quote => quote.leadStatus === "Won");
     
     // Group by sales person
-    const salesByPerson: Record<string, number> = {};
+    const revenueByPerson: Record<string, number> = {};
     
     filteredQuotes.forEach(quote => {
       if (!quote.createdBy) return;
       
-      if (!salesByPerson[quote.createdBy]) {
-        salesByPerson[quote.createdBy] = 0;
+      if (!revenueByPerson[quote.createdBy]) {
+        revenueByPerson[quote.createdBy] = 0;
       }
       
-      salesByPerson[quote.createdBy] += quote.totalPrice || 0;
+      // Add the total price of the won quote to the salesperson's revenue
+      revenueByPerson[quote.createdBy] += quote.totalPrice || 0;
     });
     
-    // Convert to array and sort
-    const sortedSales = Object.entries(salesByPerson)
+    // Convert to array and sort by revenue (highest first)
+    const sortedSales = Object.entries(revenueByPerson)
       .map(([name, total]) => ({ name, total }))
       .sort((a, b) => b.total - a.total);
     
-    // Return top 3 performers
+    // Return top 3 revenue generators
     return sortedSales.slice(0, 3);
   };
   
@@ -410,8 +411,8 @@ export default function Dashboard() {
                   <Card className="overflow-hidden border-0 shadow-sm bg-gradient-to-br from-green-50 to-blue-50">
                     <CardHeader className="pb-0 py-3 px-4">
                       <div>
-                        <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">Top Salespeople</CardTitle>
-                        <CardDescription className="text-xs sm:text-sm text-gray-600">Best performing team members</CardDescription>
+                        <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">Top Revenue Generators</CardTitle>
+                        <CardDescription className="text-xs sm:text-sm text-gray-600">Salespeople with highest closed revenue</CardDescription>
                       </div>
                     </CardHeader>
                     <CardContent className="pt-2 px-4 pb-3">
@@ -430,11 +431,14 @@ export default function Dashboard() {
                                     </span>
                                     <span className="font-medium text-sm">{person.name}</span>
                                   </div>
-                                  <span className="text-sm font-semibold text-indigo-600">${person.total.toLocaleString()}</span>
+                                  <div className="flex flex-col items-end">
+                                    <span className="text-sm font-semibold text-indigo-600">${person.total.toLocaleString()}</span>
+                                    <span className="text-xs text-gray-500">closed revenue</span>
+                                  </div>
                                 </div>
                               ))
                             ) : (
-                              <div className="text-sm text-gray-500 p-2">No closed deals this month</div>
+                              <div className="text-sm text-gray-500 p-2">No closed revenue this month</div>
                             )}
                           </div>
                         </div>
@@ -453,11 +457,14 @@ export default function Dashboard() {
                                     </span>
                                     <span className="font-medium text-sm">{person.name}</span>
                                   </div>
-                                  <span className="text-sm font-semibold text-indigo-600">${person.total.toLocaleString()}</span>
+                                  <div className="flex flex-col items-end">
+                                    <span className="text-sm font-semibold text-indigo-600">${person.total.toLocaleString()}</span>
+                                    <span className="text-xs text-gray-500">closed revenue</span>
+                                  </div>
                                 </div>
                               ))
                             ) : (
-                              <div className="text-sm text-gray-500 p-2">No closed deals yet</div>
+                              <div className="text-sm text-gray-500 p-2">No closed revenue yet</div>
                             )}
                           </div>
                         </div>
