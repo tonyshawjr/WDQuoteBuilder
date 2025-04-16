@@ -120,14 +120,14 @@ export default function Calculator() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="mb-6">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-            Web Design Estimate
+            Web Design Quote
           </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Create a customized estimate for your client's web design project</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Create a customized quote for your client's web design project</p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="calculator">Build Estimate</TabsTrigger>
+            <TabsTrigger value="calculator">Build Quote</TabsTrigger>
             <TabsTrigger value="save-quote" disabled={!isReadyToSaveQuote}>Save Quote</TabsTrigger>
           </TabsList>
           
@@ -171,7 +171,7 @@ export default function Calculator() {
               {/* Desktop summary is hidden on mobile */}
               <div className="hidden lg:block lg:w-1/3">
                 <div className="bg-card rounded-lg shadow-sm p-4 border border-border sticky top-24">
-                  <EstimateSummary
+                  <QuoteSummary
                     selectedFeatures={selectedFeatures}
                     selectedProjectType={selectedProjectType}
                     selectedPages={selectedPages}
@@ -225,7 +225,7 @@ export default function Calculator() {
               <div className="lg:w-1/2 mt-6 lg:mt-0">
                 <div className="bg-card rounded-lg shadow-sm p-4 border border-border">
                   <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Quote Summary</h2>
-                  <EstimateSummary
+                  <QuoteSummary
                     selectedFeatures={selectedFeatures}
                     selectedProjectType={selectedProjectType}
                     selectedPages={selectedPages}
