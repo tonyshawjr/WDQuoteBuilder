@@ -395,6 +395,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  app.get('/api/system-settings', async (req, res) => {
+    try {
+      const settings = await storage.getSystemSettings();
+      res.json(settings || {
+        businessName: null,
+        lightModeColor: "#1E40AF", // Default blue
+        darkModeColor: "#F9B200"   // Default yellow
+      });
+    } catch (error) {
+      console.error('Error getting system settings:', error);
+      res.status(500).json({ message: 'Error getting system settings' });
+    }
+  });
+  
   app.post('/api/business-name', async (req, res) => {
     try {
       // Check if the user is an admin
@@ -418,6 +432,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error updating business name:', error);
       res.status(500).json({ message: 'Error updating business name' });
+    }
+  });
+  
+  app.post('/api/brand-colors', async (req, res) => {
+    try {
+      // Check if the user is an admin
+      if (!req.user || !req.user.isAdmin) {
+        return res.status(403).json({ message: 'Only admins can update brand colors' });
+      }
+      
+      const { lightModeColor, darkModeColor } = req.body;
+      
+      if (!lightModeColor || !darkModeColor || 
+          typeof lightModeColor !== 'string' || 
+          typeof darkModeColor !== 'string') {
+        return res.status(400).json({ message: 'Valid color values are required' });
+      }
+      
+      const success = await storage.updateBrandColors(lightModeColor, darkModeColor);
+      
+      if (success) {
+        res.json({ message: 'Brand colors updated successfully', lightModeColor, darkModeColor });
+      } else {
+        res.status(500).json({ message: 'Error updating brand colors' });
+      }
+    } catch (error) {
+      console.error('Error updating brand colors:', error);
+      res.status(500).json({ message: 'Error updating brand colors' });
     }
   });
   
