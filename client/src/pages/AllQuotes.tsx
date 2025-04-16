@@ -432,99 +432,68 @@ export default function AllQuotes() {
             <CardContent className="p-0">
               {/* Desktop view */}
               <div className="hidden md:block">
-                <div className="grid grid-cols-[repeat(16,minmax(0,1fr))] bg-gray-800 px-6 py-3 text-xs font-medium text-gray-200 uppercase tracking-wider">
-                  <button 
-                    className="col-span-3 flex items-center hover:text-white"
-                    onClick={() => toggleSort("clientName")}
-                  >
-                    Client 
-                    <ArrowUpDown className={`h-3 w-3 ml-1 ${sortField === "clientName" ? "opacity-100" : "opacity-50"}`} />
-                  </button>
-                  <div className="col-span-3">Project Type</div>
-                  <button 
-                    className="col-span-2 flex items-center hover:text-white"
-                    onClick={() => toggleSort("createdAt")}
-                  >
-                    Created 
-                    <ArrowUpDown className={`h-3 w-3 ml-1 ${sortField === "createdAt" ? "opacity-100" : "opacity-50"}`} />
-                  </button>
-                  <div className="col-span-2">Rep</div>
-                  <div className="col-span-2">Status</div>
-                  <button 
-                    className="col-span-2 flex items-center hover:text-white justify-end"
-                    onClick={() => toggleSort("totalPrice")}
-                  >
-                    Value 
-                    <ArrowUpDown className={`h-3 w-3 ml-1 ${sortField === "totalPrice" ? "opacity-100" : "opacity-50"}`} />
-                  </button>
-                  <button 
-                    className="col-span-2 flex items-center hover:text-white"
-                    onClick={() => toggleSort("updatedAt")}
-                  >
-                    Updated 
-                    <ArrowUpDown className={`h-3 w-3 ml-1 ${sortField === "updatedAt" ? "opacity-100" : "opacity-50"}`} />
-                  </button>
-                </div>
-                <div>
-                  {filteredQuotes.map((quote: QuoteType) => (
-                    <div 
-                      key={quote.id} 
-                      className="grid grid-cols-[repeat(16,minmax(0,1fr))] px-6 py-4 hover:bg-[#282828] transition-colors cursor-pointer border-b border-gray-700"
-                      onClick={() => navigate(`/quotes/${quote.id}`)}
-                    >
-                      <div className="col-span-3">
-                        <div className="font-medium text-white">{quote.clientName}</div>
-                        <div className="text-sm text-gray-400 truncate">{quote.businessName || "Individual"}</div>
-                      </div>
-                      
-                      <div className="col-span-3 flex items-center">
-                        <div className="text-sm text-gray-300">
-                          {getProjectTypeName(quote.projectTypeId)}
-                        </div>
-                      </div>
-                      
-                      <div className="col-span-2 flex items-center text-sm text-gray-400">
-                        {new Date(quote.createdAt).toLocaleDateString()}
-                      </div>
-                      
-                      <div className="col-span-2 flex items-center text-sm text-gray-400">
-                        {Array.isArray(users) 
-                          ? users.find(u => u.username === quote.createdBy)
-                              ? `${users.find(u => u.username === quote.createdBy)?.firstName || ''} ${users.find(u => u.username === quote.createdBy)?.lastName || ''}`
-                              : quote.createdBy
-                          : quote.createdBy
-                        }
-                      </div>
-                      
-                      <div className="col-span-2">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                          quote.leadStatus === "Won" 
-                            ? "bg-green-500 text-white" 
-                            : quote.leadStatus === "Lost"
-                              ? "bg-red-500 text-white"
-                              : quote.leadStatus === "In Progress"
-                                ? "bg-blue-500 text-white"
-                                : quote.leadStatus === "On Hold"
-                                  ? "bg-gray-500 text-white"
-                                  : quote.leadStatus === "Proposal Sent"
-                                    ? "bg-purple-500 text-white"
-                                    : "bg-yellow-400 text-gray-900"
-                        }`}>
-                          <span className="h-2 w-2 rounded-full mr-1.5 bg-current opacity-70"></span>
-                          {quote.leadStatus}
-                        </span>
-                      </div>
-                      
-                      <div className="col-span-2 font-semibold text-yellow-500 text-right">
-                        ${quote.totalPrice?.toLocaleString()}
-                      </div>
-                      
-                      <div className="col-span-2 text-sm text-gray-400">
-                        {new Date(quote.updatedAt || quote.createdAt).toLocaleDateString()}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <table className="w-full border-collapse">
+                  <tbody>
+                    {filteredQuotes.map((quote: QuoteType) => (
+                      <tr 
+                        key={quote.id} 
+                        className="cursor-pointer hover:bg-[#282828] transition-colors border-b border-gray-700"
+                        onClick={() => navigate(`/quotes/${quote.id}`)}
+                      >
+                        <td className="py-4 px-4">
+                          <div className="font-medium text-white">{quote.clientName}</div>
+                          <div className="text-sm text-gray-400 truncate">{quote.businessName || "Individual"}</div>
+                        </td>
+                        
+                        <td className="py-4">
+                          <div className="text-sm text-gray-300">
+                            {getProjectTypeName(quote.projectTypeId)}
+                          </div>
+                        </td>
+                        
+                        <td className="py-4 text-sm text-gray-400">
+                          {new Date(quote.createdAt).toLocaleDateString()}
+                        </td>
+                        
+                        <td className="py-4 text-sm text-gray-400">
+                          {Array.isArray(users) 
+                            ? users.find(u => u.username === quote.createdBy)
+                                ? `${users.find(u => u.username === quote.createdBy)?.firstName || ''} ${users.find(u => u.username === quote.createdBy)?.lastName || ''}`
+                                : quote.createdBy
+                            : quote.createdBy
+                          }
+                        </td>
+                        
+                        <td className="py-4">
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                            quote.leadStatus === "Won" 
+                              ? "bg-green-500 text-white" 
+                              : quote.leadStatus === "Lost"
+                                ? "bg-red-500 text-white"
+                                : quote.leadStatus === "In Progress"
+                                  ? "bg-blue-500 text-white"
+                                  : quote.leadStatus === "On Hold"
+                                    ? "bg-gray-500 text-white"
+                                    : quote.leadStatus === "Proposal Sent"
+                                      ? "bg-purple-500 text-white"
+                                      : "bg-yellow-400 text-gray-900"
+                          }`}>
+                            <span className="h-2 w-2 rounded-full mr-1.5 bg-current opacity-70"></span>
+                            {quote.leadStatus}
+                          </span>
+                        </td>
+                        
+                        <td className="py-4 font-semibold text-yellow-500 text-right">
+                          ${quote.totalPrice?.toLocaleString()}
+                        </td>
+                        
+                        <td className="py-4 text-sm text-gray-400 text-right">
+                          {new Date(quote.updatedAt || quote.createdAt).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
               
               {/* Mobile view - card style */}
