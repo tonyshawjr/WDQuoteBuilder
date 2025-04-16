@@ -26,7 +26,7 @@ export function Steps({ steps, activeStep, className }: StepsProps) {
             const isCompleted = index < activeIndex;
             
             return (
-              <React.Fragment key={step.id}>
+              <div key={step.id} className="flex items-center">
                 {/* Step Indicator */}
                 <div className="flex flex-col items-center">
                   <div 
@@ -65,7 +65,7 @@ export function Steps({ steps, activeStep, className }: StepsProps) {
                     )}
                   />
                 )}
-              </React.Fragment>
+              </div>
             );
           })}
         </div>

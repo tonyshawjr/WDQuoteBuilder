@@ -100,11 +100,31 @@ export class InstallationService {
    * Create database schema for the application
    */
   private async createDatabaseSchema(dbService: DatabaseService, dbType: DatabaseType): Promise<void> {
-    // Create tables based on database type
-    const createTablesQueries = this.getCreateTablesQueries(dbType);
-    
-    for (const query of createTablesQueries) {
-      await dbService.query(query);
+    try {
+      // First check if tables already exist by checking for users table
+      const dbConfig = this.configManager.getDatabaseConfig();
+      const checkResult = await dbService.query(`
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema = '${dbType === 'mysql' ? dbConfig.database : 'public'}'
+        AND table_name = 'users'
+      `);
+      
+      // If users table already exists, skip schema creation
+      if (checkResult && checkResult.length > 0) {
+        console.log('Database tables already exist, skipping schema creation');
+        return;
+      }
+      
+      // Create tables based on database type
+      const createTablesQueries = this.getCreateTablesQueries(dbType);
+      
+      for (const query of createTablesQueries) {
+        await dbService.query(query);
+      }
+    } catch (error) {
+      console.error('Error checking or creating database schema:', error);
+      throw error;
     }
   }
 
@@ -112,14 +132,30 @@ export class InstallationService {
    * Create admin user
    */
   private async createAdminUser(dbService: DatabaseService, adminUser: AdminUser): Promise<void> {
-    // Hash the password
-    const hashedPassword = await this.hashPassword(adminUser.password);
-    
-    // Insert the admin user
-    await dbService.query(
-      'INSERT INTO users (username, password, email, firstName, lastName, isAdmin) VALUES (?, ?, ?, ?, ?, ?)',
-      [adminUser.username, hashedPassword, adminUser.email, adminUser.firstName, adminUser.lastName, true]
-    );
+    try {
+      // Check if admin user already exists
+      const existingUser = await dbService.queryOne(
+        'SELECT COUNT(*) as count FROM users WHERE username = ? OR email = ?',
+        [adminUser.username, adminUser.email]
+      );
+      
+      if (existingUser && existingUser.count > 0) {
+        console.log('Admin user already exists, skipping creation');
+        return;
+      }
+      
+      // Hash the password
+      const hashedPassword = await this.hashPassword(adminUser.password);
+      
+      // Insert the admin user
+      await dbService.query(
+        'INSERT INTO users (username, password, email, firstName, lastName, isAdmin) VALUES (?, ?, ?, ?, ?, ?)',
+        [adminUser.username, hashedPassword, adminUser.email, adminUser.firstName, adminUser.lastName, true]
+      );
+    } catch (error) {
+      console.error('Error creating admin user:', error);
+      throw error;
+    }
   }
 
   /**
@@ -148,43 +184,56 @@ export class InstallationService {
    * Add demo data to the database
    */
   private async addDemoData(dbService: DatabaseService, dbType: DatabaseType): Promise<void> {
-    // Add project types
-    await dbService.query(
-      'INSERT INTO project_types (name, basePrice, description) VALUES (?, ?, ?)',
-      ['New Website', 1000, 'Brand new website development']
-    );
-    
-    await dbService.query(
-      'INSERT INTO project_types (name, basePrice, description) VALUES (?, ?, ?)',
-      ['Existing Website Redesign', 750, 'Redesign of an existing website']
-    );
-    
-    // Add pages
-    await dbService.query(
-      'INSERT INTO pages (name, description, pricePerPage, defaultQuantity, supportsQuantity, isActive) VALUES (?, ?, ?, ?, ?, ?)',
-      ['Home Page', 'Main landing page', 250, 1, false, true]
-    );
-    
-    await dbService.query(
-      'INSERT INTO pages (name, description, pricePerPage, defaultQuantity, supportsQuantity, isActive) VALUES (?, ?, ?, ?, ?, ?)',
-      ['Standard Page', 'Regular content page', 200, 1, true, true]
-    );
-    
-    // Add features
-    await dbService.query(
-      'INSERT INTO features (name, description, pricingType, flatPrice, category, supportsQuantity, forAllProjectTypes) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      ['Custom Design', 'Unique design tailored to your brand', 'flat', 500, 'Design', false, true]
-    );
-    
-    await dbService.query(
-      'INSERT INTO features (name, description, pricingType, flatPrice, category, supportsQuantity, forAllProjectTypes) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      ['Contact Form', 'Form for visitors to reach you', 'flat', 150, 'Functionality', true, true]
-    );
-    
-    await dbService.query(
-      'INSERT INTO features (name, description, pricingType, hourlyRate, estimatedHours, category, supportsQuantity, forAllProjectTypes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      ['Custom Development', 'Custom programming for specific needs', 'hourly', 75, 10, 'Development', true, true]
-    );
+    try {
+      // Check if data already exists in project_types table
+      const projectTypesExist = await dbService.queryOne('SELECT COUNT(*) as count FROM project_types');
+      
+      if (projectTypesExist && projectTypesExist.count > 0) {
+        console.log('Demo data already exists, skipping demo data creation');
+        return;
+      }
+      
+      // Add project types
+      await dbService.query(
+        'INSERT INTO project_types (name, basePrice, description) VALUES (?, ?, ?)',
+        ['New Website', 1000, 'Brand new website development']
+      );
+      
+      await dbService.query(
+        'INSERT INTO project_types (name, basePrice, description) VALUES (?, ?, ?)',
+        ['Existing Website Redesign', 750, 'Redesign of an existing website']
+      );
+      
+      // Add pages
+      await dbService.query(
+        'INSERT INTO pages (name, description, pricePerPage, defaultQuantity, supportsQuantity, isActive) VALUES (?, ?, ?, ?, ?, ?)',
+        ['Home Page', 'Main landing page', 250, 1, false, true]
+      );
+      
+      await dbService.query(
+        'INSERT INTO pages (name, description, pricePerPage, defaultQuantity, supportsQuantity, isActive) VALUES (?, ?, ?, ?, ?, ?)',
+        ['Standard Page', 'Regular content page', 200, 1, true, true]
+      );
+      
+      // Add features
+      await dbService.query(
+        'INSERT INTO features (name, description, pricingType, flatPrice, category, supportsQuantity, forAllProjectTypes) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        ['Custom Design', 'Unique design tailored to your brand', 'flat', 500, 'Design', false, true]
+      );
+      
+      await dbService.query(
+        'INSERT INTO features (name, description, pricingType, flatPrice, category, supportsQuantity, forAllProjectTypes) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        ['Contact Form', 'Form for visitors to reach you', 'flat', 150, 'Functionality', true, true]
+      );
+      
+      await dbService.query(
+        'INSERT INTO features (name, description, pricingType, hourlyRate, estimatedHours, category, supportsQuantity, forAllProjectTypes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        ['Custom Development', 'Custom programming for specific needs', 'hourly', 75, 10, 'Development', true, true]
+      );
+    } catch (error) {
+      console.error('Error adding demo data:', error);
+      throw error;
+    }
   }
 
   /**
