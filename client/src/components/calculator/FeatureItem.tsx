@@ -38,8 +38,8 @@ export function FeatureItem({
   
   return (
     <div className={`flex items-start justify-between p-4 ${isSelected ? 'bg-[#282828]' : 'hover:bg-gray-50 dark:hover:bg-[#282828]/50'}`}>
-      <div className="flex items-start space-x-3">
-        <div className="flex items-center h-5 mt-1">
+      <div className="flex space-x-3">
+        <div className={`flex ${feature.description ? 'items-start mt-1' : 'items-center'}`}>
           <Checkbox
             id={`feature-${feature.id}`}
             checked={isSelected}
