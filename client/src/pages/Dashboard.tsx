@@ -359,8 +359,8 @@ export default function Dashboard() {
           
           <TabsContent value="quotes" className="pt-4">
             <div className="bg-card shadow-lg rounded-xl overflow-hidden">
-              <div className="px-6 py-5 flex justify-between items-center border-b border-border">
-                <h3 className="text-xl font-semibold">Recent Quotes</h3>
+              <div className="px-6 py-4 flex justify-between items-center border-b border-border">
+                <h3 className="text-lg font-semibold">Recent Quotes</h3>
                 <Button 
                   variant="secondary" 
                   className="bg-primary text-primary-foreground hover:bg-primary/90"
@@ -394,25 +394,25 @@ export default function Dashboard() {
                         {timeFilteredQuotes.slice(0, 5).map((quote: Quote) => (
                           <tr 
                             key={quote.id} 
-                            className="cursor-pointer"
+                            className="cursor-pointer hover:bg-muted/50 transition-colors border-b border-border"
                             onClick={() => navigate(`/quotes/${quote.id}`)}
                           >
-                            <td>
+                            <td className="py-4 px-4">
                               <div className="font-medium">{quote.clientName}</div>
                               <div className="text-sm text-muted-foreground truncate">{quote.businessName || "Individual"}</div>
                             </td>
                             
-                            <td>
+                            <td className="py-4">
                               <div className="text-sm">
                                 {getProjectTypeName(quote.projectTypeId)}
                               </div>
                             </td>
                             
-                            <td className="text-sm text-muted-foreground">
+                            <td className="py-4 text-sm text-muted-foreground">
                               {new Date(quote.createdAt).toLocaleDateString()}
                             </td>
                             
-                            <td className="text-sm text-muted-foreground">
+                            <td className="py-4 text-sm text-muted-foreground">
                               {Array.isArray(users) 
                                 ? users.find(u => u.username === quote.createdBy)
                                     ? `${users.find(u => u.username === quote.createdBy)?.firstName || ''} ${users.find(u => u.username === quote.createdBy)?.lastName || ''}`
@@ -421,7 +421,7 @@ export default function Dashboard() {
                               }
                             </td>
                             
-                            <td>
+                            <td className="py-4">
                               <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
                                 quote.leadStatus === "Won" 
                                   ? "bg-green-500 text-white" 
@@ -434,11 +434,11 @@ export default function Dashboard() {
                               </span>
                             </td>
                             
-                            <td className="font-semibold">
+                            <td className="py-4 font-semibold">
                               ${quote.totalPrice?.toLocaleString()}
                             </td>
                             
-                            <td className="text-sm text-muted-foreground">
+                            <td className="py-4 text-sm text-muted-foreground pr-4">
                               {new Date(quote.updatedAt || quote.createdAt).toLocaleDateString()}
                             </td>
                           </tr>
