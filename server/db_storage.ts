@@ -75,32 +75,76 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(user: InsertUser): Promise<User> {
-    const [newUser] = await db.insert(users).values(user).returning();
-    return newUser;
+    try {
+      console.log('DB storage - Creating user with data:', JSON.stringify(user));
+      
+      // Ensure all required fields are present and properly typed
+      const userData = {
+        username: String(user.username),
+        password: String(user.password),
+        isAdmin: user.isAdmin === true // Ensure this is a boolean
+      };
+      
+      console.log('DB storage - Processed user data:', JSON.stringify(userData));
+      
+      const [newUser] = await db.insert(users).values(userData).returning();
+      console.log('DB storage - User created successfully:', JSON.stringify(newUser));
+      return newUser;
+    } catch (error) {
+      console.error('DB storage - Error creating user:', error);
+      throw error;
+    }
   }
   
   async updateUser(id: number, userData: InsertUser): Promise<User | undefined> {
     try {
+      console.log('DB storage - Updating user with data:', JSON.stringify(userData));
+      
+      // Prepare the data to ensure proper types
+      const processedData: Record<string, any> = {};
+      
+      if (userData.username !== undefined) {
+        processedData.username = String(userData.username);
+      }
+      
+      if (userData.password !== undefined) {
+        processedData.password = String(userData.password);
+      }
+      
+      if (userData.isAdmin !== undefined) {
+        processedData.isAdmin = userData.isAdmin === true;
+      }
+      
+      console.log('DB storage - Processed update data:', JSON.stringify(processedData));
+      
       const [updatedUser] = await db
         .update(users)
-        .set(userData)
+        .set(processedData)
         .where(eq(users.id, id))
         .returning();
+        
+      console.log('DB storage - User updated successfully:', JSON.stringify(updatedUser));
       return updatedUser;
     } catch (error) {
-      console.error('Error updating user:', error);
+      console.error('DB storage - Error updating user:', error);
       return undefined;
     }
   }
   
   async deleteUser(id: number): Promise<boolean> {
     try {
+      console.log('DB storage - Deleting user with ID:', id);
+      
       const result = await db
         .delete(users)
         .where(eq(users.id, id));
-      return result.rowCount > 0;
+        
+      const success = (result.rowCount ?? 0) > 0;
+      console.log('DB storage - User deletion result:', success ? 'Success' : 'Failed');
+      
+      return success;
     } catch (error) {
-      console.error('Error deleting user:', error);
+      console.error('DB storage - Error deleting user:', error);
       return false;
     }
   }

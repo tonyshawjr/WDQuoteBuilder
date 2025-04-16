@@ -107,11 +107,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create a new user (admin only)
   app.post('/api/users', isAdmin, async (req, res) => {
     try {
-      // This will validate the user data against our schema
-      const { username, password, isAdmin } = req.body;
+      // Debug: Log the entire request body
+      console.log('POST /api/users - Request body:', req.body);
       
-      // Log the user creation attempt
-      console.log('Attempting to create user:', { username, isAdmin });
+      // This will validate the user data against our schema
+      const { username, password, isAdmin: isAdminFlag } = req.body;
+      
+      // Log the extracted values
+      console.log('Extracted values:', { 
+        username: username, 
+        passwordLength: password ? password.length : 0,
+        isAdmin: isAdminFlag
+      });
       
       if (!username || !password) {
         return res.status(400).json({ message: 'Username and password are required' });
@@ -123,11 +130,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Username already exists' });
       }
       
-      const newUser = await storage.createUser({ 
-        username, 
-        password, 
-        isAdmin: isAdmin === true 
-      });
+      // Using explicit values to ensure proper typing
+      const userData = { 
+        username: String(username), 
+        password: String(password), 
+        isAdmin: isAdminFlag === true 
+      };
+      
+      console.log('Creating user with data:', userData);
+      
+      const newUser = await storage.createUser(userData);
       
       console.log('User created successfully:', newUser);
       res.status(201).json(newUser);
