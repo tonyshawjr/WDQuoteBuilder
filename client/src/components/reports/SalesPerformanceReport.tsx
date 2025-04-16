@@ -40,7 +40,7 @@ interface SalesPerformanceResponse {
 
 export default function SalesPerformanceReport() {
   const [timeRange, setTimeRange] = useState<string>("all");
-  const [sortField, setSortField] = useState<string>("totalRevenue");
+  const [sortField, setSortField] = useState<string>("wonRevenue");
   const [chartMetric, setChartMetric] = useState<string>("revenue");
   
   // Fetch sales performance data
@@ -256,7 +256,7 @@ export default function SalesPerformanceReport() {
                 <div>
                   <CardTitle>Sales Performance Ranking</CardTitle>
                   <CardDescription>
-                    Sales team members ranked by performance
+                    Sales team members ranked by actual won revenue
                   </CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
