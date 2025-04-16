@@ -207,10 +207,10 @@ export default function SalesPerformanceReport() {
         <Card className="bg-[#282828]">
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-sm text-gray-500 mb-1">Total Revenue</p>
-              <p className="text-3xl font-bold">{formatCurrency(data.teamTotals.totalRevenue)}</p>
-              <p className="text-sm text-green-500 mt-1">
-                Won: {formatCurrency(data.teamTotals.wonRevenue)}
+              <p className="text-sm text-gray-500 mb-1">Won Revenue</p>
+              <p className="text-3xl font-bold text-green-500">{formatCurrency(data.teamTotals.wonRevenue)}</p>
+              <p className="text-sm text-gray-400 mt-1">
+                From {data.teamTotals.wonQuotes} won quotes
               </p>
             </div>
           </CardContent>
@@ -219,10 +219,10 @@ export default function SalesPerformanceReport() {
         <Card className="bg-[#282828]">
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-sm text-gray-500 mb-1">Total Quotes</p>
-              <p className="text-3xl font-bold">{data.teamTotals.totalQuotes}</p>
-              <p className="text-sm text-blue-500 mt-1">
-                Average Size: {formatCurrency(data.teamTotals.averageQuoteSize)}
+              <p className="text-sm text-gray-500 mb-1">Potential Revenue</p>
+              <p className="text-3xl font-bold text-yellow-500">{formatCurrency(data.teamTotals.totalRevenue - data.teamTotals.wonRevenue)}</p>
+              <p className="text-sm text-gray-400 mt-1">
+                From {data.teamTotals.pendingQuotes} pending quotes
               </p>
             </div>
           </CardContent>
@@ -232,7 +232,7 @@ export default function SalesPerformanceReport() {
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-sm text-gray-500 mb-1">Conversion Rate</p>
-              <p className="text-3xl font-bold">
+              <p className="text-3xl font-bold text-purple-500">
                 {(data.teamTotals.conversionRate * 100).toFixed(1)}%
               </p>
               <p className="text-sm text-gray-400 mt-1">
@@ -245,10 +245,14 @@ export default function SalesPerformanceReport() {
         <Card className="bg-[#282828]">
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-sm text-gray-500 mb-1">Pending Quotes</p>
-              <p className="text-3xl font-bold">{data.teamTotals.pendingQuotes}</p>
-              <p className="text-sm text-orange-500 mt-1">
-                Potential Revenue: {formatCurrency(data.teamTotals.totalRevenue - data.teamTotals.wonRevenue)}
+              <p className="text-sm text-gray-500 mb-1">Avg. Won Deal Size</p>
+              <p className="text-3xl font-bold text-orange-500">
+                {formatCurrency(data.teamTotals.wonQuotes > 0 
+                  ? data.teamTotals.wonRevenue / data.teamTotals.wonQuotes 
+                  : 0)}
+              </p>
+              <p className="text-sm text-gray-400 mt-1">
+                Total Quotes: {data.teamTotals.totalQuotes}
               </p>
             </div>
           </CardContent>
@@ -334,11 +338,13 @@ export default function SalesPerformanceReport() {
                           ? "Conversion Rate" 
                           : sortField === "wonRevenue"
                             ? "Won Revenue"
-                            : sortField === "pendingQuotes"
-                              ? "Potential Deals"
-                              : sortField === "wonQuotes"
-                                ? "Won Deals"
-                                : "Average Deal Size"
+                            : sortField === "lostRevenue"
+                              ? "Lost Revenue"
+                              : sortField === "potentialRevenue"
+                                ? "Potential Revenue"
+                                : sortField === "averageWonSize"
+                                  ? "Average Won Deal Size"
+                                  : "Revenue"
                       }
                       fill={colors[sortField as keyof typeof colors] || "#F9B200"}
                     />
@@ -362,25 +368,32 @@ export default function SalesPerformanceReport() {
                     <tr className="border-b border-gray-800">
                       <th className="text-left py-3 px-4">Sales Person</th>
                       <th className="text-right py-3 px-4">Total Quotes</th>
-                      <th className="text-right py-3 px-4">Total Revenue</th>
                       <th className="text-right py-3 px-4">Won Revenue</th>
-                      <th className="text-right py-3 px-4">Won/Lost</th>
-                      <th className="text-right py-3 px-4">Avg. Size</th>
+                      <th className="text-right py-3 px-4">Lost Revenue</th>
+                      <th className="text-right py-3 px-4">Potential Rev.</th>
+                      <th className="text-right py-3 px-4">Avg. Won Size</th>
                       <th className="text-right py-3 px-4">Conv. Rate</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {sortedSalesPerformance.map((person, index) => (
-                      <tr key={index} className="border-b border-gray-800">
-                        <td className="py-3 px-4 font-medium">{person.name}</td>
-                        <td className="py-3 px-4 text-right">{person.totalQuotes}</td>
-                        <td className="py-3 px-4 text-right">{formatCurrency(person.totalRevenue)}</td>
-                        <td className="py-3 px-4 text-right">{formatCurrency(person.wonRevenue)}</td>
-                        <td className="py-3 px-4 text-right">{person.wonQuotes}/{person.lostQuotes}</td>
-                        <td className="py-3 px-4 text-right">{formatCurrency(person.averageQuoteSize)}</td>
-                        <td className="py-3 px-4 text-right">{(person.conversionRate * 100).toFixed(1)}%</td>
-                      </tr>
-                    ))}
+                    {sortedSalesPerformance.map((person, index) => {
+                      const potentialRevenue = person.potentialRevenue || 
+                        (person.totalRevenue - person.wonRevenue - (person.lostRevenue || 0));
+                      const averageWonSize = person.averageWonSize || 
+                        (person.wonQuotes > 0 ? person.wonRevenue / person.wonQuotes : 0);
+                        
+                      return (
+                        <tr key={index} className="border-b border-gray-800">
+                          <td className="py-3 px-4 font-medium">{person.name}</td>
+                          <td className="py-3 px-4 text-right">{person.totalQuotes}</td>
+                          <td className="py-3 px-4 text-right text-green-500">{formatCurrency(person.wonRevenue)}</td>
+                          <td className="py-3 px-4 text-right text-red-500">{formatCurrency(person.lostRevenue || 0)}</td>
+                          <td className="py-3 px-4 text-right text-yellow-500">{formatCurrency(potentialRevenue)}</td>
+                          <td className="py-3 px-4 text-right">{formatCurrency(averageWonSize)}</td>
+                          <td className="py-3 px-4 text-right">{(person.conversionRate * 100).toFixed(1)}%</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
