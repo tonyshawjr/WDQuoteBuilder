@@ -15,7 +15,6 @@ import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export function Header() {
   const { user, logout, isAdmin } = useAuth();
@@ -130,7 +129,6 @@ export function Header() {
                   <span className="text-sm text-gray-700 dark:text-gray-300">
                     {user.firstName || ''} {user.lastName || ''}
                   </span>
-                  <ThemeToggle />
                   <Button 
                     variant="ghost" 
                     size="icon" 
@@ -156,7 +154,6 @@ export function Header() {
                         <span className="font-medium">
                           {user.firstName || ''} {user.lastName || ''}
                         </span>
-                        <ThemeToggle />
                       </div>
                       
                       <nav className="flex flex-col space-y-2 flex-grow">

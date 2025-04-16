@@ -1,10 +1,10 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
-type Theme = "light" | "dark" | "system";
+type Theme = "dark"; // Only allow dark theme
 
 interface ThemeContextType {
   theme: Theme;
-  setTheme: (theme: Theme) => void;
+  setTheme: (theme: Theme) => void; // Keep the interface but it will always set to dark
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -17,58 +17,33 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({
   children,
-  defaultTheme = "system",
+  defaultTheme = "dark", // Always default to dark
   storageKey = "ui-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  );
+  // Always use dark theme, ignoring stored value
+  const [theme] = useState<Theme>("dark");
 
   useEffect(() => {
     const root = window.document.documentElement;
     
-    // Remove all previous theme classes
-    root.classList.remove("light", "dark");
-
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
-      root.classList.add(systemTheme);
-    } else {
-      root.classList.add(theme);
+    // Remove light class if it exists
+    root.classList.remove("light");
+    
+    // Always add dark class
+    if (!root.classList.contains("dark")) {
+      root.classList.add("dark");
     }
-  }, [theme]);
-
-  // Update theme in local storage when it changes
-  useEffect(() => {
-    localStorage.setItem(storageKey, theme);
-  }, [theme, storageKey]);
-
-  // Watch for system preference changes
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     
-    const handleChange = () => {
-      if (theme === "system") {
-        const root = window.document.documentElement;
-        root.classList.remove("light", "dark");
-        root.classList.add(
-          mediaQuery.matches ? "dark" : "light"
-        );
-      }
-    };
-    
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, [theme]);
+    // Always store dark theme
+    localStorage.setItem(storageKey, "dark");
+  }, []); // Only run once on mount
 
   const value = {
     theme,
-    setTheme: (newTheme: Theme) => {
-      setTheme(newTheme);
+    // This setTheme function is maintained for compatibility but does nothing
+    setTheme: () => {
+      // No-op - we always stay in dark mode
     },
   };
 
