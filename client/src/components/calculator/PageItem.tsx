@@ -92,9 +92,11 @@ export function PageItem({
             </span>
           </>
         ) : (
-          <span className={`text-sm font-medium whitespace-nowrap ${isSelected ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`}>
-            ${(page.pricePerPage || 0).toFixed(2)}
-          </span>
+          <div className="flex justify-end w-full">
+            <span className={`text-sm font-medium whitespace-nowrap ${isSelected ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`}>
+              ${(page.pricePerPage || 0).toFixed(2)}
+            </span>
+          </div>
         )}
       </div>
     </div>
