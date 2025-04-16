@@ -329,11 +329,12 @@ export default function QuoteDetailsPage() {
   // Get status badge color
   const getStatusColor = (status: string | null) => {
     switch (status) {
-      case "Won": return "bg-green-100 text-green-800";
-      case "Lost": return "bg-red-100 text-red-800";
-      case "Proposal Sent": return "bg-blue-100 text-blue-800";
-      case "On Hold": return "bg-yellow-100 text-yellow-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "Won": return "bg-green-500 text-white";
+      case "Lost": return "bg-red-500 text-white";
+      case "In Progress": return "bg-blue-500 text-white";
+      case "On Hold": return "bg-gray-500 text-white";
+      case "Proposal Sent": return "bg-purple-500 text-white";
+      default: return "bg-yellow-400 text-gray-900";
     }
   };
   
@@ -893,27 +894,21 @@ export default function QuoteDetailsPage() {
                 <div className="flex flex-wrap gap-4 mb-6">
                   <div className="flex items-center">
                     <span className="text-sm text-gray-500 mr-2">Status:</span>
-                    {isEditing ? (
-                      <Select 
-                        value={leadStatus || ""}
-                        onValueChange={handleStatusChange}
-                      >
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Update Status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="In Progress">In Progress</SelectItem>
-                          <SelectItem value="Proposal Sent">Proposal Sent</SelectItem>
-                          <SelectItem value="Won">Won</SelectItem>
-                          <SelectItem value="Lost">Lost</SelectItem>
-                          <SelectItem value="On Hold">On Hold</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <Badge className={getStatusColor(quote.leadStatus)}>
-                        {quote.leadStatus || "In Progress"}
-                      </Badge>
-                    )}
+                    <Select 
+                      value={leadStatus || ""}
+                      onValueChange={handleStatusChange}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Update Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Proposal Sent">Proposal Sent</SelectItem>
+                        <SelectItem value="In Progress">In Progress</SelectItem>
+                        <SelectItem value="On Hold">On Hold</SelectItem>
+                        <SelectItem value="Won">Won</SelectItem>
+                        <SelectItem value="Lost">Lost</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="flex items-center">
