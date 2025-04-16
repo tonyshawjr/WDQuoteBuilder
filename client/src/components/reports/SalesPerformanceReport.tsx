@@ -131,12 +131,11 @@ export default function SalesPerformanceReport() {
 
   // Colors for the charts
   const colors = {
-    totalRevenue: "#F9B200",
-    wonRevenue: "#10b981",
-    totalQuotes: "#3b82f6",
-    wonQuotes: "#8b5cf6",
-    averageQuoteSize: "#f97316",
-    conversionRate: "#ef4444"
+    wonRevenue: "#10b981",       // Green for won revenue
+    pendingQuotes: "#F9B200",    // Yellow for potential deals
+    wonQuotes: "#8b5cf6",        // Purple for won quotes
+    averageQuoteSize: "#f97316", // Orange for average size
+    conversionRate: "#ef4444"    // Red for conversion rate
   };
 
   // Prepare monthly performance chart data
@@ -265,11 +264,11 @@ export default function SalesPerformanceReport() {
                       <SelectValue placeholder="Sort by" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="totalRevenue">Total Revenue</SelectItem>
                       <SelectItem value="wonRevenue">Won Revenue</SelectItem>
-                      <SelectItem value="totalQuotes">Total Quotes</SelectItem>
+                      <SelectItem value="pendingQuotes">Potential Deals</SelectItem>
                       <SelectItem value="conversionRate">Conversion Rate</SelectItem>
-                      <SelectItem value="averageQuoteSize">Average Quote Size</SelectItem>
+                      <SelectItem value="wonQuotes">Won Deals</SelectItem>
+                      <SelectItem value="averageQuoteSize">Average Deal Size</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -299,10 +298,10 @@ export default function SalesPerformanceReport() {
                       formatter={(value: any) => {
                         if (sortField === "conversionRate") {
                           return [`${value.toFixed(1)}%`, "Conversion Rate"];
-                        } else if (sortField.includes("Revenue") || sortField === "averageQuoteSize") {
-                          return [formatCurrency(value), sortField === "wonRevenue" ? "Won Revenue" : sortField === "averageQuoteSize" ? "Avg. Quote Size" : "Total Revenue"];
+                        } else if (sortField === "wonRevenue" || sortField === "averageQuoteSize") {
+                          return [formatCurrency(value), sortField === "wonRevenue" ? "Won Revenue" : "Avg. Deal Size"];
                         } else {
-                          return [value, sortField === "wonQuotes" ? "Won Quotes" : "Total Quotes"];
+                          return [value, sortField === "wonQuotes" ? "Won Deals" : sortField === "pendingQuotes" ? "Potential Deals" : "Quotes"];
                         }
                       }}
                       labelFormatter={(label) => `Sales Person: ${label}`}
@@ -313,15 +312,13 @@ export default function SalesPerformanceReport() {
                       name={
                         sortField === "conversionRate" 
                           ? "Conversion Rate" 
-                          : sortField === "totalRevenue" 
-                            ? "Total Revenue" 
-                            : sortField === "wonRevenue"
-                              ? "Won Revenue"
-                              : sortField === "totalQuotes"
-                                ? "Total Quotes"
-                                : sortField === "wonQuotes"
-                                  ? "Won Quotes"
-                                  : "Average Quote Size"
+                          : sortField === "wonRevenue"
+                            ? "Won Revenue"
+                            : sortField === "pendingQuotes"
+                              ? "Potential Deals"
+                              : sortField === "wonQuotes"
+                                ? "Won Deals"
+                                : "Average Deal Size"
                       }
                       fill={colors[sortField as keyof typeof colors] || "#F9B200"}
                     />
@@ -447,9 +444,9 @@ export default function SalesPerformanceReport() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>Sales Distribution by Person</CardTitle>
+                <CardTitle>Won Revenue Distribution</CardTitle>
                 <CardDescription>
-                  Percentage of total revenue by sales person
+                  Percentage of won revenue by sales person
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -459,7 +456,7 @@ export default function SalesPerformanceReport() {
                       <Pie
                         data={sortedSalesPerformance.map((person, index) => ({
                           name: person.name,
-                          value: person.totalRevenue,
+                          value: person.wonRevenue,
                           fill: Object.values(colors)[index % Object.values(colors).length]
                         }))}
                         cx="50%"
