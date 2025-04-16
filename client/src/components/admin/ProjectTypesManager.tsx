@@ -31,6 +31,7 @@ import {
 // Form validation schema
 const projectTypeFormSchema = insertProjectTypeSchema.extend({
   name: z.string().min(2, "Name must be at least 2 characters"),
+  basePrice: z.number().min(0, "Base price must be a positive number")
 });
 
 type ProjectTypeFormValues = z.infer<typeof projectTypeFormSchema>;
@@ -46,6 +47,7 @@ export function ProjectTypesManager() {
     resolver: zodResolver(projectTypeFormSchema),
     defaultValues: {
       name: "",
+      basePrice: 0
     },
   });
 
@@ -140,7 +142,10 @@ export function ProjectTypesManager() {
 
   // Open dialog for creating a new project type
   const handleCreateClick = () => {
-    form.reset({ name: "" });
+    form.reset({ 
+      name: "",
+      basePrice: 0 
+    });
     setDialogMode("create");
     setCurrentProjectType(null);
     setOpenDialog(true);
@@ -148,7 +153,10 @@ export function ProjectTypesManager() {
 
   // Open dialog for editing an existing project type
   const handleEditClick = (projectType: ProjectType) => {
-    form.reset({ name: projectType.name });
+    form.reset({ 
+      name: projectType.name,
+      basePrice: projectType.basePrice
+    });
     setDialogMode("edit");
     setCurrentProjectType(projectType);
     setOpenDialog(true);
@@ -186,6 +194,7 @@ export function ProjectTypesManager() {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
+                <TableHead>Base Price</TableHead>
                 <TableHead className="w-[100px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -193,6 +202,7 @@ export function ProjectTypesManager() {
               {projectTypes.map((projectType: ProjectType) => (
                 <TableRow key={projectType.id}>
                   <TableCell>{projectType.name}</TableCell>
+                  <TableCell>${projectType.basePrice}</TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button 
@@ -241,6 +251,25 @@ export function ProjectTypesManager() {
                     <FormLabel>Name</FormLabel>
                     <FormControl>
                       <Input placeholder="Website Redesign" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="basePrice"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Base Price ($)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="500" 
+                        {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
