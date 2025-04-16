@@ -45,7 +45,7 @@ export default function AllQuotes() {
   // Query parameters and filters
   const [search, setSearch] = useState("");
   const [selectedUser, setSelectedUser] = useState<"all" | number>("all");
-  const [selectedStatus, setSelectedStatus] = useState<"all" | "Won" | "Lost" | "Pending">("all");
+  const [selectedStatus, setSelectedStatus] = useState<"all" | "Won" | "Lost" | "Pending" | "In Progress">("all");
   const [selectedProjectType, setSelectedProjectType] = useState<"all" | number>("all");
   const [timeFilter, setTimeFilter] = useState<"all" | "month" | "week">("all");
   const [sortField, setSortField] = useState<"createdAt" | "updatedAt" | "totalPrice" | "clientName">("createdAt");
@@ -244,13 +244,14 @@ export default function AllQuotes() {
                         <label className="text-xs font-medium mb-1 block">Status</label>
                         <Select 
                           value={selectedStatus}
-                          onValueChange={(value: "all" | "Won" | "Lost" | "Pending") => setSelectedStatus(value)}
+                          onValueChange={(value: "all" | "Won" | "Lost" | "Pending" | "In Progress") => setSelectedStatus(value)}
                         >
                           <SelectTrigger className="h-8 text-xs">
                             <SelectValue placeholder="Status" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">All Statuses</SelectItem>
+                            <SelectItem value="In Progress">In Progress</SelectItem>
                             <SelectItem value="Pending">Pending</SelectItem>
                             <SelectItem value="Won">Won</SelectItem>
                             <SelectItem value="Lost">Lost</SelectItem>
@@ -498,10 +499,12 @@ export default function AllQuotes() {
                             ? "bg-green-500 text-white" 
                             : quote.leadStatus === "Lost"
                               ? "bg-red-500 text-white"
-                              : "bg-yellow-400 text-gray-900"
+                              : quote.leadStatus === "In Progress"
+                                ? "bg-blue-500 text-white"
+                                : "bg-yellow-400 text-gray-900"
                         }`}>
                           <span className="h-2 w-2 rounded-full mr-1.5 bg-current opacity-70"></span>
-                          {quote.leadStatus || "Pending"}
+                          {quote.leadStatus}
                         </span>
                       </div>
                       
@@ -535,10 +538,12 @@ export default function AllQuotes() {
                           ? "bg-green-500 text-white" 
                           : quote.leadStatus === "Lost"
                             ? "bg-red-500 text-white"
-                            : "bg-yellow-400 text-gray-900"
+                            : quote.leadStatus === "In Progress"
+                              ? "bg-blue-500 text-white"
+                              : "bg-yellow-400 text-gray-900"
                       }`}>
                         <span className="h-2 w-2 rounded-full mr-1 bg-current opacity-70"></span>
-                        {quote.leadStatus || "Pending"}
+                        {quote.leadStatus}
                       </span>
                     </div>
                     
