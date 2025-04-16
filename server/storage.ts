@@ -194,9 +194,56 @@ export class MemStorage implements IStorage {
   }
   
   async getFeaturesByProjectType(projectTypeId: number): Promise<Feature[]> {
-    return Array.from(this.featuresMap.values()).filter(
-      feature => feature.projectTypeId === projectTypeId
-    );
+    try {
+      // Get features directly assigned to this project type
+      const directFeatures = Array.from(this.featuresMap.values()).filter(
+        feature => feature.projectTypeId === projectTypeId
+      );
+      
+      // Get features marked as "for all project types"
+      const globalFeatures = Array.from(this.featuresMap.values()).filter(
+        feature => feature.forAllProjectTypes === true
+      );
+      
+      // Get feature IDs assigned through junction table
+      const relationFeatureIds = Array.from(this.featureProjectTypesMap.values())
+        .filter(rel => rel.projectTypeId === projectTypeId)
+        .map(rel => rel.featureId);
+      
+      // Get features from the junction table
+      const junctionFeatures = Array.from(this.featuresMap.values()).filter(
+        feature => 
+          // Only include features that aren't already included via direct assignment or global setting
+          feature.projectTypeId === null && 
+          feature.forAllProjectTypes === false &&
+          // And are in the relation map
+          relationFeatureIds.includes(feature.id)
+      );
+      
+      // Combine all features, ensuring no duplicates
+      const allFeatureIds = new Set<number>();
+      const allFeatures: Feature[] = [];
+      
+      // Helper to add features without duplicates
+      const addFeatures = (featuresToAdd: Feature[]) => {
+        for (const feature of featuresToAdd) {
+          if (!allFeatureIds.has(feature.id)) {
+            allFeatureIds.add(feature.id);
+            allFeatures.push(feature);
+          }
+        }
+      };
+      
+      // Add all feature types in priority order
+      addFeatures(directFeatures);
+      addFeatures(globalFeatures);
+      addFeatures(junctionFeatures);
+      
+      return allFeatures;
+    } catch (error) {
+      console.error('Error in MemStorage.getFeaturesByProjectType:', error);
+      return [];
+    }
   }
   
   async getFeature(id: number): Promise<Feature | undefined> {

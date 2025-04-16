@@ -1,9 +1,10 @@
 import { db } from "./db";
-import { and, eq, isNull, or } from "drizzle-orm";
+import { and, eq, isNull, or, SQL, sql } from "drizzle-orm";
 import {
   users,
   projectTypes,
   features,
+  featureProjectTypes,
   pages,
   quotes,
   quoteFeatures,
@@ -15,6 +16,8 @@ import {
   type InsertProjectType,
   type Feature,
   type InsertFeature,
+  type FeatureProjectType,
+  type InsertFeatureProjectType,
   type Page,
   type InsertPage,
   type Quote,
@@ -256,7 +259,66 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getFeaturesByProjectType(projectTypeId: number): Promise<Feature[]> {
-    return db.select().from(features).where(eq(features.projectTypeId, projectTypeId));
+    // Get features directly assigned to this project type with projectTypeId
+    const directFeatures = await db
+      .select()
+      .from(features)
+      .where(eq(features.projectTypeId, projectTypeId));
+    
+    // Get features marked as "for all project types"
+    const globalFeatures = await db
+      .select()
+      .from(features)
+      .where(eq(features.forAllProjectTypes, true));
+    
+    // Get features assigned through the junction table
+    const relations = await db
+      .select()
+      .from(featureProjectTypes)
+      .where(eq(featureProjectTypes.projectTypeId, projectTypeId));
+    
+    // Extract just the feature IDs from junction table results
+    const junctionFeatureIds = relations.map(rel => rel.featureId);
+    
+    // Only query if we have any junction relations
+    let junctionFeatures: Feature[] = [];
+    if (junctionFeatureIds.length > 0) {
+      // Use regular Drizzle query with a WHERE clause when there are any junction feature IDs
+      junctionFeatures = await db
+        .select()
+        .from(features)
+        .where(
+          and(
+            isNull(features.projectTypeId),
+            eq(features.forAllProjectTypes, false),
+            // Create a condition that checks if the feature ID is in the list of junction feature IDs
+            junctionFeatureIds.length === 1 
+              ? eq(features.id, junctionFeatureIds[0]) 
+              : sql`${features.id} IN (${junctionFeatureIds.join(',')})`
+          )
+        );
+    }
+    
+    // Combine all features, ensuring no duplicates
+    const allFeatureIds = new Set<number>();
+    const allFeatures: Feature[] = [];
+    
+    // Helper to add features without duplicates
+    const addFeatures = (featuresToAdd: Feature[]) => {
+      for (const feature of featuresToAdd) {
+        if (!allFeatureIds.has(feature.id)) {
+          allFeatureIds.add(feature.id);
+          allFeatures.push(feature);
+        }
+      }
+    };
+    
+    // Add all feature types in priority order
+    addFeatures(directFeatures);
+    addFeatures(globalFeatures);
+    addFeatures(junctionFeatures);
+    
+    return allFeatures;
   }
 
   async getFeature(id: number): Promise<Feature | undefined> {
@@ -279,7 +341,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteFeature(id: number): Promise<boolean> {
+    // Due to CASCADE on delete, feature-project type relationships will be automatically deleted
     const result = await db.delete(features).where(eq(features.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  // Feature-ProjectType relationship operations
+  async createFeatureProjectType(featureProjectType: InsertFeatureProjectType): Promise<FeatureProjectType> {
+    const [newFeatureProjectType] = await db
+      .insert(featureProjectTypes)
+      .values(featureProjectType)
+      .returning();
+    return newFeatureProjectType;
+  }
+
+  async getFeatureProjectTypes(featureId: number): Promise<FeatureProjectType[]> {
+    return db
+      .select()
+      .from(featureProjectTypes)
+      .where(eq(featureProjectTypes.featureId, featureId));
+  }
+
+  async deleteFeatureProjectTypes(featureId: number): Promise<boolean> {
+    const result = await db
+      .delete(featureProjectTypes)
+      .where(eq(featureProjectTypes.featureId, featureId));
     return (result.rowCount ?? 0) > 0;
   }
 
