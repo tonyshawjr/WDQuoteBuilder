@@ -39,7 +39,7 @@ import {
 // Form validation schemas
 const featureFormSchema = insertFeatureSchema.extend({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  projectTypeId: z.coerce.number({ required_error: "Please select a project type" }),
+  projectTypeId: z.coerce.number().optional().nullable(), // Make projectTypeId optional
   category: z.string().min(2, "Category must be at least 2 characters"),
   pricingType: z.string().min(2, "Pricing type is required"),
   description: z.string().optional(),
@@ -47,6 +47,7 @@ const featureFormSchema = insertFeatureSchema.extend({
   hourlyRate: z.coerce.number().optional().nullable(),
   estimatedHours: z.coerce.number().optional().nullable(),
   supportsQuantity: z.boolean().optional().default(false),
+  forAllProjectTypes: z.boolean().optional().default(false),
 });
 
 const pageFormSchema = insertPageSchema.extend({
@@ -69,6 +70,8 @@ export function FeaturesAndPagesManager() {
   const [dialogMode, setDialogMode] = useState<"create" | "edit">("create");
   const [currentFeature, setCurrentFeature] = useState<Feature | null>(null);
   const [currentPage, setCurrentPage] = useState<Page | null>(null);
+  const [selectedProjectTypes, setSelectedProjectTypes] = useState<number[]>([]);
+  const [forAllProjectTypes, setForAllProjectTypes] = useState(false);
   
   // Feature form setup
   const featureForm = useForm<FeatureFormValues>({
@@ -263,10 +266,17 @@ export function FeaturesAndPagesManager() {
 
   // Handle form submissions
   const onFeatureSubmit = (values: FeatureFormValues) => {
+    // Add selected project types and forAllProjectTypes to the form values
+    const featureData = {
+      ...values,
+      selectedProjectTypes: forAllProjectTypes ? [] : selectedProjectTypes,
+      forAllProjectTypes: forAllProjectTypes
+    };
+    
     if (dialogMode === "create") {
-      createFeatureMutation.mutate(values);
+      createFeatureMutation.mutate(featureData);
     } else if (dialogMode === "edit" && currentFeature) {
-      updateFeatureMutation.mutate({ ...values, id: currentFeature.id });
+      updateFeatureMutation.mutate({ ...featureData, id: currentFeature.id });
     }
   };
 
@@ -282,7 +292,7 @@ export function FeaturesAndPagesManager() {
   const handleCreateFeatureClick = () => {
     featureForm.reset({
       name: "",
-      projectTypeId: 0,
+      projectTypeId: null,
       category: "",
       pricingType: "flat",
       description: "",
@@ -290,7 +300,10 @@ export function FeaturesAndPagesManager() {
       hourlyRate: null,
       estimatedHours: null,
       supportsQuantity: false,
+      forAllProjectTypes: false
     });
+    setSelectedProjectTypes([]);
+    setForAllProjectTypes(false);
     setDialogMode("create");
     setCurrentFeature(null);
     setOpenFeatureDialog(true);
@@ -307,7 +320,11 @@ export function FeaturesAndPagesManager() {
       hourlyRate: feature.hourlyRate,
       estimatedHours: feature.estimatedHours,
       supportsQuantity: feature.supportsQuantity || false,
+      forAllProjectTypes: feature.forAllProjectTypes || false
     });
+    // TODO: In the future, we'll need to fetch the selected project types for this feature
+    setSelectedProjectTypes(feature.projectTypeId ? [feature.projectTypeId] : []);
+    setForAllProjectTypes(feature.forAllProjectTypes || false);
     setDialogMode("edit");
     setCurrentFeature(feature);
     setOpenFeatureDialog(true);
