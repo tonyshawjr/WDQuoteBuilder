@@ -510,7 +510,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as User;
       
       // If not admin, ensure the user can only access their own quotes
-      if (!user.isAdmin && quote.createdBy !== user.id.toString()) {
+      if (!user.isAdmin && quote.createdBy !== user.username) {
         return res.status(403).json({ message: 'Access denied' });
       }
       
@@ -533,7 +533,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as User;
       
       // If not admin, ensure the user can only access their own quotes
-      if (!user.isAdmin && quote.createdBy !== user.id.toString()) {
+      if (!user.isAdmin && quote.createdBy !== user.username) {
         return res.status(403).json({ message: 'Access denied' });
       }
       
@@ -564,7 +564,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as User;
       
       // If not admin, ensure the user can only access their own quotes
-      if (!user.isAdmin && quote.createdBy !== user.id.toString()) {
+      if (!user.isAdmin && quote.createdBy !== user.username) {
         return res.status(403).json({ message: 'Access denied' });
       }
       
@@ -634,7 +634,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as User;
       
       // If not admin, ensure the user can only access their own quotes
-      if (!user.isAdmin && quote.createdBy !== user.id.toString()) {
+      if (!user.isAdmin && quote.createdBy !== user.username) {
         return res.status(403).json({ message: 'Access denied' });
       }
       
@@ -665,7 +665,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as User;
       
       // If not admin, ensure the user can only access their own quotes
-      if (!user.isAdmin && quote.createdBy !== user.id.toString()) {
+      if (!user.isAdmin && quote.createdBy !== user.username) {
         return res.status(403).json({ message: 'Access denied' });
       }
       
@@ -745,7 +745,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as User;
       
       // If not admin, ensure the user can only modify their own quotes
-      if (!user.isAdmin && quote.createdBy !== user.id.toString()) {
+      if (!user.isAdmin && quote.createdBy !== user.username) {
         return res.status(403).json({ message: 'Access denied' });
       }
       
@@ -803,7 +803,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as User;
       
       // If not admin, ensure the user can only modify their own quotes
-      if (!user.isAdmin && quote.createdBy !== user.id.toString()) {
+      if (!user.isAdmin && quote.createdBy !== user.username) {
         return res.status(403).json({ message: 'Access denied' });
       }
       
@@ -878,7 +878,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as User;
       
       // If not admin, ensure the user can only modify their own quotes
-      if (!user.isAdmin && existingQuote.createdBy !== user.id.toString()) {
+      if (!user.isAdmin && existingQuote.createdBy !== user.username) {
         return res.status(403).json({ message: 'Access denied' });
       }
 
@@ -915,7 +915,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as User;
       
       // If not admin, ensure the user can only modify their own quotes
-      if (!user.isAdmin && existingQuote.createdBy !== user.id.toString()) {
+      if (!user.isAdmin && existingQuote.createdBy !== user.username) {
         return res.status(403).json({ message: 'Access denied' });
       }
       
@@ -942,7 +942,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as User;
       
       // If not admin, ensure the user can only delete their own quotes
-      if (!user.isAdmin && existingQuote.createdBy !== user.id.toString()) {
+      if (!user.isAdmin && existingQuote.createdBy !== user.username) {
         return res.status(403).json({ message: 'Access denied' });
       }
       
