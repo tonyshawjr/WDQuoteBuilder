@@ -15,6 +15,7 @@ import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export function Header() {
   const { user, logout, isAdmin } = useAuth();
@@ -59,7 +60,7 @@ export function Header() {
   }, [isMobile]);
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header className="bg-background shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo and title - always visible */}
@@ -126,9 +127,10 @@ export function Header() {
                 </nav>
                 
                 <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-700">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
                     {user.firstName || ''} {user.lastName || ''}
                   </span>
+                  <ThemeToggle />
                   <Button 
                     variant="ghost" 
                     size="icon" 
@@ -150,10 +152,11 @@ export function Header() {
                   </SheetTrigger>
                   <SheetContent side="right" className="w-[75vw] sm:w-[350px]">
                     <div className="flex flex-col h-full pb-10">
-                      <div className="flex items-center mb-6 mt-2">
+                      <div className="flex items-center justify-between mb-6 mt-2">
                         <span className="font-medium">
                           {user.firstName || ''} {user.lastName || ''}
                         </span>
+                        <ThemeToggle />
                       </div>
                       
                       <nav className="flex flex-col space-y-2 flex-grow">
