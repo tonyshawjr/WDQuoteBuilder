@@ -1368,19 +1368,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Calculate quote size distribution
       const quoteSizeDistribution = {
-        small: 0,      // < $1,000
-        medium: 0,     // $1,000 - $5,000
-        large: 0,      // $5,000 - $10,000
-        enterprise: 0  // > $10,000
+        small: 0,      // $0 - $5,500
+        medium: 0,     // $5,500 - $10,500
+        large: 0,      // $10,500 - $25,500
+        enterprise: 0  // > $25,500
       };
       
       filteredQuotes.forEach(quote => {
         const price = quote.totalPrice;
-        if (price < 1000) {
+        if (price < 5500) {
           quoteSizeDistribution.small += 1;
-        } else if (price < 5000) {
+        } else if (price < 10500) {
           quoteSizeDistribution.medium += 1;
-        } else if (price < 10000) {
+        } else if (price < 25500) {
           quoteSizeDistribution.large += 1;
         } else {
           quoteSizeDistribution.enterprise += 1;

@@ -89,10 +89,10 @@ export default function QuoteMetricsReport() {
   };
 
   const sizePieData = data ? [
-    { name: "Small (<$1k)", value: data.quoteSizeDistribution.small, color: "#f59e0b" },
-    { name: "Medium ($1k-$5k)", value: data.quoteSizeDistribution.medium, color: "#f97316" },
-    { name: "Large ($5k-$10k)", value: data.quoteSizeDistribution.large, color: "#ea580c" },
-    { name: "Enterprise (>$10k)", value: data.quoteSizeDistribution.enterprise, color: "#c2410c" }
+    { name: "Small ($0-$5.5k)", value: data.quoteSizeDistribution.small, color: "#f59e0b" },
+    { name: "Medium ($5.5k-$10.5k)", value: data.quoteSizeDistribution.medium, color: "#f97316" },
+    { name: "Large ($10.5k-$25.5k)", value: data.quoteSizeDistribution.large, color: "#ea580c" },
+    { name: "Enterprise (>$25.5k)", value: data.quoteSizeDistribution.enterprise, color: "#c2410c" }
   ] : [];
 
   const statusPieData = data?.quoteStatusDistribution || [];
@@ -245,26 +245,28 @@ export default function QuoteMetricsReport() {
             <div className="h-[250px]">
               {data && sizePieData.some(item => item.value > 0) ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={sizePieData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      dataKey="value"
-                      nameKey="name"
-                      label={({ name, value, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      labelLine={false}
-                    >
+                  <BarChart
+                    data={sizePieData}
+                    layout="vertical"
+                    margin={{ top: 20, right: 30, left: 150, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" />
+                    <YAxis 
+                      type="category" 
+                      dataKey="name" 
+                      tick={{ fontSize: 12 }}
+                      width={150}
+                    />
+                    <Tooltip
+                      formatter={(value) => [value, "Quote Count"]}
+                    />
+                    <Bar dataKey="value" name="Number of Quotes">
                       {sizePieData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
-                    </Pie>
-                    <Tooltip 
-                      formatter={(value, name) => [value, name]}
-                      labelFormatter={() => "Quote Count"}
-                    />
-                  </PieChart>
+                    </Bar>
+                  </BarChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="flex items-center justify-center h-full">
