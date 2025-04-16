@@ -53,10 +53,10 @@ export function EstimateSummary({
   const pagesPrice = selectedPages.reduce((sum, page) => sum + calculatePagePrice(page), 0);
   const totalPrice = basePrice + featuresPrice + pagesPrice;
   
-  const handleCopyEstimate = () => {
+  const handleCopyQuote = () => {
     if (!selectedProjectType) return;
     
-    let text = `Project Estimate: ${selectedProjectType.name}\n\n`;
+    let text = `Project Quote: ${selectedProjectType.name}\n\n`;
     text += `Base Price: ${formatCurrency(basePrice)}\n\n`;
     
     if (selectedPages.length > 0) {
@@ -79,13 +79,13 @@ export function EstimateSummary({
       });
     }
     
-    text += `\nTotal Estimate: ${formatCurrency(totalPrice)}`;
+    text += `\nTotal Quote: ${formatCurrency(totalPrice)}`;
     
     navigator.clipboard.writeText(text).then(() => {
       setIsCopied(true);
       toast({
         title: "Copied to clipboard",
-        description: "Estimate has been copied to clipboard",
+        description: "Quote has been copied to clipboard",
       });
       
       setTimeout(() => setIsCopied(false), 2000);
@@ -177,7 +177,7 @@ export function EstimateSummary({
       // Total
       doc.setFontSize(12);
       doc.setFont("helvetica", "bold");
-      doc.text(`Total Estimate: ${formatCurrency(totalPrice)}`, margin, y);
+      doc.text(`Total Quote: ${formatCurrency(totalPrice)}`, margin, y);
       
       // Add footer
       const footerY = doc.internal.pageSize.getHeight() - 10;
@@ -271,7 +271,7 @@ export function EstimateSummary({
               
               <div className="border-t border-gray-200 dark:border-gray-700 pt-3 sm:pt-4">
                 <div className="flex justify-between items-center font-medium">
-                  <span className="text-gray-900 dark:text-gray-200">Total Estimate</span>
+                  <span className="text-gray-900 dark:text-gray-200">Total Quote</span>
                   <span className="text-lg text-primary font-bold">{formatCurrency(totalPrice)}</span>
                 </div>
               </div>
@@ -283,7 +283,7 @@ export function EstimateSummary({
           <div className="flex space-x-2">
             <Button 
               className="flex-1" 
-              onClick={handleCopyEstimate}
+              onClick={handleCopyQuote}
               disabled={!hasSelections || isCopied}
               size="sm"
             >
@@ -296,7 +296,7 @@ export function EstimateSummary({
               ) : (
                 <>
                   <Clipboard className="h-4 w-4 mr-2" />
-                  <span className="sm:inline hidden">Copy Estimate</span>
+                  <span className="sm:inline hidden">Copy Quote</span>
                   <span className="inline sm:hidden">Copy</span>
                 </>
               )}
