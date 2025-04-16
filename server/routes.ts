@@ -1487,6 +1487,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         wonQuotes: number,
         wonRevenue: number,
         lostQuotes: number,
+        lostRevenue?: number,
         pendingQuotes: number,
         averageQuoteSize: number,
         conversionRate: number
@@ -1555,6 +1556,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           salesPerson.wonRevenue += quote.totalPrice;
         } else if (quote.leadStatus === 'Lost') {
           salesPerson.lostQuotes += 1;
+          salesPerson.lostRevenue = (salesPerson.lostRevenue || 0) + quote.totalPrice;
         } else {
           salesPerson.pendingQuotes += 1;
         }
