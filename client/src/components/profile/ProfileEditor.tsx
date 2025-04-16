@@ -35,13 +35,16 @@ type PasswordChangeFormValues = z.infer<typeof passwordChangeSchema>;
 export function ProfileEditor() {
   const { toast } = useToast();
   const { user, isAdmin } = useAuth();
-  const [isEditingUsername, setIsEditingUsername] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
   
   // Profile form setup
   const profileForm = useForm<UserProfileFormValues>({
     resolver: zodResolver(userProfileSchema),
     defaultValues: {
       username: user?.username || "",
+      email: user?.email || "",
+      firstName: user?.firstName || "",
+      lastName: user?.lastName || "",
     },
   });
 
@@ -60,10 +63,14 @@ export function ProfileEditor() {
     mutationFn: async (data: UserProfileFormValues) => {
       if (!user) throw new Error("User not authenticated");
       
-      return await apiRequest(`/api/users/${user.id}`, {
+      return await apiRequest(`/api/me/profile`, {
         method: "PUT",
         body: JSON.stringify({
           username: data.username,
+          email: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          currentPassword: user.password, // This is needed for the endpoint validation
           // Keep the user's admin status
           isAdmin: user.isAdmin,
         }),
@@ -75,7 +82,7 @@ export function ProfileEditor() {
         description: "Your profile has been updated successfully",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
-      setIsEditingUsername(false);
+      setIsEditingProfile(false);
     },
     onError: (error) => {
       toast({
@@ -91,11 +98,16 @@ export function ProfileEditor() {
     mutationFn: async (data: PasswordChangeFormValues) => {
       if (!user) throw new Error("User not authenticated");
       
-      return await apiRequest(`/api/users/${user.id}/change-password`, {
-        method: "POST",
+      return await apiRequest(`/api/me/profile`, {
+        method: "PUT",
         body: JSON.stringify({
+          username: user.username, // Keep the same username
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
           currentPassword: data.currentPassword,
-          newPassword: data.newPassword,
+          password: data.newPassword,
+          isAdmin: user.isAdmin,
         }),
       });
     },
@@ -105,6 +117,7 @@ export function ProfileEditor() {
         description: "Your password has been changed successfully",
       });
       passwordForm.reset();
+      queryClient.invalidateQueries({ queryKey: ["/api/me"] });
     },
     onError: (error) => {
       toast({
@@ -125,13 +138,16 @@ export function ProfileEditor() {
     changePasswordMutation.mutate(values);
   };
 
-  // Toggle username editing
-  const toggleEditUsername = () => {
-    if (isEditingUsername) {
-      setIsEditingUsername(false);
+  // Toggle profile editing
+  const toggleEditProfile = () => {
+    if (isEditingProfile) {
+      setIsEditingProfile(false);
       profileForm.setValue("username", user?.username || "");
+      profileForm.setValue("email", user?.email || "");
+      profileForm.setValue("firstName", user?.firstName || "");
+      profileForm.setValue("lastName", user?.lastName || "");
     } else {
-      setIsEditingUsername(true);
+      setIsEditingProfile(true);
     }
   };
 
@@ -148,20 +164,40 @@ export function ProfileEditor() {
         </CardHeader>
         <CardContent>
           <Form {...profileForm}>
-            <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-4">
-              <div className="flex items-center space-x-4">
+            <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
+              <div className="flex items-center space-x-4 mb-6">
                 <div className="bg-primary/10 text-primary rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl">
-                  {user.username.charAt(0).toUpperCase()}
+                  {user.username?.charAt(0)?.toUpperCase() || 'U'}
                 </div>
                 
                 <div className="flex-1">
-                  <div className="text-sm text-muted-foreground">Username</div>
-                  {isEditingUsername ? (
+                  <div className="font-medium">{user.username}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {isAdmin ? "Administrator" : "Regular User"}
+                  </div>
+                </div>
+                
+                {!isEditingProfile && (
+                  <Button 
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={toggleEditProfile}
+                  >
+                    Edit Profile
+                  </Button>
+                )}
+              </div>
+              
+              {isEditingProfile ? (
+                <>
+                  <div className="grid gap-4 md:grid-cols-2">
                     <FormField
                       control={profileForm.control}
                       name="username"
                       render={({ field }) => (
                         <FormItem>
+                          <FormLabel>Username</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
@@ -169,58 +205,108 @@ export function ProfileEditor() {
                         </FormItem>
                       )}
                     />
-                  ) : (
-                    <div className="font-medium">{user.username}</div>
-                  )}
-                </div>
-                
-                {isEditingUsername ? (
-                  <div className="flex space-x-2">
-                    <Button 
-                      type="submit"
-                      size="sm"
-                      disabled={updateProfileMutation.isPending}
-                    >
-                      {updateProfileMutation.isPending ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Check className="h-4 w-4" />
+                    
+                    <FormField
+                      control={profileForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input type="email" {...field} value={field.value || ''} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
-                      <span className="sr-only">Save</span>
-                    </Button>
-                    <Button 
+                    />
+                  </div>
+                  
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <FormField
+                      control={profileForm.control}
+                      name="firstName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>First Name</FormLabel>
+                          <FormControl>
+                            <Input {...field} value={field.value || ''} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={profileForm.control}
+                      name="lastName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Last Name</FormLabel>
+                          <FormControl>
+                            <Input {...field} value={field.value || ''} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <div className="flex justify-end space-x-2 mt-4">
+                    <Button
                       type="button"
                       variant="outline"
-                      size="sm"
-                      onClick={toggleEditUsername}
+                      onClick={toggleEditProfile}
                     >
                       Cancel
                     </Button>
+                    <Button
+                      type="submit"
+                      disabled={updateProfileMutation.isPending}
+                    >
+                      {updateProfileMutation.isPending && (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      )}
+                      Save Changes
+                    </Button>
                   </div>
-                ) : (
-                  <Button 
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={toggleEditUsername}
-                  >
-                    Edit
-                  </Button>
-                )}
-              </div>
+                </>
+              ) : (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-sm font-medium">Email</div>
+                      <div className="text-sm text-muted-foreground">
+                        {user.email || "Not provided"}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="text-sm font-medium">Username</div>
+                      <div className="text-sm text-muted-foreground">
+                        {user.username}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-sm font-medium">First Name</div>
+                      <div className="text-sm text-muted-foreground">
+                        {user.firstName || "Not provided"}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="text-sm font-medium">Last Name</div>
+                      <div className="text-sm text-muted-foreground">
+                        {user.lastName || "Not provided"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </form>
           </Form>
-          
-          <div className="mt-4 pt-4 border-t">
-            <div className="flex items-center space-x-4">
-              <div className="flex-1">
-                <div className="font-medium">Role</div>
-                <div className="text-sm text-muted-foreground">
-                  {isAdmin ? "Administrator" : "Regular User"}
-                </div>
-              </div>
-            </div>
-          </div>
         </CardContent>
       </Card>
       
