@@ -1027,7 +1027,7 @@ export default function QuoteDetailsPage() {
                                   {((isEditing ? editableFeatures : (quoteFeatures || [])) || []).map((item, index) => (
                                     <div 
                                       key={item.id} 
-                                      className="bg-gray-50 p-3 rounded-md"
+                                      className="bg-[#1F1F1F] border border-gray-800 p-3 rounded-md"
                                     >
                                       <div className="flex justify-between mb-1 items-center">
                                         <div className="flex-grow">
@@ -1131,7 +1131,7 @@ export default function QuoteDetailsPage() {
                                   {((isEditing ? editablePages : (quotePages || [])) || []).map(item => (
                                     <div 
                                       key={item.id} 
-                                      className="bg-gray-50 p-3 rounded-md"
+                                      className="bg-[#1F1F1F] border border-gray-800 p-3 rounded-md"
                                     >
                                       <div className="flex justify-between mb-1 items-center">
                                         <div className="flex-grow">
@@ -1234,7 +1234,7 @@ export default function QuoteDetailsPage() {
                               className="min-h-[150px]"
                             />
                           ) : (
-                            <div className="bg-gray-50 p-4 rounded-md min-h-[100px]">
+                            <div className="bg-[#1F1F1F] border border-gray-800 p-4 rounded-md min-h-[100px]">
                               {quote.notes || (
                                 <span className="text-gray-400 italic">No client notes added yet</span>
                               )}
@@ -1259,7 +1259,7 @@ export default function QuoteDetailsPage() {
                               className="min-h-[150px]"
                             />
                           ) : (
-                            <div className="bg-gray-50 p-4 rounded-md min-h-[100px]">
+                            <div className="bg-[#1F1F1F] border border-gray-800 p-4 rounded-md min-h-[100px]">
                               {quote.internalNotes || (
                                 <span className="text-gray-400 italic">No internal notes added yet</span>
                               )}
@@ -1371,7 +1371,7 @@ export default function QuoteDetailsPage() {
                   .map(feature => (
                     <div 
                       key={feature.id}
-                      className="flex items-center justify-between p-3 my-1 border rounded-md hover:bg-gray-50 cursor-pointer"
+                      className="flex items-center justify-between p-3 my-1 border rounded-md hover:bg-[#282828] cursor-pointer"
                       onClick={() => addFeatureToQuote(feature.id)}
                     >
                       <div>
@@ -1439,7 +1439,7 @@ export default function QuoteDetailsPage() {
                   .map(page => (
                     <div 
                       key={page.id}
-                      className="flex items-center justify-between p-3 my-1 border rounded-md hover:bg-gray-50 cursor-pointer"
+                      className="flex items-center justify-between p-3 my-1 border rounded-md hover:bg-[#282828] cursor-pointer"
                       onClick={() => addPageToQuote(page.id)}
                     >
                       <div>
