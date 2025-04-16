@@ -15,8 +15,11 @@ interface SalesPersonPerformance {
   wonQuotes: number;
   wonRevenue: number;
   lostQuotes: number;
+  lostRevenue: number;
   pendingQuotes: number;
+  potentialRevenue: number;
   averageQuoteSize: number;
+  averageWonSize: number;
   conversionRate: number;
 }
 
@@ -97,15 +100,22 @@ export default function SalesPerformanceReport() {
   const sortedSalesPerformance = [...data.salesPerformance].sort((a, b) => {
     if (sortField === "conversionRate") {
       return b.conversionRate - a.conversionRate;
-    } else if (sortField === "averageQuoteSize") {
-      return b.averageQuoteSize - a.averageQuoteSize;
-    } else if (sortField === "totalQuotes") {
-      return b.totalQuotes - a.totalQuotes;
+    } else if (sortField === "averageWonSize") {
+      // Use provided or calculate if needed
+      const aAvgWon = a.averageWonSize || (a.wonQuotes > 0 ? a.wonRevenue / a.wonQuotes : 0);
+      const bAvgWon = b.averageWonSize || (b.wonQuotes > 0 ? b.wonRevenue / b.wonQuotes : 0);
+      return bAvgWon - aAvgWon;
+    } else if (sortField === "lostRevenue") {
+      return (b.lostRevenue || 0) - (a.lostRevenue || 0);
+    } else if (sortField === "potentialRevenue") {
+      const aPotential = a.potentialRevenue || (a.totalRevenue - a.wonRevenue - (a.lostRevenue || 0));
+      const bPotential = b.potentialRevenue || (b.totalRevenue - b.wonRevenue - (b.lostRevenue || 0));
+      return bPotential - aPotential;
     } else if (sortField === "wonRevenue") {
       return b.wonRevenue - a.wonRevenue;
     } else {
-      // Default to totalRevenue
-      return b.totalRevenue - a.totalRevenue;
+      // Default to wonRevenue (if sortField not recognized)
+      return b.wonRevenue - a.wonRevenue;
     }
   });
 
@@ -114,9 +124,12 @@ export default function SalesPerformanceReport() {
     name: person.name,
     totalRevenue: person.totalRevenue,
     wonRevenue: person.wonRevenue,
+    lostRevenue: person.lostRevenue || 0, // Add lost revenue
+    potentialRevenue: person.potentialRevenue || (person.totalRevenue - person.wonRevenue - (person.lostRevenue || 0)), // Calculate potential
     totalQuotes: person.totalQuotes,
     wonQuotes: person.wonQuotes,
     averageQuoteSize: person.averageQuoteSize,
+    averageWonSize: person.averageWonSize || (person.wonQuotes > 0 ? person.wonRevenue / person.wonQuotes : 0), // Calculate if not provided
     conversionRate: person.conversionRate * 100
   }));
 
@@ -131,11 +144,11 @@ export default function SalesPerformanceReport() {
 
   // Colors for the charts
   const colors = {
-    wonRevenue: "#10b981",       // Green for won revenue
-    pendingQuotes: "#F9B200",    // Yellow for potential deals
-    wonQuotes: "#8b5cf6",        // Purple for won quotes
-    averageQuoteSize: "#f97316", // Orange for average size
-    conversionRate: "#ef4444"    // Red for conversion rate
+    wonRevenue: "#10b981",         // Green for won revenue
+    lostRevenue: "#ef4444",        // Red for lost revenue
+    potentialRevenue: "#F9B200",   // Yellow for potential revenue
+    averageWonSize: "#f97316",     // Orange for average size
+    conversionRate: "#8b5cf6"      // Purple for conversion rate
   };
 
   // Prepare monthly performance chart data
@@ -265,10 +278,10 @@ export default function SalesPerformanceReport() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="wonRevenue">Won Revenue</SelectItem>
-                      <SelectItem value="pendingQuotes">Potential Deals</SelectItem>
+                      <SelectItem value="lostRevenue">Lost Revenue</SelectItem>
+                      <SelectItem value="potentialRevenue">Potential Revenue</SelectItem>
                       <SelectItem value="conversionRate">Conversion Rate</SelectItem>
-                      <SelectItem value="wonQuotes">Won Deals</SelectItem>
-                      <SelectItem value="averageQuoteSize">Average Deal Size</SelectItem>
+                      <SelectItem value="averageWonSize">Average Won Deal Size</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -298,10 +311,17 @@ export default function SalesPerformanceReport() {
                       formatter={(value: any) => {
                         if (sortField === "conversionRate") {
                           return [`${value.toFixed(1)}%`, "Conversion Rate"];
-                        } else if (sortField === "wonRevenue" || sortField === "averageQuoteSize") {
-                          return [formatCurrency(value), sortField === "wonRevenue" ? "Won Revenue" : "Avg. Deal Size"];
+                        } else if (sortField.includes("Revenue") || sortField.includes("Size")) {
+                          let label;
+                          if (sortField === "wonRevenue") label = "Won Revenue";
+                          else if (sortField === "lostRevenue") label = "Lost Revenue";
+                          else if (sortField === "potentialRevenue") label = "Potential Revenue";
+                          else if (sortField === "averageWonSize") label = "Avg. Won Deal Size";
+                          else label = "Revenue";
+                          
+                          return [formatCurrency(value), label];
                         } else {
-                          return [value, sortField === "wonQuotes" ? "Won Deals" : sortField === "pendingQuotes" ? "Potential Deals" : "Quotes"];
+                          return [value, "Count"];
                         }
                       }}
                       labelFormatter={(label) => `Sales Person: ${label}`}
