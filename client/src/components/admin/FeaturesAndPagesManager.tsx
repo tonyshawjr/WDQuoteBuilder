@@ -392,7 +392,7 @@ export function FeaturesAndPagesManager() {
             <div className="flex justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-          ) : features.length === 0 ? (
+          ) : !features || features.length === 0 ? (
             <div className="bg-muted/50 p-8 rounded-lg text-center">
               <p className="text-muted-foreground mb-4">No features found</p>
               <Button onClick={handleCreateFeatureClick}>Create your first feature</Button>
@@ -462,7 +462,7 @@ export function FeaturesAndPagesManager() {
             <div className="flex justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-          ) : pages.length === 0 ? (
+          ) : !pages || pages.length === 0 ? (
             <div className="bg-muted/50 p-8 rounded-lg text-center">
               <p className="text-muted-foreground mb-4">No pages found</p>
               <Button onClick={handleCreatePageClick}>Create your first page</Button>
