@@ -99,6 +99,7 @@ export function FeaturesAndPagesManager() {
       projectTypeId: null,
       description: "",
       defaultQuantity: 1,
+      supportsQuantity: true,
       isActive: true,
     },
   });
@@ -346,6 +347,7 @@ export function FeaturesAndPagesManager() {
       projectTypeId: null,
       description: "",
       defaultQuantity: 1,
+      supportsQuantity: true,
       isActive: true,
     });
     setDialogMode("create");
@@ -360,6 +362,7 @@ export function FeaturesAndPagesManager() {
       projectTypeId: page.projectTypeId,
       description: page.description || "",
       defaultQuantity: page.defaultQuantity,
+      supportsQuantity: page.supportsQuantity !== null ? page.supportsQuantity : true,
       isActive: page.isActive || true,
     });
     setDialogMode("edit");
