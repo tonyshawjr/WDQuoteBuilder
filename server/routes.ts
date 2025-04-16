@@ -110,6 +110,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // This will validate the user data against our schema
       const { username, password, isAdmin } = req.body;
       
+      // Log the user creation attempt
+      console.log('Attempting to create user:', { username, isAdmin });
+      
+      if (!username || !password) {
+        return res.status(400).json({ message: 'Username and password are required' });
+      }
+      
       // Check if username already exists
       const existingUser = await storage.getUserByUsername(username);
       if (existingUser) {
@@ -119,11 +126,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newUser = await storage.createUser({ 
         username, 
         password, 
-        isAdmin: !!isAdmin 
+        isAdmin: isAdmin === true 
       });
       
+      console.log('User created successfully:', newUser);
       res.status(201).json(newUser);
     } catch (err) {
+      console.error('User creation error:', err);
       res.status(400).json({ message: err instanceof Error ? err.message : 'Invalid data' });
     }
   });

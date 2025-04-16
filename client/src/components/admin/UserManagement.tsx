@@ -63,9 +63,14 @@ export function UserManagement() {
   // Create user mutation
   const createUserMutation = useMutation({
     mutationFn: async (data: UserFormValues) => {
+      console.log("Creating user with data:", data);
       return await apiRequest("/api/users", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          username: data.username.trim(),
+          password: data.password,
+          isAdmin: data.isAdmin
+        }),
       });
     },
     onSuccess: () => {
@@ -78,9 +83,10 @@ export function UserManagement() {
       form.reset();
     },
     onError: (error) => {
+      console.error("User creation error:", error);
       toast({
         title: "Failed to create user",
-        description: error.message,
+        description: error.message || "There was an error creating the user",
         variant: "destructive",
       });
     },
@@ -89,9 +95,20 @@ export function UserManagement() {
   // Update user mutation
   const updateUserMutation = useMutation({
     mutationFn: async (data: UserFormValues & { id: number }) => {
+      console.log("Updating user with data:", data);
+      // Only include password in the update if it's not empty
+      const updateData: Record<string, any> = {
+        username: data.username.trim(),
+        isAdmin: data.isAdmin
+      };
+      
+      if (data.password) {
+        updateData.password = data.password;
+      }
+      
       return await apiRequest(`/api/users/${data.id}`, {
         method: "PUT",
-        body: JSON.stringify(data),
+        body: JSON.stringify(updateData),
       });
     },
     onSuccess: () => {
@@ -104,9 +121,10 @@ export function UserManagement() {
       form.reset();
     },
     onError: (error) => {
+      console.error("User update error:", error);
       toast({
         title: "Failed to update user",
-        description: error.message,
+        description: error.message || "There was an error updating the user",
         variant: "destructive",
       });
     },
