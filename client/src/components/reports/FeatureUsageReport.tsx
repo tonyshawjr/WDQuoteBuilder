@@ -122,7 +122,12 @@ export default function FeatureUsageReport() {
                 >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" />
-                  <YAxis type="category" dataKey="featureName" width={90} />
+                  <YAxis 
+                    type="category" 
+                    dataKey="featureName" 
+                    width={60}
+                    tick={{fontSize: 11}}
+                  />
                   <Tooltip 
                     formatter={(value: number) => {
                       if (chartMetric === "revenue") {
@@ -180,7 +185,15 @@ export default function FeatureUsageReport() {
                       <tr key={index} className="border-b border-gray-800">
                         <td className="py-3 px-4">{index + 1}</td>
                         <td className="py-3 px-4">
-                          <span className="font-medium">{feature.featureName}</span>
+                          <span className="font-medium">
+                            {/* Truncate long feature names on mobile */}
+                            <span className="hidden md:inline">{feature.featureName}</span>
+                            <span className="inline md:hidden">
+                              {feature.featureName.length > 20 
+                                ? `${feature.featureName.substring(0, 18)}...` 
+                                : feature.featureName}
+                            </span>
+                          </span>
                         </td>
                         <td className="py-3 px-4 text-right">{feature.count}</td>
                         <td className="py-3 px-4 text-right">
