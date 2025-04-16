@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -21,19 +21,22 @@ export default function BusinessSettings() {
       if (!res.ok) throw new Error("Failed to fetch business name");
       const data = await res.json();
       return data;
-    },
-    onSuccess: (data) => {
-      // Set the initial state from the API response
-      setBusinessName(data.businessName || "");
     }
   });
   
+  // Set the initial business name when data is loaded
+  React.useEffect(() => {
+    if (data?.businessName) {
+      setBusinessName(data.businessName);
+    }
+  }, [data]);
+  
   // Update business name mutation
   const updateMutation = useMutation({
-    async mutationFn(newBusinessName: string) {
-      const res = await apiRequest("POST", "/api/business-name", {
+    mutationFn: async (newBusinessName: string) => {
+      const res = await apiRequest("POST", "/api/business-name", JSON.stringify({
         businessName: newBusinessName
-      });
+      }));
       return await res.json();
     },
     onSuccess: () => {

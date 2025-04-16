@@ -12,12 +12,26 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function Header() {
   const { user, logout, isAdmin } = useAuth();
   const [location, setLocation] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const isMobile = useIsMobile();
+  
+  // Get business name from system settings
+  const { data: businessSettings, isLoading: isLoadingBusinessName } = useQuery({
+    queryKey: ["/api/business-name"],
+    async queryFn() {
+      const res = await fetch("/api/business-name");
+      if (!res.ok) throw new Error("Failed to fetch business name");
+      return await res.json();
+    },
+    // Only fetch if user is logged in
+    enabled: !!user
+  });
   
   const handleLogout = async () => {
     await logout();
@@ -52,8 +66,20 @@ export function Header() {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
             </svg>
-            <h1 className="ml-2 text-lg font-semibold hidden sm:block">Web Design Pricing Calculator</h1>
-            <h1 className="ml-2 text-lg font-semibold sm:hidden">WD Calculator</h1>
+            <div className="ml-2">
+              {isLoadingBusinessName && user ? (
+                <Skeleton className="h-6 w-40" />
+              ) : (
+                <>
+                  <h1 className="text-lg font-semibold hidden sm:block">
+                    {businessSettings?.businessName || "Web Design Pricing Calculator"}
+                  </h1>
+                  <h1 className="text-lg font-semibold sm:hidden">
+                    {businessSettings?.businessName || "WD Calculator"}
+                  </h1>
+                </>
+              )}
+            </div>
           </div>
           
           {user && (
