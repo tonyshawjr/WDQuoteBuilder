@@ -313,7 +313,7 @@ export default function SalesPerformanceReport() {
                   <BarChart
                     data={barChartData}
                     layout="vertical"
-                    margin={{ top: 20, right: 30, left: 100, bottom: 5 }}
+                    margin={{ top: 20, right: 20, left: 80, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis 
@@ -326,7 +326,7 @@ export default function SalesPerformanceReport() {
                             : (value) => value
                       }
                     />
-                    <YAxis type="category" dataKey="name" width={100} />
+                    <YAxis type="category" dataKey="name" width={80} />
                     <Tooltip 
                       formatter={(value: any) => {
                         if (sortField === "conversionRate") {
@@ -446,7 +446,7 @@ export default function SalesPerformanceReport() {
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart
                       data={monthlyChartData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                      margin={{ top: 20, right: 20, left: 10, bottom: 5 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" />
@@ -511,10 +511,14 @@ export default function SalesPerformanceReport() {
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        outerRadius={100}
+                        outerRadius="70%"
                         dataKey="value"
                         nameKey="name"
-                        label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        label={({name, percent}) => {
+                          // Shortened name for mobile
+                          const shortName = name.split(' ')[0]; 
+                          return `${shortName}: ${(percent * 100).toFixed(0)}%`;
+                        }}
                       >
                         {sortedSalesPerformance.map((entry, index) => (
                           <Cell 
@@ -547,7 +551,7 @@ export default function SalesPerformanceReport() {
                         name: person.name,
                         rate: person.conversionRate * 100
                       }))}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 50 }}
+                      margin={{ top: 20, right: 20, left: 10, bottom: 50 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis 
@@ -555,7 +559,7 @@ export default function SalesPerformanceReport() {
                         angle={-45} 
                         textAnchor="end"
                         height={80}
-                        tick={{fontSize: 12}}
+                        tick={{fontSize: 10}}
                       />
                       <YAxis 
                         tickFormatter={(value) => `${value}%`}
