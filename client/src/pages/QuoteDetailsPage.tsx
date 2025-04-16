@@ -70,6 +70,7 @@ interface QuotePageExtended extends QuotePage {
   pageName: string;
   pricePerPage: number;
   adminPricePerPage?: number;
+  supportsQuantity?: boolean;
 }
 
 export default function QuoteDetailsPage() {
@@ -218,7 +219,9 @@ export default function QuoteDetailsPage() {
           // Use admin-defined pricing instead of calculated
           pricePerPage: page.pricePerPage,
           // Store admin pricing for later use
-          adminPricePerPage: page.pricePerPage
+          adminPricePerPage: page.pricePerPage,
+          // Pass along the supportsQuantity setting
+          supportsQuantity: page.supportsQuantity
         };
       }) as QuotePageExtended[];
     }
@@ -751,7 +754,8 @@ export default function QuoteDetailsPage() {
         ...newQuotePage,
         pageName: page.name,
         pricePerPage: page.pricePerPage,
-        adminPricePerPage: page.pricePerPage
+        adminPricePerPage: page.pricePerPage,
+        supportsQuantity: page.supportsQuantity
       };
       
       setEditablePages(prev => [...prev, extendedPage]);
@@ -1146,28 +1150,21 @@ export default function QuoteDetailsPage() {
                                           </span>
                                           {isEditing ? (
                                             <div className="flex mt-2 space-x-2">
-                                              <div className="w-24">
-                                                <div className="text-xs text-gray-500 mb-1">Quantity</div>
-                                                <div className="relative">
+                                              {item.supportsQuantity !== false ? (
+                                                <div className="w-24">
+                                                  <div className="text-xs text-gray-500 mb-1">Quantity</div>
                                                   <Input 
                                                     type="number"
-                                                    className={`h-8 ${item.supportsQuantity === false ? 'opacity-70 cursor-not-allowed' : ''}`}
+                                                    className="h-8"
                                                     min={1}
                                                     value={item.quantity}
                                                     onChange={(e) => {
                                                       const newQuantity = parseInt(e.target.value) || 1;
                                                       updatePageQuantity(item.id, newQuantity);
                                                     }}
-                                                    disabled={item.supportsQuantity === false}
-                                                    readOnly={item.supportsQuantity === false}
                                                   />
-                                                  {item.supportsQuantity === false && (
-                                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                                      <span className="text-xs text-amber-500 bg-gray-900 px-1 rounded-sm">Fixed</span>
-                                                    </div>
-                                                  )}
                                                 </div>
-                                              </div>
+                                              ) : null}
                                               <div className="w-32">
                                                 <div className="text-xs text-gray-500 mb-1">Price</div>
                                                 <Input 
