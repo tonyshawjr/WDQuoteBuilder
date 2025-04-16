@@ -55,10 +55,20 @@ export class DatabaseStorage implements IStorage {
   }
   
   // System Settings operations
-  async getBusinessName(): Promise<string | null> {
+  async getSystemSettings(): Promise<SystemSetting | null> {
     try {
       // Get the first system settings record
       const [settings] = await db.select().from(systemSettings);
+      return settings || null;
+    } catch (error) {
+      console.error('Error getting system settings:', error);
+      return null;
+    }
+  }
+  
+  async getBusinessName(): Promise<string | null> {
+    try {
+      const settings = await this.getSystemSettings();
       return settings?.businessName || null;
     } catch (error) {
       console.error('Error getting business name:', error);
@@ -86,6 +96,31 @@ export class DatabaseStorage implements IStorage {
       return true;
     } catch (error) {
       console.error('Error updating business name:', error);
+      return false;
+    }
+  }
+  
+  async updateBrandColors(lightModeColor: string, darkModeColor: string): Promise<boolean> {
+    try {
+      // Get the first system settings record
+      const [settings] = await db.select().from(systemSettings);
+      
+      if (settings) {
+        // Update existing record
+        await db.update(systemSettings)
+          .set({ lightModeColor, darkModeColor })
+          .where(eq(systemSettings.id, settings.id));
+      } else {
+        // Create new record if none exists
+        await db.insert(systemSettings).values({
+          lightModeColor, 
+          darkModeColor
+        });
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error updating brand colors:', error);
       return false;
     }
   }

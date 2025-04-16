@@ -6,11 +6,15 @@ import { z } from "zod";
 export const systemSettings = pgTable("system_settings", {
   id: serial("id").primaryKey(),
   businessName: text("business_name"),
+  lightModeColor: text("light_mode_color").default("#1E40AF"), // Default blue
+  darkModeColor: text("dark_mode_color").default("#F9B200"),  // Default yellow
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const insertSystemSettingsSchema = createInsertSchema(systemSettings).pick({
   businessName: true,
+  lightModeColor: true,
+  darkModeColor: true,
 });
 
 // User table
