@@ -165,106 +165,108 @@ export function ProfileEditor() {
 
   return (
     <div className="space-y-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile Details</CardTitle>
-          <CardDescription>Update your personal information</CardDescription>
+      <Card className="border-0 shadow-sm overflow-hidden">
+        <CardHeader className="bg-gray-50 border-b px-6 py-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle className="text-xl">Profile Details</CardTitle>
+              <CardDescription className="text-gray-600 mt-1">
+                Update your personal information
+              </CardDescription>
+            </div>
+            {!isEditingProfile && (
+              <Button 
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={toggleEditProfile}
+                className="shadow-sm"
+              >
+                Edit Profile
+              </Button>
+            )}
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           <Form {...profileForm}>
             <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
-              <div className="flex justify-between items-center mb-6">
-                <div>
-                  <div className="font-bold text-lg">
-                    {user.firstName || ''} {user.lastName || ''}
-                  </div>
-                </div>
-                
-                {!isEditingProfile && (
-                  <Button 
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={toggleEditProfile}
-                  >
-                    Edit Profile
-                  </Button>
-                )}
-              </div>
-              
               {isEditingProfile ? (
                 <>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <FormField
-                      control={profileForm.control}
-                      name="username"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Username</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  <div className="grid gap-5">
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      <FormField
+                        control={profileForm.control}
+                        name="username"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-700 font-medium">Username</FormLabel>
+                            <FormControl>
+                              <Input {...field} className="shadow-sm" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={profileForm.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-700 font-medium">Email</FormLabel>
+                            <FormControl>
+                              <Input type="email" {...field} value={field.value || ''} className="shadow-sm" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                     
-                    <FormField
-                      control={profileForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input type="email" {...field} value={field.value || ''} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      <FormField
+                        control={profileForm.control}
+                        name="firstName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-700 font-medium">First Name</FormLabel>
+                            <FormControl>
+                              <Input {...field} value={field.value || ''} className="shadow-sm" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={profileForm.control}
+                        name="lastName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-700 font-medium">Last Name</FormLabel>
+                            <FormControl>
+                              <Input {...field} value={field.value || ''} className="shadow-sm" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                   </div>
                   
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <FormField
-                      control={profileForm.control}
-                      name="firstName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>First Name</FormLabel>
-                          <FormControl>
-                            <Input {...field} value={field.value || ''} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={profileForm.control}
-                      name="lastName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Last Name</FormLabel>
-                          <FormControl>
-                            <Input {...field} value={field.value || ''} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  
-                  <div className="flex justify-end space-x-2 mt-4">
+                  <div className="flex justify-end space-x-2 pt-2">
                     <Button
                       type="button"
                       variant="outline"
                       onClick={toggleEditProfile}
+                      className="shadow-sm"
                     >
                       Cancel
                     </Button>
                     <Button
                       type="submit"
                       disabled={updateProfileMutation.isPending}
+                      className="shadow-sm"
                     >
                       {updateProfileMutation.isPending && (
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -274,36 +276,51 @@ export function ProfileEditor() {
                   </div>
                 </>
               ) : (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <div className="text-sm font-medium">Email</div>
-                      <div className="text-sm text-muted-foreground">
-                        {user.email || "Not provided"}
-                      </div>
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center">
+                    <div className="flex items-center justify-center bg-primary/10 rounded-full w-16 h-16 mb-4 sm:mb-0 sm:mr-6">
+                      <span className="text-primary font-semibold text-xl">
+                        {user.firstName ? user.firstName.charAt(0).toUpperCase() : ''}
+                        {user.lastName ? user.lastName.charAt(0).toUpperCase() : ''}
+                      </span>
                     </div>
                     
                     <div>
-                      <div className="text-sm font-medium">Username</div>
-                      <div className="text-sm text-muted-foreground">
-                        {user.username}
-                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-1">
+                        {user.firstName || ''} {user.lastName || ''}
+                      </h3>
+                      <p className="text-gray-500">{user.email || "No email provided"}</p>
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8 border-t border-gray-100 pt-6">
                     <div>
-                      <div className="text-sm font-medium">First Name</div>
-                      <div className="text-sm text-muted-foreground">
-                        {user.firstName || "Not provided"}
-                      </div>
+                      <h4 className="text-sm font-medium text-gray-500 mb-1">Username</h4>
+                      <p className="text-gray-900">{user.username}</p>
                     </div>
                     
                     <div>
-                      <div className="text-sm font-medium">Last Name</div>
-                      <div className="text-sm text-muted-foreground">
-                        {user.lastName || "Not provided"}
-                      </div>
+                      <h4 className="text-sm font-medium text-gray-500 mb-1">Email</h4>
+                      <p className="text-gray-900">{user.email || "Not provided"}</p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500 mb-1">First Name</h4>
+                      <p className="text-gray-900">{user.firstName || "Not provided"}</p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500 mb-1">Last Name</h4>
+                      <p className="text-gray-900">{user.lastName || "Not provided"}</p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500 mb-1">Role</h4>
+                      <p className="text-gray-900">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isAdmin ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}`}>
+                          {isAdmin ? 'Administrator' : 'Sales User'}
+                        </span>
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -313,65 +330,89 @@ export function ProfileEditor() {
         </CardContent>
       </Card>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Change Password</CardTitle>
-          <CardDescription>Update your password to secure your account</CardDescription>
+      <Card className="border-0 shadow-sm overflow-hidden">
+        <CardHeader className="bg-gray-50 border-b px-6 py-4">
+          <CardTitle className="text-xl">Change Password</CardTitle>
+          <CardDescription className="text-gray-600 mt-1">
+            Update your password to secure your account
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           <Form {...passwordForm}>
-            <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
-              <FormField
-                control={passwordForm.control}
-                name="currentPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Current Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="Enter your current password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-5">
+              <div className="space-y-5">
+                <FormField
+                  control={passwordForm.control}
+                  name="currentPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700 font-medium">Current Password</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="password" 
+                          placeholder="Enter your current password" 
+                          {...field} 
+                          className="shadow-sm"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <FormField
+                    control={passwordForm.control}
+                    name="newPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700 font-medium">New Password</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="password" 
+                            placeholder="Enter your new password" 
+                            {...field} 
+                            className="shadow-sm"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={passwordForm.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700 font-medium">Confirm New Password</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="password" 
+                            placeholder="Confirm your new password" 
+                            {...field} 
+                            className="shadow-sm"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
               
-              <FormField
-                control={passwordForm.control}
-                name="newPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>New Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="Enter your new password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={passwordForm.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirm New Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="Confirm your new password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <Button 
-                type="submit"
-                disabled={changePasswordMutation.isPending}
-              >
-                {changePasswordMutation.isPending && (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                )}
-                Change Password
-              </Button>
+              <div className="pt-2">
+                <Button 
+                  type="submit"
+                  disabled={changePasswordMutation.isPending}
+                  className="shadow-sm"
+                >
+                  {changePasswordMutation.isPending && (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  )}
+                  Change Password
+                </Button>
+              </div>
             </form>
           </Form>
         </CardContent>
