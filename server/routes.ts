@@ -113,7 +113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('POST /api/users - Request body:', JSON.stringify(req.body));
       
       // Direct access approach for debugging
-      let username, password, isAdminFlag;
+      let username, password, email, firstName, lastName, isAdminFlag;
       
       // Try different ways to access the data
       if (typeof req.body === 'string') {
@@ -121,6 +121,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const parsedBody = JSON.parse(req.body);
           username = parsedBody.username;
           password = parsedBody.password;
+          email = parsedBody.email;
+          firstName = parsedBody.firstName;
+          lastName = parsedBody.lastName;
           isAdminFlag = parsedBody.isAdmin;
           console.log('Parsed string body:', parsedBody);
         } catch (e) {
@@ -130,6 +133,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Try accessing directly from body
         username = req.body.username;
         password = req.body.password;
+        email = req.body.email;
+        firstName = req.body.firstName;
+        lastName = req.body.lastName;
         isAdminFlag = req.body.isAdmin;
       }
       
@@ -143,6 +149,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (typeof req.body[key] === 'object' && req.body[key] !== null) {
               if (req.body[key].username) username = req.body[key].username;
               if (req.body[key].password) password = req.body[key].password;
+              if (req.body[key].email) email = req.body[key].email;
+              if (req.body[key].firstName) firstName = req.body[key].firstName;
+              if (req.body[key].lastName) lastName = req.body[key].lastName;
               if (req.body[key].isAdmin !== undefined) isAdminFlag = req.body[key].isAdmin;
             }
           });
@@ -153,6 +162,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Final extracted values:', { 
         username, 
         passwordLength: password ? password.length : 0,
+        email,
+        firstName,
+        lastName,
         isAdmin: isAdminFlag
       });
       
@@ -169,7 +181,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Using explicit values to ensure proper typing
       const userData = { 
         username: String(username), 
-        password: String(password), 
+        password: String(password),
+        email: email ? String(email) : null,
+        firstName: firstName ? String(firstName) : null,
+        lastName: lastName ? String(lastName) : null,
         isAdmin: isAdminFlag === true 
       };
       
@@ -181,6 +196,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(newUser);
     } catch (err) {
       console.error('User creation error:', err);
+      res.status(400).json({ message: err instanceof Error ? err.message : 'Invalid data' });
+    }
+  });
+  
+  // Update a user (admin only)
+  app.put('/api/users/:id', isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { username, password, email, firstName, lastName, isAdmin: isAdminFlag } = req.body;
+      
+      console.log('PUT /api/users/:id - Request body:', {
+        id,
+        username,
+        passwordLength: password ? password.length : 0,
+        email,
+        firstName,
+        lastName,
+        isAdmin: isAdminFlag
+      });
+      
+      // Check if user exists
+      const existingUser = await storage.getUser(id);
+      if (!existingUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Check if new username already exists (and it's not the current user)
+      if (username && username !== existingUser.username) {
+        const userWithSameUsername = await storage.getUserByUsername(username);
+        if (userWithSameUsername && userWithSameUsername.id !== id) {
+          return res.status(400).json({ message: 'Username already exists' });
+        }
+      }
+      
+      // Prepare update data
+      const updateData = {
+        username: username || existingUser.username,
+        isAdmin: isAdminFlag === true || isAdminFlag === false ? isAdminFlag : existingUser.isAdmin,
+        email: email !== undefined ? email : existingUser.email,
+        firstName: firstName !== undefined ? firstName : existingUser.firstName,
+        lastName: lastName !== undefined ? lastName : existingUser.lastName
+      };
+      
+      // Only include password if it's not empty
+      if (password) {
+        updateData.password = password;
+      } else {
+        updateData.password = existingUser.password;
+      }
+      
+      console.log('Updating user data:', updateData);
+      
+      const updatedUser = await storage.updateUser(id, updateData);
+      
+      if (!updatedUser) {
+        return res.status(500).json({ message: 'Failed to update user' });
+      }
+      
+      console.log('User updated successfully:', updatedUser);
+      res.json(updatedUser);
+    } catch (err) {
+      console.error('User update error:', err);
       res.status(400).json({ message: err instanceof Error ? err.message : 'Invalid data' });
     }
   });
@@ -210,8 +287,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update current user's profile
   app.put('/api/me/profile', isAuthenticated, async (req, res) => {
     try {
-      const { username, password, currentPassword } = req.body;
+      const { username, password, email, firstName, lastName, currentPassword } = req.body;
       const userId = req.user.id;
+      
+      console.log('Profile update requested:', {
+        userId,
+        username,
+        passwordUpdated: !!password,
+        email,
+        firstName,
+        lastName
+      });
       
       // Get the current user
       const user = await storage.getUser(userId);
@@ -236,6 +322,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedUser = await storage.updateUser(userId, {
         username: username || user.username,
         password: password || user.password,
+        email: email !== undefined ? email : user.email,
+        firstName: firstName !== undefined ? firstName : user.firstName,
+        lastName: lastName !== undefined ? lastName : user.lastName,
         isAdmin: user.isAdmin // Preserve admin status
       });
       
@@ -248,6 +337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json(updatedUser);
       });
     } catch (err) {
+      console.error('Profile update error:', err);
       res.status(500).json({ message: 'Server error' });
     }
   });
