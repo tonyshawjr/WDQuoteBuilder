@@ -23,7 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const userData = await apiRequest("/api/me");
+        const userData = await apiRequest("GET", "/api/me");
         setUser(userData);
         queryClient.setQueryData(['/api/me'], userData);
       } catch (error) {
@@ -40,10 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (username: string, password: string): Promise<User> => {
     try {
       console.log("Attempting login with:", username);
-      const userData = await apiRequest("/api/login", {
-        method: "POST",
-        body: JSON.stringify({ username, password })
-      });
+      const userData = await apiRequest("POST", "/api/login", { username, password });
       
       console.log("Login data:", userData);
       setUser(userData);
@@ -57,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   
   const refreshUser = async (): Promise<void> => {
     try {
-      const userData = await apiRequest("/api/me");
+      const userData = await apiRequest("GET", "/api/me");
       setUser(userData);
       queryClient.setQueryData(['/api/me'], userData);
     } catch (error) {
@@ -69,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async (): Promise<void> => {
     try {
-      await apiRequest("/api/logout", { method: "POST" });
+      await apiRequest("POST", "/api/logout");
       setUser(null);
       queryClient.setQueryData(['/api/me'], null);
       queryClient.invalidateQueries();

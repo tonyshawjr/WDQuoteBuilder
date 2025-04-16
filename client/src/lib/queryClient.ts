@@ -12,11 +12,31 @@ async function throwIfResNotOk(res: Response) {
 }
 
 export async function apiRequest(
-  method: string,
-  url: string,
-  body?: any,
-  options: RequestInit = {},
+  methodOrUrl: string,
+  urlOrBodyOrOptions?: string | any | RequestInit,
+  bodyOrOptions?: any | RequestInit,
+  optionsParam?: RequestInit,
 ) {
+  // Handle different call signatures
+  let method: string;
+  let url: string;
+  let body: any = undefined;
+  let options: RequestInit = {};
+
+  // Handle the different ways this function can be called
+  if (typeof urlOrBodyOrOptions === 'string') {
+    // Called with (method, url, body?, options?)
+    method = methodOrUrl;
+    url = urlOrBodyOrOptions;
+    body = bodyOrOptions;
+    options = optionsParam || {};
+  } else {
+    // Called with (url, options?)
+    method = 'GET';
+    url = methodOrUrl;
+    options = urlOrBodyOrOptions || {};
+  }
+  
   try {
     const defaultOptions: RequestInit = {
       method: method,
