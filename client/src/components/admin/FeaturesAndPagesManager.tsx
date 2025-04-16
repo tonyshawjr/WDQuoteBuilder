@@ -56,6 +56,7 @@ const pageFormSchema = insertPageSchema.extend({
   projectTypeId: z.coerce.number().optional().nullable(),
   description: z.string().optional(),
   defaultQuantity: z.coerce.number().optional().nullable(),
+  supportsQuantity: z.boolean().optional().default(true),
   isActive: z.boolean().optional().default(true),
 });
 

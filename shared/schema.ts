@@ -99,6 +99,7 @@ export const pages = pgTable("pages", {
   pricePerPage: doublePrecision("price_per_page").notNull(),
   projectTypeId: integer("project_type_id"), // Optional
   defaultQuantity: integer("default_quantity").default(1),
+  supportsQuantity: boolean("supports_quantity").default(true).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
 });
 
@@ -108,6 +109,7 @@ export const insertPageSchema = createInsertSchema(pages).pick({
   pricePerPage: true,
   projectTypeId: true,
   defaultQuantity: true,
+  supportsQuantity: true,
   isActive: true,
 });
 
