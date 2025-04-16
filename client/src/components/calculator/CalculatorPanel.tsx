@@ -230,9 +230,6 @@ export function CalculatorPanel({
                   <div className="space-y-6">
                     {Object.entries(featuresByCategory).map(([category, categoryFeatures]) => (
                       <div key={category} className="bg-white dark:bg-[#1F1F1F] rounded-lg">
-                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-200 p-4 border-b border-gray-100 dark:border-gray-800">
-                          {category}
-                        </h4>
                         <div>
                           {categoryFeatures.map(feature => (
                             <FeatureItem

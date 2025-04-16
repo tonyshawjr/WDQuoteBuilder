@@ -313,7 +313,7 @@ export default function SalesPerformanceReport() {
                   <BarChart
                     data={barChartData}
                     layout="vertical"
-                    margin={{ top: 20, right: 20, left: 80, bottom: 5 }}
+                    margin={{ top: 20, right: 20, left: 30, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis 
@@ -326,7 +326,12 @@ export default function SalesPerformanceReport() {
                             : (value) => value
                       }
                     />
-                    <YAxis type="category" dataKey="name" width={80} />
+                    <YAxis 
+                      type="category" 
+                      dataKey="name" 
+                      width={40}
+                      tick={{fontSize: 10}}
+                    />
                     <Tooltip 
                       formatter={(value: any) => {
                         if (sortField === "conversionRate") {
@@ -382,13 +387,28 @@ export default function SalesPerformanceReport() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-800">
-                      <th className="text-left py-3 px-4">Sales Person</th>
-                      <th className="text-right py-3 px-4">Total Quotes</th>
-                      <th className="text-right py-3 px-4">Won Revenue</th>
-                      <th className="text-right py-3 px-4">Lost Revenue</th>
-                      <th className="text-right py-3 px-4">Potential Rev.</th>
-                      <th className="text-right py-3 px-4">Avg. Won Size</th>
-                      <th className="text-right py-3 px-4">Conv. Rate</th>
+                      <th className="text-left py-3 px-2 md:px-4">Person</th>
+                      <th className="text-right py-3 px-2 md:px-4">Quotes</th>
+                      <th className="text-right py-3 px-2 md:px-4 whitespace-nowrap">
+                        <span className="hidden md:inline">Won Revenue</span>
+                        <span className="inline md:hidden">Won</span>
+                      </th>
+                      <th className="text-right py-3 px-2 md:px-4 whitespace-nowrap">
+                        <span className="hidden md:inline">Lost Revenue</span>
+                        <span className="inline md:hidden">Lost</span>
+                      </th>
+                      <th className="text-right py-3 px-2 md:px-4 whitespace-nowrap">
+                        <span className="hidden md:inline">Potential Rev.</span>
+                        <span className="inline md:hidden">Potential</span>
+                      </th>
+                      <th className="text-right py-3 px-2 md:px-4 whitespace-nowrap">
+                        <span className="hidden md:inline">Avg. Won Size</span>
+                        <span className="inline md:hidden">Avg.</span>
+                      </th>
+                      <th className="text-right py-3 px-2 md:px-4 whitespace-nowrap">
+                        <span className="hidden md:inline">Conv. Rate</span>
+                        <span className="inline md:hidden">Conv.</span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -400,13 +420,19 @@ export default function SalesPerformanceReport() {
                         
                       return (
                         <tr key={index} className="border-b border-gray-800">
-                          <td className="py-3 px-4 font-medium">{person.name}</td>
-                          <td className="py-3 px-4 text-right">{person.totalQuotes}</td>
-                          <td className="py-3 px-4 text-right text-green-500">{formatCurrency(person.wonRevenue)}</td>
-                          <td className="py-3 px-4 text-right text-red-500">{formatCurrency(person.lostRevenue || 0)}</td>
-                          <td className="py-3 px-4 text-right text-yellow-500">{formatCurrency(potentialRevenue)}</td>
-                          <td className="py-3 px-4 text-right">{formatCurrency(averageWonSize)}</td>
-                          <td className="py-3 px-4 text-right">{(person.conversionRate * 100).toFixed(1)}%</td>
+                          <td className="py-3 px-2 md:px-4 font-medium whitespace-nowrap">
+                            {/* Truncate names on mobile */}
+                            <span className="hidden md:inline">{person.name}</span>
+                            <span className="inline md:hidden">
+                              {person.name.split(' ')[0]}
+                            </span>
+                          </td>
+                          <td className="py-3 px-2 md:px-4 text-right">{person.totalQuotes}</td>
+                          <td className="py-3 px-2 md:px-4 text-right text-green-500">{formatCurrency(person.wonRevenue)}</td>
+                          <td className="py-3 px-2 md:px-4 text-right text-red-500">{formatCurrency(person.lostRevenue || 0)}</td>
+                          <td className="py-3 px-2 md:px-4 text-right text-yellow-500">{formatCurrency(potentialRevenue)}</td>
+                          <td className="py-3 px-2 md:px-4 text-right">{formatCurrency(averageWonSize)}</td>
+                          <td className="py-3 px-2 md:px-4 text-right">{(person.conversionRate * 100).toFixed(1)}%</td>
                         </tr>
                       );
                     })}
