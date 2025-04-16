@@ -7,7 +7,8 @@ import {
   Settings, 
   LayoutDashboard, 
   Menu, 
-  ChevronRight 
+  ChevronRight,
+  FileText
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
@@ -104,6 +105,15 @@ export function Header() {
                     <Calculator className="h-4 w-4 mr-2" />
                     Calculator
                   </Button>
+
+                  <Button 
+                    variant={location === "/quotes" ? "default" : "ghost"} 
+                    onClick={() => navigateTo("/quotes")}
+                    size="sm"
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    All Quotes
+                  </Button>
                   
                   <Button 
                     variant={location === "/settings" ? "default" : "ghost"} 
@@ -164,6 +174,16 @@ export function Header() {
                         >
                           <Calculator className="h-5 w-5 mr-2" />
                           Calculator
+                          <ChevronRight className="h-4 w-4 ml-auto" />
+                        </Button>
+
+                        <Button 
+                          variant={location === "/quotes" ? "default" : "ghost"} 
+                          onClick={() => navigateTo("/quotes")}
+                          className="justify-start"
+                        >
+                          <FileText className="h-5 w-5 mr-2" />
+                          All Quotes
                           <ChevronRight className="h-4 w-4 ml-auto" />
                         </Button>
                         
