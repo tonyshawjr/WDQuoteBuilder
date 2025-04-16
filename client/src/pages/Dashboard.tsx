@@ -240,6 +240,22 @@ export default function Dashboard() {
     return monthNames.indexOf(a.name) - monthNames.indexOf(b.name);
   });
   
+  // Create a greeting based on time of day
+  const getGreeting = () => {
+    const currentHour = new Date().getHours();
+    if (currentHour < 12) return "Good morning";
+    if (currentHour < 18) return "Good afternoon";
+    return "Good evening";
+  };
+  
+  // Get a motivational message based on time of day
+  const getMotivationalMessage = () => {
+    const currentHour = new Date().getHours();
+    if (currentHour < 12) return "A fresh start to create amazing proposals!";
+    if (currentHour < 18) return "Keep the momentum going with your quotes!";
+    return "Wrapping up the day with impressive numbers!";
+  };
+
   return (
     <>
       <Header />
@@ -247,9 +263,12 @@ export default function Dashboard() {
         <div className="flex flex-col justify-between items-start mb-6">
           <div className="mb-4">
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-              Hello, {user?.firstName || 'there'}! 👋
+              {getGreeting()}, {user?.firstName || 'there'}! 👋
             </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Welcome to your dashboard. Here's an overview of your quotes and performance.</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {user?.firstName ? `Welcome back, ${user.firstName}. ` : 'Welcome back. '}
+              {getMotivationalMessage()}
+            </p>
           </div>
           
           <div className="flex flex-wrap gap-2 w-full">
