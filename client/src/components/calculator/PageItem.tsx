@@ -27,6 +27,11 @@ export function PageItem({
   }, [quantity]);
   
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // If page doesn't support quantity, don't allow changes
+    if (page.supportsQuantity === false) {
+      return;
+    }
+    
     const newQuantity = parseInt(e.target.value);
     if (newQuantity > 0) {
       setLocalQuantity(newQuantity);
@@ -70,15 +75,21 @@ export function PageItem({
       </div>
       
       <div className="flex items-center space-x-2 min-w-[160px]">
-        <div className="w-full max-w-[80px]">
+        <div className="w-full max-w-[80px] relative">
           <Input 
             type="number"
             min="1"
             value={localQuantity}
             onChange={handleQuantityChange}
-            disabled={!isSelected}
-            className="h-8 text-sm bg-gray-950 border-gray-700"
+            disabled={!isSelected || page.supportsQuantity === false}
+            className={`h-8 text-sm bg-gray-950 border-gray-700 ${page.supportsQuantity === false ? 'opacity-70 cursor-not-allowed' : ''}`}
+            readOnly={page.supportsQuantity === false}
           />
+          {page.supportsQuantity === false && isSelected && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <span className="text-xs text-amber-500 bg-gray-900 px-1 rounded-sm">Fixed</span>
+            </div>
+          )}
         </div>
         <span className={`text-sm font-medium whitespace-nowrap ${isSelected ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`}>
           ${totalPrice.toFixed(2)}

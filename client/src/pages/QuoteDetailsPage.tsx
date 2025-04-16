@@ -535,6 +535,12 @@ export default function QuoteDetailsPage() {
     setEditablePages(prev => 
       prev.map(page => {
         if (page.id === pageId) {
+          // Check if this page supports quantity changes
+          if (page.supportsQuantity === false) {
+            // Don't change quantity for pages that don't support it
+            return page;
+          }
+        
           // Always use admin-defined pricing when available
           let pricePerPage;
           
@@ -1142,16 +1148,25 @@ export default function QuoteDetailsPage() {
                                             <div className="flex mt-2 space-x-2">
                                               <div className="w-24">
                                                 <div className="text-xs text-gray-500 mb-1">Quantity</div>
-                                                <Input 
-                                                  type="number"
-                                                  className="h-8"
-                                                  min={1}
-                                                  value={item.quantity}
-                                                  onChange={(e) => {
-                                                    const newQuantity = parseInt(e.target.value) || 1;
-                                                    updatePageQuantity(item.id, newQuantity);
-                                                  }}
-                                                />
+                                                <div className="relative">
+                                                  <Input 
+                                                    type="number"
+                                                    className={`h-8 ${item.supportsQuantity === false ? 'opacity-70 cursor-not-allowed' : ''}`}
+                                                    min={1}
+                                                    value={item.quantity}
+                                                    onChange={(e) => {
+                                                      const newQuantity = parseInt(e.target.value) || 1;
+                                                      updatePageQuantity(item.id, newQuantity);
+                                                    }}
+                                                    disabled={item.supportsQuantity === false}
+                                                    readOnly={item.supportsQuantity === false}
+                                                  />
+                                                  {item.supportsQuantity === false && (
+                                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                      <span className="text-xs text-amber-500 bg-gray-900 px-1 rounded-sm">Fixed</span>
+                                                    </div>
+                                                  )}
+                                                </div>
                                               </div>
                                               <div className="w-32">
                                                 <div className="text-xs text-gray-500 mb-1">Price</div>
