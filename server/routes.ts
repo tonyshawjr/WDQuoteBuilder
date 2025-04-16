@@ -600,6 +600,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/features/:id', isAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      
+      // First delete related feature-project type relationships
+      // (This is now redundant since we have CASCADE, but we'll keep it for safety)
+      await storage.deleteFeatureProjectTypes(id);
+      
+      // Then delete the feature itself
       const success = await storage.deleteFeature(id);
       
       if (!success) {
@@ -608,6 +614,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ success });
     } catch (err) {
+      console.error('Error deleting feature:', err);
       res.status(500).json({ message: 'Server error' });
     }
   });
