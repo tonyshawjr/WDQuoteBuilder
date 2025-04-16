@@ -3,17 +3,15 @@ import { useLocation } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import FeatureUsageReport from "@/components/reports/FeatureUsageReport";
-import QuoteMetricsReport from "@/components/reports/QuoteMetricsReport";
 import { Header } from "@/components/layout/Header";
 
 export default function Reports() {
   const [, setLocation] = useLocation();
   
-  // Fetch the current user
+  // Get user data from the existing API endpoint
   const { 
     data: user, 
-    isLoading: loading 
+    isLoading 
   } = useQuery({
     queryKey: ['/api/me'],
     retry: false
@@ -21,21 +19,23 @@ export default function Reports() {
 
   // Redirect if not logged in
   useEffect(() => {
-    if (!loading && !user) {
+    if (!isLoading && !user) {
       setLocation("/login");
     }
-  }, [loading, user, setLocation]);
+  }, [isLoading, user, setLocation]);
 
-  if (loading || !user) {
+  if (isLoading || !user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
-
-  // Only admin users should access these reports
-  if (!user.isAdmin) {
+  
+  // Check admin access based on the user object
+  // Cast the user object to include isAdmin property
+  const userData = user as { isAdmin?: boolean };
+  if (!userData.isAdmin) {
     setLocation("/dashboard");
     return null;
   }
@@ -54,11 +54,21 @@ export default function Reports() {
           </TabsList>
           
           <TabsContent value="feature-usage">
-            <FeatureUsageReport />
+            <div className="space-y-6">
+              <div className="p-8 bg-[#282828] rounded-lg">
+                <h2 className="text-xl font-semibold mb-4">Feature Usage Analysis - Coming Soon</h2>
+                <p className="text-gray-400">This report will show the most frequently selected features across all quotes, helping you identify which features are most valuable to your clients.</p>
+              </div>
+            </div>
           </TabsContent>
           
           <TabsContent value="quote-metrics">
-            <QuoteMetricsReport />
+            <div className="space-y-6">
+              <div className="p-8 bg-[#282828] rounded-lg">
+                <h2 className="text-xl font-semibold mb-4">Quote Metrics - Coming Soon</h2>
+                <p className="text-gray-400">This report will display metrics about your quotes, including average quote size, quote status distribution, and revenue performance.</p>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

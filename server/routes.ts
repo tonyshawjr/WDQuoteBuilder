@@ -1222,6 +1222,227 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: 'Server error' });
     }
   });
+  
+  // Report: Feature Usage Analysis - Shows most used features across all quotes
+  app.get('/api/reports/feature-usage', isAuthenticated, async (req, res) => {
+    try {
+      // Only admin users can access this report
+      const user = req.user as User;
+      if (!user.isAdmin) {
+        return res.status(403).json({ error: 'Unauthorized access' });
+      }
+      
+      const timeRange = req.query.timeRange as string || 'all';
+      
+      // Get all quotes
+      const quotes = await storage.getQuotes();
+      
+      // Get all features for reference
+      const features = await storage.getFeatures();
+      
+      // Filter quotes by time range if needed
+      let filteredQuotes = quotes;
+      if (timeRange !== 'all') {
+        const now = new Date();
+        let cutoffDate = new Date();
+        
+        if (timeRange === 'past30days') {
+          cutoffDate.setDate(now.getDate() - 30);
+        } else if (timeRange === 'past90days') {
+          cutoffDate.setDate(now.getDate() - 90);
+        } else if (timeRange === 'pastyear') {
+          cutoffDate.setFullYear(now.getFullYear() - 1);
+        }
+        
+        filteredQuotes = quotes.filter(quote => {
+          const quoteDate = new Date(quote.createdAt);
+          return quoteDate >= cutoffDate;
+        });
+      }
+      
+      // Get usage data for all features
+      const featureUsageMap = new Map<number, { count: number, totalRevenue: number }>();
+      
+      // Process each quote to count feature occurrences
+      for (const quote of filteredQuotes) {
+        const quoteFeatures = await storage.getQuoteFeatures(quote.id);
+        
+        for (const quoteFeature of quoteFeatures) {
+          const { featureId, quantity, price } = quoteFeature;
+          
+          if (!featureUsageMap.has(featureId)) {
+            featureUsageMap.set(featureId, { count: 0, totalRevenue: 0 });
+          }
+          
+          const featureData = featureUsageMap.get(featureId)!;
+          featureData.count += 1;
+          featureData.totalRevenue += price * quantity;
+          featureUsageMap.set(featureId, featureData);
+        }
+      }
+      
+      // Convert map to array and add feature names
+      const featureUsage = Array.from(featureUsageMap.entries()).map(([featureId, data]) => {
+        const feature = features.find(f => f.id === featureId);
+        return {
+          featureId,
+          featureName: feature ? feature.name : 'Unknown Feature',
+          count: data.count,
+          totalRevenue: data.totalRevenue
+        };
+      });
+      
+      // Sort by usage count (descending)
+      featureUsage.sort((a, b) => b.count - a.count);
+      
+      res.json({
+        featureUsage,
+        totalQuotes: filteredQuotes.length,
+        timeRange
+      });
+    } catch (error) {
+      console.error('Error generating feature usage report:', error);
+      res.status(500).json({ error: 'Failed to generate feature usage report' });
+    }
+  });
+  
+  // Report: Quote Metrics - Shows aggregate metrics about quotes
+  app.get('/api/reports/quote-metrics', isAuthenticated, async (req, res) => {
+    try {
+      // Only admin users can access this report
+      const user = req.user as User;
+      if (!user.isAdmin) {
+        return res.status(403).json({ error: 'Unauthorized access' });
+      }
+      
+      const timeRange = req.query.timeRange as string || 'all';
+      
+      // Get all quotes
+      const quotes = await storage.getQuotes();
+      
+      // Filter quotes by time range if needed
+      let filteredQuotes = quotes;
+      if (timeRange !== 'all') {
+        const now = new Date();
+        let cutoffDate = new Date();
+        
+        if (timeRange === 'past30days') {
+          cutoffDate.setDate(now.getDate() - 30);
+        } else if (timeRange === 'past90days') {
+          cutoffDate.setDate(now.getDate() - 90);
+        } else if (timeRange === 'pastyear') {
+          cutoffDate.setFullYear(now.getFullYear() - 1);
+        }
+        
+        filteredQuotes = quotes.filter(quote => {
+          const quoteDate = new Date(quote.createdAt);
+          return quoteDate >= cutoffDate;
+        });
+      }
+      
+      // Calculate total revenue
+      const totalRevenue = filteredQuotes.reduce((sum, quote) => sum + quote.totalPrice, 0);
+      
+      // Calculate average quote size
+      const averageQuoteSize = filteredQuotes.length > 0 
+        ? totalRevenue / filteredQuotes.length 
+        : 0;
+      
+      // Group quotes by status
+      const statusCounts: Record<string, { count: number, value: number }> = {};
+      filteredQuotes.forEach(quote => {
+        const status = quote.leadStatus || 'Proposal Sent';
+        if (!statusCounts[status]) {
+          statusCounts[status] = { count: 0, value: 0 };
+        }
+        statusCounts[status].count += 1;
+        statusCounts[status].value += quote.totalPrice;
+      });
+      
+      // Prepare status distribution data
+      const quoteStatusDistribution = Object.entries(statusCounts).map(([status, data]) => ({
+        status,
+        count: data.count,
+        value: data.value
+      }));
+      
+      // Calculate quote size distribution
+      const quoteSizeDistribution = {
+        small: 0,      // < $1,000
+        medium: 0,     // $1,000 - $5,000
+        large: 0,      // $5,000 - $10,000
+        enterprise: 0  // > $10,000
+      };
+      
+      filteredQuotes.forEach(quote => {
+        const price = quote.totalPrice;
+        if (price < 1000) {
+          quoteSizeDistribution.small += 1;
+        } else if (price < 5000) {
+          quoteSizeDistribution.medium += 1;
+        } else if (price < 10000) {
+          quoteSizeDistribution.large += 1;
+        } else {
+          quoteSizeDistribution.enterprise += 1;
+        }
+      });
+      
+      // Calculate conversion metrics
+      const wonQuotes = filteredQuotes.filter(quote => quote.leadStatus === 'Won');
+      const potentialQuotes = filteredQuotes.filter(quote => 
+        quote.leadStatus !== 'Won' && quote.leadStatus !== 'Lost'
+      );
+      
+      const wonRevenue = wonQuotes.reduce((sum, quote) => sum + quote.totalPrice, 0);
+      const potentialRevenue = potentialQuotes.reduce((sum, quote) => sum + quote.totalPrice, 0);
+      
+      const conversionRate = filteredQuotes.length > 0
+        ? wonQuotes.length / filteredQuotes.length
+        : 0;
+      
+      // Group quotes by month for trend analysis
+      const quotesByMonth = new Map<string, { count: number, totalSize: number }>();
+      
+      filteredQuotes.forEach(quote => {
+        const date = new Date(quote.createdAt);
+        const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+        
+        if (!quotesByMonth.has(monthKey)) {
+          quotesByMonth.set(monthKey, { count: 0, totalSize: 0 });
+        }
+        
+        const monthData = quotesByMonth.get(monthKey)!;
+        monthData.count += 1;
+        monthData.totalSize += quote.totalPrice;
+        quotesByMonth.set(monthKey, monthData);
+      });
+      
+      // Prepare data for charts
+      const quoteSizesByMonth = Array.from(quotesByMonth.entries())
+        .map(([month, data]) => ({
+          month,
+          count: data.count,
+          averageSize: data.count > 0 ? data.totalSize / data.count : 0
+        }))
+        .sort((a, b) => a.month.localeCompare(b.month));
+      
+      res.json({
+        averageQuoteSize,
+        quoteSizesByMonth,
+        quoteStatusDistribution,
+        quoteSizeDistribution,
+        totalQuotes: filteredQuotes.length,
+        totalRevenue,
+        conversionRate,
+        wonRevenue,
+        potentialRevenue,
+        timeRange
+      });
+    } catch (error) {
+      console.error('Error generating quote metrics report:', error);
+      res.status(500).json({ error: 'Failed to generate quote metrics report' });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
