@@ -128,11 +128,20 @@ export default function Dashboard() {
   const wonQuotes = timeFilteredQuotes.filter((quote: Quote) => quote.leadStatus === "Won").length;
   const lostQuotes = timeFilteredQuotes.filter((quote: Quote) => quote.leadStatus === "Lost").length;
   
-  // Calculate total value of quotes
+  // Calculate value of quotes by status
   const totalValue = timeFilteredQuotes.reduce((sum: number, quote: Quote) => sum + (quote.totalPrice || 0), 0);
   const wonValue = timeFilteredQuotes
     .filter((quote: Quote) => quote.leadStatus === "Won")
     .reduce((sum: number, quote: Quote) => sum + (quote.totalPrice || 0), 0);
+  const lostValue = timeFilteredQuotes
+    .filter((quote: Quote) => quote.leadStatus === "Lost")
+    .reduce((sum: number, quote: Quote) => sum + (quote.totalPrice || 0), 0);
+  const pendingValue = timeFilteredQuotes
+    .filter((quote: Quote) => quote.leadStatus !== "Won" && quote.leadStatus !== "Lost")
+    .reduce((sum: number, quote: Quote) => sum + (quote.totalPrice || 0), 0);
+  
+  // Calculate the total pipeline value (excluding lost opportunities)
+  const activePipelineValue = wonValue + pendingValue;
   
   // Data for pie chart
   const statusData = [
@@ -478,7 +487,7 @@ export default function Dashboard() {
                       <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                         <h4 className="text-sm font-medium text-gray-500 mb-1">Open Opportunities</h4>
                         <p className="text-2xl font-bold text-indigo-600">
-                          ${(totalValue - wonValue).toLocaleString()}
+                          ${pendingValue.toLocaleString()}
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
                           From {pendingQuotes} pending quotes
@@ -502,25 +511,25 @@ export default function Dashboard() {
                         <div className="flex-1 flex">
                           <div 
                             className="h-3 bg-green-500 rounded-l-full" 
-                            style={{ width: `${totalValue > 0 ? (wonValue / totalValue) * 100 : 0}%` }}
+                            style={{ width: `${activePipelineValue > 0 ? (wonValue / activePipelineValue) * 100 : 0}%` }}
                           ></div>
                           <div 
                             className="h-3 bg-yellow-400" 
-                            style={{ width: `${totalValue > 0 ? ((totalValue - wonValue) / totalValue) * 100 : 0}%` }}
+                            style={{ width: `${activePipelineValue > 0 ? (pendingValue / activePipelineValue) * 100 : 0}%` }}
                           ></div>
                         </div>
                         <span className="text-lg font-bold ml-4 text-gray-800">
-                          ${totalValue.toLocaleString()}
+                          ${activePipelineValue.toLocaleString()}
                         </span>
                       </div>
                       <div className="flex text-xs text-gray-500 mt-2">
                         <span className="flex items-center">
                           <span className="w-2 h-2 inline-block bg-green-500 rounded-full mr-1"></span>
-                          Closed: {totalValue > 0 ? Math.round((wonValue / totalValue) * 100) : 0}%
+                          Closed: {activePipelineValue > 0 ? Math.round((wonValue / activePipelineValue) * 100) : 0}%
                         </span>
                         <span className="flex items-center ml-4">
                           <span className="w-2 h-2 inline-block bg-yellow-400 rounded-full mr-1"></span>
-                          Open: {totalValue > 0 ? Math.round(((totalValue - wonValue) / totalValue) * 100) : 0}%
+                          Open: {activePipelineValue > 0 ? Math.round((pendingValue / activePipelineValue) * 100) : 0}%
                         </span>
                       </div>
                     </div>
