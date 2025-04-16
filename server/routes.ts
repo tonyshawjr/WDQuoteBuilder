@@ -384,6 +384,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
   
+  // System Settings routes
+  app.get('/api/business-name', async (req, res) => {
+    try {
+      const businessName = await storage.getBusinessName();
+      res.json({ businessName });
+    } catch (error) {
+      console.error('Error getting business name:', error);
+      res.status(500).json({ message: 'Error getting business name' });
+    }
+  });
+  
+  app.post('/api/business-name', async (req, res) => {
+    try {
+      // Check if the user is an admin
+      if (!req.user || !req.user.isAdmin) {
+        return res.status(403).json({ message: 'Only admins can update business name' });
+      }
+      
+      const { businessName } = req.body;
+      
+      if (!businessName || typeof businessName !== 'string') {
+        return res.status(400).json({ message: 'Business name is required' });
+      }
+      
+      const success = await storage.updateBusinessName(businessName.trim());
+      
+      if (success) {
+        res.json({ message: 'Business name updated successfully', businessName: businessName.trim() });
+      } else {
+        res.status(500).json({ message: 'Error updating business name' });
+      }
+    } catch (error) {
+      console.error('Error updating business name:', error);
+      res.status(500).json({ message: 'Error updating business name' });
+    }
+  });
+  
   app.get('/api/me', (req, res) => {
     console.log('GET /api/me - Auth status:', req.isAuthenticated());
     if (req.isAuthenticated()) {

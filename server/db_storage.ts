@@ -30,6 +30,62 @@ export class DatabaseStorage implements IStorage {
   constructor() {
     // Initialize with a test admin user if none exists
     this.initTestUsers();
+    this.initSystemSettings();
+  }
+  
+  private async initSystemSettings() {
+    try {
+      // Check if there's a business name already set
+      const businessName = await this.getBusinessName();
+      
+      // If no business name found, create a default one
+      if (businessName === null) {
+        console.log('Initializing system settings with default business name...');
+        await db.insert(systemSettings).values({
+          businessName: "Web Design Agency"
+        });
+        console.log('System settings initialized successfully');
+      }
+    } catch (error) {
+      console.error('Error initializing system settings:', error);
+    }
+  }
+  
+  // System Settings operations
+  async getBusinessName(): Promise<string | null> {
+    try {
+      // Get the first system settings record
+      const [settings] = await db.select().from(systemSettings);
+      return settings?.businessName || null;
+    } catch (error) {
+      console.error('Error getting business name:', error);
+      return null;
+    }
+  }
+  
+  async updateBusinessName(businessName: string): Promise<boolean> {
+    try {
+      // Get the first system settings record
+      const [settings] = await db.select().from(systemSettings);
+      
+      if (settings) {
+        // Update existing record
+        await db.update(systemSettings)
+          .set({ businessName, updatedAt: new Date() })
+          .where(eq(systemSettings.id, settings.id));
+      } else {
+        // Create new record if none exists
+        await db.insert(systemSettings).values({
+          businessName,
+          updatedAt: new Date()
+        });
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error updating business name:', error);
+      return false;
+    }
   }
   
   private async initTestUsers() {

@@ -5,8 +5,9 @@ import { ProfileEditor } from "@/components/profile/ProfileEditor";
 import { UserManagement } from "@/components/admin/UserManagement";
 import { ProjectTypesManager } from "@/components/admin/ProjectTypesManager";
 import { FeaturesAndPagesManager } from "@/components/admin/FeaturesAndPagesManager";
+import BusinessSettings from "@/components/admin/BusinessSettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UserCog, Users, FileText, Settings as SettingsIcon, Database } from "lucide-react";
+import { UserCog, Users, FileText, Settings as SettingsIcon, Database, Building2 } from "lucide-react";
 import { Loader2 } from "lucide-react";
 
 export default function Settings() {
@@ -36,7 +37,7 @@ export default function Settings() {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 mb-6 sm:w-auto sm:inline-flex">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 mb-6 sm:w-auto sm:inline-flex">
             <TabsTrigger value="profile">
               <UserCog className="h-4 w-4 mr-2" />
               My Profile
@@ -44,6 +45,10 @@ export default function Settings() {
             
             {isAdmin && (
               <>
+                <TabsTrigger value="business">
+                  <Building2 className="h-4 w-4 mr-2" />
+                  Business
+                </TabsTrigger>
                 <TabsTrigger value="users">
                   <Users className="h-4 w-4 mr-2" />
                   Users
@@ -68,6 +73,12 @@ export default function Settings() {
           
           {isAdmin && (
             <>
+              <TabsContent value="business">
+                <div className="max-w-3xl">
+                  <BusinessSettings />
+                </div>
+              </TabsContent>
+              
               <TabsContent value="users">
                 <UserManagement />
               </TabsContent>
