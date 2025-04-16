@@ -102,28 +102,28 @@ export default function Settings() {
   return (
     <>
       <Header />
-      <div className="bg-gradient-to-b from-gray-50 to-white min-h-screen">
+      <div className="bg-[#1F1F1F] min-h-screen">
         <div className="max-w-screen-2xl mx-auto">
           <div className="flex flex-col md:flex-row min-h-[calc(100vh-64px)]">
             {/* Mobile Menu Toggle */}
             {isMobile && (
-              <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-100 sticky top-0 z-10">
+              <div className="flex items-center justify-between px-6 py-4 bg-[#282828] border-b border-gray-700 sticky top-0 z-10">
                 <div className="flex items-center">
                   <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                     <SheetTrigger asChild>
-                      <button className="inline-flex items-center justify-center rounded-md h-10 w-10 text-gray-500 hover:text-gray-900 focus:outline-none">
+                      <button className="inline-flex items-center justify-center rounded-md h-10 w-10 text-gray-400 hover:text-white focus:outline-none">
                         <span className="sr-only">Open menu</span>
                         <Menu className="h-6 w-6" />
                       </button>
                     </SheetTrigger>
-                    <SheetContent side="left" className="p-0 w-[280px] sm:max-w-none">
+                    <SheetContent side="left" className="p-0 w-[280px] sm:max-w-none bg-[#282828] border-r border-gray-700">
                       <div className="flex flex-col h-full">
-                        <div className="p-4 border-b">
+                        <div className="p-4 border-b border-gray-700">
                           <div className="flex items-center justify-between">
-                            <h2 className="text-lg font-semibold text-gray-900">Settings</h2>
+                            <h2 className="text-lg font-semibold text-white">Settings</h2>
                             <button 
                               onClick={() => setIsSidebarOpen(false)}
-                              className="rounded-full h-8 w-8 inline-flex items-center justify-center text-gray-500 hover:text-gray-900 focus:outline-none"
+                              className="rounded-full h-8 w-8 inline-flex items-center justify-center text-gray-400 hover:text-white focus:outline-none"
                             >
                               <X className="h-5 w-5" />
                             </button>
@@ -139,9 +139,9 @@ export default function Settings() {
                   <div className="ml-4">
                     <div className="flex items-center">
                       {currentTab?.icon && (
-                        <span className="inline-flex mr-2 text-primary">{currentTab.icon}</span>
+                        <span className="inline-flex mr-2 text-[#F9B200]">{currentTab.icon}</span>
                       )}
-                      <h1 className="text-xl font-semibold text-gray-900">{currentTab?.label}</h1>
+                      <h1 className="text-xl font-semibold text-white">{currentTab?.label}</h1>
                     </div>
                   </div>
                 </div>
@@ -149,18 +149,18 @@ export default function Settings() {
             )}
             
             {/* Desktop Sidebar */}
-            <div className={`hidden md:block w-64 border-r border-gray-100 bg-white flex-shrink-0`}>
+            <div className={`hidden md:block w-64 border-r border-gray-700 bg-[#282828] flex-shrink-0`}>
               <div className="h-full p-6">
                 <div className="flex items-center mb-6">
-                  <SettingsIcon className="h-5 w-5 text-primary mr-2" />
-                  <h1 className="text-xl font-semibold">Settings</h1>
+                  <SettingsIcon className="h-5 w-5 text-[#F9B200] mr-2" />
+                  <h1 className="text-xl font-semibold text-white">Settings</h1>
                 </div>
                 {renderSidebar()}
               </div>
             </div>
             
             {/* Main Content */}
-            <div className="flex-1 bg-white md:bg-transparent">
+            <div className="flex-1 bg-[#1F1F1F]">
               <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                 <div className="hidden">
                   <TabsList>
@@ -177,11 +177,11 @@ export default function Settings() {
                     <div className="mb-8">
                       <div className="flex items-center">
                         {currentTab?.icon && (
-                          <span className="inline-flex mr-2 bg-primary/10 p-2 rounded-lg text-primary">{currentTab.icon}</span>
+                          <span className="inline-flex mr-2 bg-[#F9B200]/10 p-2 rounded-lg text-[#F9B200]">{currentTab.icon}</span>
                         )}
                         <div>
-                          <h1 className="text-2xl font-bold text-gray-900">{currentTab?.label}</h1>
-                          <p className="text-gray-500 mt-1">
+                          <h1 className="text-2xl font-bold text-white">{currentTab?.label}</h1>
+                          <p className="text-gray-400 mt-1">
                             {currentTab?.id === "profile" && "Manage your personal information and security settings"}
                             {currentTab?.id === "business" && "Configure your business details used throughout the application"}
                             {currentTab?.id === "users" && "Manage user accounts and permissions"}
@@ -190,10 +190,10 @@ export default function Settings() {
                           </p>
                         </div>
                         {isAdmin && currentTab?.category === "admin" && (
-                          <Badge className="ml-3 bg-primary-foreground text-primary border-primary/20">Admin Only</Badge>
+                          <Badge className="ml-3 bg-[#282828] text-[#F9B200] border-[#F9B200]/20">Admin Only</Badge>
                         )}
                       </div>
-                      <Separator className="mt-6" />
+                      <Separator className="mt-6 bg-gray-700" />
                     </div>
                   )}
                   
@@ -243,8 +243,8 @@ export default function Settings() {
                 onClick={() => handleTabChange(tab.id)}
                 className={`flex items-center w-full px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                   activeTab === tab.id 
-                    ? 'bg-primary/10 text-primary' 
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-[#F9B200]/10 text-[#F9B200]' 
+                    : 'text-gray-300 hover:bg-[#1F1F1F]'
                 }`}
               >
                 <span className="inline-flex mr-3">{tab.icon}</span>
@@ -266,8 +266,8 @@ export default function Settings() {
                   onClick={() => handleTabChange(tab.id)}
                   className={`flex items-center w-full px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                     activeTab === tab.id 
-                      ? 'bg-primary/10 text-primary' 
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'bg-[#F9B200]/10 text-[#F9B200]' 
+                      : 'text-gray-300 hover:bg-[#1F1F1F]'
                   }`}
                 >
                   <span className="inline-flex mr-3">{tab.icon}</span>
@@ -281,7 +281,7 @@ export default function Settings() {
         <div className="pt-4">
           <button
             onClick={() => window.location.href = '/'}
-            className="flex items-center w-full px-3 py-2 text-sm font-medium rounded-lg transition-colors text-gray-700 hover:bg-gray-100"
+            className="flex items-center w-full px-3 py-2 text-sm font-medium rounded-lg transition-colors text-gray-300 hover:bg-[#1F1F1F]"
           >
             <Home className="h-5 w-5 mr-3" />
             Back to Dashboard

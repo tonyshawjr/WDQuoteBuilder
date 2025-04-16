@@ -304,35 +304,24 @@ export function ProfileEditor() {
                     </Button>
                   </div>
                   
-                  <div className="flex flex-col md:flex-row md:items-center pb-10">
-                    <div className="flex-shrink-0 mb-6 md:mb-0 md:mr-8">
-                      <div className="relative group">
-                        <div className="flex items-center justify-center bg-gradient-to-br from-primary/80 to-primary rounded-full w-28 h-28 text-white shadow-lg overflow-hidden">
-                          <span className="text-3xl font-semibold">
-                            {user.firstName ? user.firstName.charAt(0).toUpperCase() : ''}
-                            {user.lastName ? user.lastName.charAt(0).toUpperCase() : ''}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    
+                  <div className="flex flex-col pb-10">
                     <div className="flex-1">
                       <div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-1">
+                        <h3 className="text-2xl font-bold text-white mb-1">
                           {user.firstName || user.username} {user.lastName || ''}
                         </h3>
                         
                         <div className="flex flex-wrap items-center gap-3 mb-4">
                           <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                             isAdmin 
-                              ? 'bg-purple-50 text-purple-700 ring-1 ring-purple-700/10' 
-                              : 'bg-blue-50 text-blue-700 ring-1 ring-blue-700/10'
+                              ? 'bg-[#F9B200]/10 text-[#F9B200] ring-1 ring-[#F9B200]/20' 
+                              : 'bg-blue-900/30 text-blue-400 ring-1 ring-blue-500/20'
                           }`}>
                             {isAdmin ? 'Administrator' : 'Sales User'}
                           </span>
                           
                           {user.email && (
-                            <span className="text-gray-500 flex items-center">
+                            <span className="text-gray-400 flex items-center">
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                               </svg>
@@ -344,23 +333,23 @@ export function ProfileEditor() {
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6 mt-6">
                         <div>
-                          <h4 className="text-sm font-medium text-gray-500">Username</h4>
-                          <p className="text-gray-900 mt-1">{user.username}</p>
+                          <h4 className="text-sm font-medium text-gray-400">Username</h4>
+                          <p className="text-white mt-1">{user.username}</p>
                         </div>
                         
                         <div>
-                          <h4 className="text-sm font-medium text-gray-500">Email</h4>
-                          <p className="text-gray-900 mt-1">{user.email || "Not provided"}</p>
+                          <h4 className="text-sm font-medium text-gray-400">Email</h4>
+                          <p className="text-white mt-1">{user.email || "Not provided"}</p>
                         </div>
                         
                         <div>
-                          <h4 className="text-sm font-medium text-gray-500">First Name</h4>
-                          <p className="text-gray-900 mt-1">{user.firstName || "Not provided"}</p>
+                          <h4 className="text-sm font-medium text-gray-400">First Name</h4>
+                          <p className="text-white mt-1">{user.firstName || "Not provided"}</p>
                         </div>
                         
                         <div>
-                          <h4 className="text-sm font-medium text-gray-500">Last Name</h4>
-                          <p className="text-gray-900 mt-1">{user.lastName || "Not provided"}</p>
+                          <h4 className="text-sm font-medium text-gray-400">Last Name</h4>
+                          <p className="text-white mt-1">{user.lastName || "Not provided"}</p>
                         </div>
                       </div>
                     </div>
