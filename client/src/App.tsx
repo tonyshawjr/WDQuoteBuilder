@@ -11,6 +11,7 @@ import QuoteDetailsPage from "@/pages/QuoteDetailsPage";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/Login";
 import Settings from "@/pages/Settings";
+import AllQuotes from "@/pages/AllQuotes";
 
 function Router() {
   return (
@@ -30,6 +31,7 @@ function Router() {
         {() => { window.location.href = "/dashboard"; return null; }}
       </Route>
       <Route path="/login" component={Login} />
+      <Route path="/quotes" component={AllQuotes} />
       <Route path="/quotes/:id" component={QuoteDetailsPage} />
       <Route path="/settings" component={Settings} />
       <Route component={NotFound} />

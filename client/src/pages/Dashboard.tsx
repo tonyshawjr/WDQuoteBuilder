@@ -511,7 +511,7 @@ export default function Dashboard() {
                     <div className="bg-gray-50 px-6 py-4 text-center">
                       <Button 
                         variant="ghost"
-                        onClick={() => {/* TODO: Implement view all quotes */}}
+                        onClick={() => navigate("/quotes")}
                         className="text-primary hover:text-primary/90 hover:bg-gray-100"
                       >
                         View all quotes
