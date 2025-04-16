@@ -363,45 +363,62 @@ export default function Dashboard() {
                 <div>
                   {/* Desktop view */}
                   <div className="hidden md:block">
-                    <div className="grid grid-cols-12 bg-gray-50 px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <div className="col-span-4">Client</div>
-                      <div className="col-span-3">Created</div>
-                      <div className="col-span-2">By</div>
-                      <div className="col-span-2 text-right">Amount</div>
-                      <div className="col-span-1 text-right">Status</div>
+                    <div className="grid grid-cols-[repeat(16,minmax(0,1fr))] bg-gray-800 px-6 py-3 text-xs font-medium text-gray-200 uppercase tracking-wider">
+                      <div className="col-span-3">Client</div>
+                      <div className="col-span-3">Project Type</div>
+                      <div className="col-span-2">Created</div>
+                      <div className="col-span-2">Rep</div>
+                      <div className="col-span-2">Status</div>
+                      <div className="col-span-2">Value</div>
+                      <div className="col-span-2">Last Updated</div>
                     </div>
                     <div>
                       {timeFilteredQuotes.slice(0, 5).map((quote: Quote) => (
                         <div 
                           key={quote.id} 
-                          className="grid grid-cols-12 px-6 py-4 hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-100"
+                          className="grid grid-cols-[repeat(16,minmax(0,1fr))] px-6 py-4 hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-100"
                           onClick={() => navigate(`/quotes/${quote.id}`)}
                         >
-                          <div className="col-span-4">
+                          <div className="col-span-3">
                             <div className="font-medium text-gray-900">{quote.clientName}</div>
                             <div className="text-sm text-gray-500 truncate">{quote.businessName || "Individual"}</div>
                           </div>
-                          <div className="col-span-3 flex items-center text-sm text-gray-600">
-                            <Calendar className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
+                          
+                          <div className="col-span-3 flex items-center">
+                            <div className="text-sm text-gray-700">
+                              {quote.projectTypeId 
+                                ? "WordPress Website" 
+                                : "Shopify Store"}
+                            </div>
+                          </div>
+                          
+                          <div className="col-span-2 flex items-center text-sm text-gray-600">
                             {new Date(quote.createdAt).toLocaleDateString()}
                           </div>
+                          
                           <div className="col-span-2 flex items-center text-sm text-gray-600">
-                            <User className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
                             {quote.createdBy}
                           </div>
-                          <div className="col-span-2 text-right font-semibold">
+                          
+                          <div className="col-span-2">
+                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                              quote.leadStatus === "Won" 
+                                ? "bg-green-500 text-white" 
+                                : quote.leadStatus === "Lost"
+                                  ? "bg-red-500 text-white"
+                                  : "bg-yellow-400 text-gray-900"
+                            }`}>
+                              <span className="h-2 w-2 rounded-full mr-1.5 bg-current opacity-70"></span>
+                              {quote.leadStatus || "In Progress"}
+                            </span>
+                          </div>
+                          
+                          <div className="col-span-2 font-semibold text-gray-900">
                             ${quote.totalPrice?.toLocaleString()}
                           </div>
-                          <div className="col-span-1 text-right">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              quote.leadStatus === "Won" 
-                                ? "bg-green-100 text-green-800" 
-                                : quote.leadStatus === "Lost"
-                                  ? "bg-red-100 text-red-800"
-                                  : "bg-yellow-100 text-yellow-800"
-                            }`}>
-                              {quote.leadStatus}
-                            </span>
+                          
+                          <div className="col-span-2 text-sm text-gray-600">
+                            {new Date(quote.updatedAt || quote.createdAt).toLocaleDateString()}
                           </div>
                         </div>
                       ))}
@@ -416,28 +433,41 @@ export default function Dashboard() {
                         className="p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
                         onClick={() => navigate(`/quotes/${quote.id}`)}
                       >
-                        <div className="flex justify-between items-start mb-3">
+                        <div className="flex justify-between items-start mb-2">
                           <div>
                             <h4 className="font-semibold text-gray-900">{quote.clientName}</h4>
                             <p className="text-sm text-gray-500">{quote.businessName || "Individual"}</p>
                           </div>
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
                             quote.leadStatus === "Won" 
-                              ? "bg-green-100 text-green-800" 
+                              ? "bg-green-500 text-white" 
                               : quote.leadStatus === "Lost"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-yellow-100 text-yellow-800"
+                                ? "bg-red-500 text-white"
+                                : "bg-yellow-400 text-gray-900"
                           }`}>
-                            {quote.leadStatus}
+                            <span className="h-2 w-2 rounded-full mr-1 bg-current opacity-70"></span>
+                            {quote.leadStatus || "In Progress"}
                           </span>
                         </div>
                         
-                        <div className="flex justify-between items-center mt-3 pt-2 border-t border-gray-100">
-                          <div className="flex items-center text-sm text-gray-500">
-                            <Calendar className="h-3.5 w-3.5 text-gray-400 mr-1.5" />
-                            {new Date(quote.createdAt).toLocaleDateString()}
+                        <div className="flex items-center mt-2 bg-gray-50 rounded-md px-2 py-1.5">
+                          <div className="text-xs font-medium text-gray-600">
+                            {quote.projectTypeId ? "WordPress Website" : "Shopify Store"}
                           </div>
-                          <div className="font-semibold">${quote.totalPrice?.toLocaleString()}</div>
+                        </div>
+                        
+                        <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
+                          <div className="flex items-center space-x-2">
+                            <div className="flex items-center text-xs text-gray-500">
+                              <Calendar className="h-3 w-3 text-gray-400 mr-1" />
+                              {new Date(quote.createdAt).toLocaleDateString()}
+                            </div>
+                            <div className="flex items-center text-xs text-gray-500">
+                              <User className="h-3 w-3 text-gray-400 mr-1" />
+                              {quote.createdBy}
+                            </div>
+                          </div>
+                          <div className="font-semibold text-sm">${quote.totalPrice?.toLocaleString()}</div>
                         </div>
                       </div>
                     ))}
