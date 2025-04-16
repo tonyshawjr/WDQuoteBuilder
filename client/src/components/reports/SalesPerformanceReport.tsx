@@ -96,8 +96,24 @@ export default function SalesPerformanceReport() {
     );
   }
 
-  // Sort the sales performance data
-  const sortedSalesPerformance = [...data.salesPerformance].sort((a, b) => {
+  // Filter and sort the sales performance data
+  let filteredSalesPerformance = [...data.salesPerformance];
+  
+  // Only include people with actual data for the specific metric
+  if (sortField === "lostRevenue") {
+    filteredSalesPerformance = filteredSalesPerformance.filter(person => 
+      (person.lostRevenue || 0) > 0 || person.lostQuotes > 0
+    );
+  } else if (sortField === "potentialRevenue") {
+    filteredSalesPerformance = filteredSalesPerformance.filter(person => {
+      const potentialRev = person.potentialRevenue || 
+        (person.totalRevenue - person.wonRevenue - (person.lostRevenue || 0));
+      return potentialRev > 0 && person.pendingQuotes > 0;
+    });
+  }
+  
+  // Sort the filtered sales performance data
+  const sortedSalesPerformance = filteredSalesPerformance.sort((a, b) => {
     if (sortField === "conversionRate") {
       return b.conversionRate - a.conversionRate;
     } else if (sortField === "averageWonSize") {
